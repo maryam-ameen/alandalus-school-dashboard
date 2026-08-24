@@ -1,0 +1,104 @@
+import "./App.css";
+
+const boards = [
+  { icon: "👥", title: "اللجان وفرق العمل", description: "إدارة اللجان وفرق العمل المدرسية" },
+  { icon: "📝", title: "الاجتماعات والمحاضر", description: "تنظيم الاجتماعات والمحاضر والاعتمادات" },
+  { icon: "📚", title: "الاختبارات", description: "إدارة سجلات الاختبارات والجداول" },
+  { icon: "📄", title: "التعاميم والمراسلات", description: "حفظ وتنظيم التعاميم والمراسلات" },
+  { icon: "📊", title: "المؤشرات", description: "متابعة المؤشرات والنتائج" },
+  { icon: "📁", title: "الأرشيف", description: "الوصول إلى الملفات والسجلات المؤرشفة" },
+];
+
+function App() {
+  return (
+    <div className="app" dir="rtl">
+
+      <aside className="sidebar">
+        <div className="logo">
+          <div className="logo-icon">🏫</div>
+          <div>
+            <h2>الأندلس</h2>
+            <span>المنصة الإدارية</span>
+          </div>
+        </div>
+
+        <nav>
+          <button className="nav-item active">🏠 الرئيسية</button>
+          <button className="nav-item">📋 اللوحات</button>
+          <button className="nav-item">📁 الأرشيف</button>
+          <button className="nav-item">📄 النماذج</button>
+          <button className="nav-item">⚙️ الإعدادات</button>
+        </nav>
+
+        <div className="sidebar-footer">
+          <div className="user-avatar">م</div>
+          <div>
+            <strong>مريم</strong>
+            <span>السكرتيرة</span>
+          </div>
+        </div>
+      </aside>
+
+      <main className="main">
+
+        <header className="header">
+          <div>
+            <h1>مرحبًا بك 👋</h1>
+            <p>منصة الأندلس الإدارية</p>
+          </div>
+
+          <div className="header-actions">
+            <div className="search">
+              🔍
+              <input placeholder="بحث في اللوحات..." />
+            </div>
+
+            <button className="notification">🔔</button>
+          </div>
+        </header>
+
+        <section className="welcome">
+          <div>
+            <h2>كل أعمالك في مكان واحد</h2>
+            <p>
+              وصول سريع وسهل إلى جميع اللوحات والسجلات الإدارية.
+            </p>
+          </div>
+        </section>
+
+        <section className="boards-section">
+          <div className="section-title">
+            <div>
+              <h2>اللوحات الإدارية</h2>
+              <p>اختر اللوحة التي تريد العمل عليها</p>
+            </div>
+          </div>
+
+          <div className="boards-grid">
+            {boards.map((board) => (
+              <div className="board-card" key={board.title}>
+
+                <div className="card-icon">
+                  {board.icon}
+                </div>
+
+                <div className="card-content">
+                  <h3>{board.title}</h3>
+                  <p>{board.description}</p>
+                </div>
+
+                <button className="open-button">
+                  فتح اللوحة ←
+                </button>
+
+              </div>
+            ))}
+          </div>
+        </section>
+
+      </main>
+    </div>
+  );
+}
+
+export default App;

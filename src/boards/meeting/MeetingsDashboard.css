@@ -1,0 +1,1737 @@
+/* =====================================================
+   Meetings Dashboard
+   ===================================================== */
+
+.meetings-logo {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.meetings-dashboard {
+  min-height: 100vh;
+  padding: 35px 45px 60px;
+  background: #f7f4ec;
+  color: #17365d;
+  font-family: "Tahoma", "Arial", sans-serif;
+  direction: rtl;
+}
+
+/* =====================================================
+   Header
+   ===================================================== */
+
+.meetings-header {
+  background: #ffffff;
+  border-radius: 26px;
+  padding: 32px 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 28px;
+  box-shadow: 0 8px 25px rgba(20, 48, 80, 0.08);
+  border: 1px solid #eee8da;
+}
+
+.meetings-kicker {
+  display: block;
+  color: #c28a21;
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.meetings-header h1 {
+  margin: 0 0 10px;
+  font-size: 34px;
+  color: #143c70;
+}
+
+.meetings-header p {
+  margin: 0;
+  color: #68778b;
+  font-size: 16px;
+}
+
+.meetings-header-icon {
+  width: 75px;
+  height: 75px;
+  border-radius: 22px;
+  background: #f1eafb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 38px;
+}
+
+/* =====================================================
+   Statistics
+   ===================================================== */
+
+.meetings-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 18px;
+  margin-bottom: 30px;
+}
+
+.meeting-stat-card {
+  position: relative;
+  background: #ffffff;
+  min-height: 135px;
+  border-radius: 22px;
+  padding: 24px;
+  overflow: hidden;
+  box-shadow: 0 6px 20px rgba(20, 48, 80, 0.07);
+  border: 1px solid #eee8da;
+}
+
+.meeting-stat-card span {
+  display: block;
+  color: #68778b;
+  font-size: 15px;
+  margin-bottom: 12px;
+}
+
+.meeting-stat-card strong {
+  display: block;
+  font-size: 34px;
+  color: #17365d;
+}
+
+.stat-icon {
+  position: absolute;
+  left: 20px;
+  bottom: 18px;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: #f6efdf;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 23px;
+}
+
+/* =====================================================
+   Toolbar
+   ===================================================== */
+
+.meetings-toolbar {
+  background: #ffffff;
+  border-radius: 22px;
+  padding: 22px 26px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 25px;
+  border: 1px solid #eee8da;
+  box-shadow: 0 5px 18px rgba(20, 48, 80, 0.05);
+}
+
+.meetings-toolbar h2 {
+  margin: 0 0 6px;
+  font-size: 23px;
+  color: #17365d;
+}
+
+.meetings-toolbar p {
+  margin: 0;
+  color: #7a8795;
+  font-size: 14px;
+}
+
+.add-meeting-btn {
+  border: none;
+  background: #143c70;
+  color: #ffffff;
+  border-radius: 14px;
+  padding: 14px 22px;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.add-meeting-btn span {
+  font-size: 21px;
+  margin-left: 7px;
+}
+
+.add-meeting-btn:hover {
+  background: #0d2e58;
+  transform: translateY(-2px);
+}
+
+/* =====================================================
+   Empty State
+   ===================================================== */
+
+.empty-meetings {
+  background: #ffffff;
+  border-radius: 25px;
+  padding: 70px 30px;
+  text-align: center;
+  border: 1px solid #eee8da;
+  box-shadow: 0 6px 20px rgba(20, 48, 80, 0.06);
+}
+
+.empty-icon {
+  width: 75px;
+  height: 75px;
+  margin: 0 auto 18px;
+  border-radius: 22px;
+  background: #f1eafb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36px;
+}
+
+.empty-meetings h3 {
+  margin: 0 0 8px;
+  font-size: 21px;
+  color: #17365d;
+}
+
+.empty-meetings p {
+  margin: 0 0 22px;
+  color: #8792a0;
+}
+
+.empty-meetings button {
+  border: none;
+  background: #143c70;
+  color: #fff;
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+/* =====================================================
+   Meeting Card
+   ===================================================== */
+
+.meetings-list {
+  display: flex;
+  flex-direction: column;
+  gap: 17px;
+}
+
+.meeting-card {
+  background: #ffffff;
+  border-radius: 22px;
+  padding: 22px;
+  display: grid;
+  grid-template-columns: 90px 1fr auto;
+  gap: 22px;
+  align-items: center;
+  border: 1px solid #eee8da;
+  box-shadow: 0 5px 18px rgba(20, 48, 80, 0.06);
+  transition: 0.2s;
+}
+
+.meeting-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 9px 25px rgba(20, 48, 80, 0.1);
+}
+
+.meeting-number {
+  width: 75px;
+  height: 75px;
+  border-radius: 20px;
+  background: #f6efdf;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.meeting-number span {
+  color: #8b7b5a;
+  font-size: 12px;
+}
+
+.meeting-number strong {
+  color: #17365d;
+  font-size: 28px;
+}
+
+.meeting-card-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.meeting-card-top h3 {
+  margin: 0;
+  font-size: 20px;
+  color: #17365d;
+}
+
+.meeting-status {
+  padding: 5px 12px;
+  border-radius: 20px;
+  background: #fff1c9;
+  color: #a87408;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.meeting-status.completed {
+  background: #e1f5e9;
+  color: #23834b;
+}
+
+.meeting-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+  color: #7b8795;
+  font-size: 13px;
+}
+
+.meeting-preview {
+  margin-top: 13px;
+  padding-top: 12px;
+  border-top: 1px solid #eee;
+  font-size: 13px;
+  color: #697687;
+}
+
+.meeting-preview p {
+  display: inline;
+  margin-right: 7px;
+}
+
+.meeting-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.view-btn {
+  border: none;
+  background: #edf3fa;
+  color: #173f70;
+  padding: 10px 15px;
+  border-radius: 11px;
+  font-family: inherit;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.delete-btn {
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 11px;
+  background: #fff0f0;
+  color: #d94b4b;
+  cursor: pointer;
+}
+
+/* =====================================================
+   Modal
+   ===================================================== */
+
+.meeting-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 35, 58, 0.48);
+  backdrop-filter: blur(5px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 9999;
+}
+
+.meeting-modal {
+  position: relative;
+  width: min(760px, 100%);
+  max-height: 92vh;
+  overflow-y: auto;
+  background: #ffffff;
+  border-radius: 25px;
+  padding: 30px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+}
+
+.modal-close {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  width: 38px;
+  height: 38px;
+  border: none;
+  border-radius: 50%;
+  background: #f2eafa;
+  color: #7650a8;
+  font-size: 25px;
+  cursor: pointer;
+}
+
+.modal-title {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 28px;
+}
+
+.modal-title > span {
+  width: 55px;
+  height: 55px;
+  border-radius: 17px;
+  background: #f1eafb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+}
+
+.modal-title small {
+  color: #c28a21;
+  font-weight: 700;
+}
+
+.modal-title h2 {
+  margin: 4px 0 0;
+  color: #17365d;
+  font-size: 25px;
+}
+
+/* =====================================================
+   Form
+   ===================================================== */
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 17px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.form-group.full {
+  grid-column: 1 / -1;
+}
+
+.form-group label {
+  color: #17365d;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #ddd7ca;
+  border-radius: 12px;
+  background: #fffdfa;
+  padding: 13px 14px;
+  font-family: inherit;
+  font-size: 14px;
+  color: #17365d;
+  outline: none;
+  transition: 0.2s;
+}
+
+.form-group input,
+.form-group select {
+  height: 48px;
+}
+
+.form-group textarea {
+  min-height: 105px;
+  resize: vertical;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  border-color: #8a68b7;
+  box-shadow: 0 0 0 3px rgba(138, 104, 183, 0.1);
+}
+
+/* =====================================================
+   Modal Buttons
+   ===================================================== */
+
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 25px;
+}
+
+.save-meeting-btn {
+  border: none;
+  background: #143c70;
+  color: #ffffff;
+  padding: 13px 25px;
+  border-radius: 12px;
+  font-family: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.cancel-meeting-btn {
+  border: 1px solid #ddd7ca;
+  background: #ffffff;
+  color: #7650a8;
+  padding: 13px 25px;
+  border-radius: 12px;
+  font-family: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* =====================================================
+   أزرار البنود والقرارات
+   ===================================================== */
+
+.add-item-btn {
+  margin-top: 10px;
+  width: fit-content;
+  min-width: 135px;
+  padding: 9px 16px;
+  border: 1px solid rgba(120, 70, 120, 0.25);
+  border-radius: 10px;
+  background: #f8f1f8;
+  color: #6f356f;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.add-item-btn:hover {
+  background: #eee0ed;
+  border-color: #8d4b8d;
+  transform: translateY(-1px);
+}
+
+.add-item-btn:active {
+  transform: translateY(0);
+}
+
+/* =====================================================
+   البنود
+   ===================================================== */
+
+.bullet-items {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.bullet-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.bullet-dot {
+  width: 24px;
+  min-width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #743b70;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.bullet-item input {
+  flex: 1;
+}
+
+.remove-item-btn {
+  width: 30px;
+  height: 30px;
+  border: none;
+  border-radius: 8px;
+  background: #f7eeee;
+  color: #a34b4b;
+  font-size: 18px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.remove-item-btn:hover {
+  background: #f0dada;
+  color: #8b2929;
+}
+
+/* =====================================================
+   محضر الاجتماع
+   ===================================================== */
+
+.minutes-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(25, 35, 50, 0.58);
+  backdrop-filter: blur(5px);
+  padding: 25px;
+  overflow-y: auto;
+  z-index: 10000;
+}
+
+.meeting-minutes-modal {
+  width: min(1100px, 96%);
+  max-height: 94vh;
+  margin: auto;
+  background: #ffffff;
+  border-radius: 22px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.22);
+  overflow-y: auto;
+  position: relative;
+  padding: 0;
+}
+
+/* =====================================================
+   رأس المحضر
+   ===================================================== */
+
+.minutes-header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 20px 28px;
+
+  background: #ffffff;
+  border-bottom: 1px solid #eee7ed;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.05);
+}
+
+.minutes-header small {
+  display: block;
+  color: #8a5a86;
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 3px;
+}
+
+.minutes-header h2 {
+  margin: 0;
+  color: #183b66;
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.minutes-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.print-btn {
+  border: none;
+  border-radius: 10px;
+  padding: 10px 16px;
+  background: #f3eaf3;
+  color: #713d6d;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.print-btn:hover {
+  background: #e8d9e7;
+  transform: translateY(-1px);
+}
+
+.minutes-header .modal-close {
+  position: static;
+
+  width: 38px;
+  height: 38px;
+
+  border: none;
+  border-radius: 10px;
+
+  background: #f7f7f7;
+  color: #555;
+
+  font-size: 22px;
+  cursor: pointer;
+}
+
+.minutes-header .modal-close:hover {
+  background: #f1dddd;
+  color: #9b3f3f;
+}
+
+/* =====================================================
+   أقسام المحضر
+   ===================================================== */
+
+.minutes-section {
+  margin: 20px 26px;
+  padding: 22px;
+
+  background: #fff;
+  border: 1px solid #eee8ed;
+  border-radius: 16px;
+
+  box-shadow: 0 3px 12px rgba(50, 30, 60, 0.04);
+}
+
+.minutes-section h3 {
+  margin: 0 0 18px;
+
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  color: #183b66;
+  font-size: 17px;
+  font-weight: 700;
+
+  padding-bottom: 12px;
+  border-bottom: 1px solid #eee8ed;
+}
+
+/* =====================================================
+   الحضور
+   ===================================================== */
+
+.attendance-list {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.attendance-member {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 12px 14px;
+
+  background: #faf9fb;
+  border: 1px solid #eee8ed;
+  border-radius: 10px;
+
+  transition: 0.2s ease;
+}
+
+.attendance-member:hover {
+  border-color: #c9aec7;
+}
+
+.attendance-member.attended {
+  background: #f5eef5;
+  border-color: #d7bdd4;
+}
+
+.attendance-member label {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  cursor: pointer;
+}
+
+.attendance-member input[type="checkbox"] {
+  width: 17px;
+  height: 17px;
+  accent-color: #7c4678;
+}
+
+.attendance-member span {
+  font-size: 14px;
+  color: #333;
+  font-weight: 600;
+}
+
+.attendance-member small {
+  color: #888;
+  font-size: 11px;
+}
+
+/* =====================================================
+   البنود والتوصيات
+   ===================================================== */
+
+.minutes-section .agenda-editor {
+  margin-bottom: 22px;
+}
+
+.minutes-section .agenda-editor:last-child {
+  margin-bottom: 0;
+}
+
+.minutes-section .agenda-editor > label {
+  display: block;
+  margin-bottom: 10px;
+
+  color: #444;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+/* =====================================================
+   التكليفات
+   ===================================================== */
+
+.minutes-section:has(.task-form) {
+  background: #fff;
+}
+
+.task-form {
+  display: grid;
+  grid-template-columns: minmax(260px, 2fr) 1.2fr 1fr 1fr auto;
+  gap: 10px;
+
+  padding: 15px;
+
+  background: #f8f5f8;
+  border: 1px solid #eadfea;
+  border-radius: 14px;
+}
+
+.task-form input,
+.task-form select {
+  width: 100%;
+  height: 43px;
+  box-sizing: border-box;
+
+  border: 1px solid #ddd5dc;
+  border-radius: 9px;
+
+  background: #fff;
+  color: #333;
+
+  padding: 0 12px;
+
+  font-family: inherit;
+  font-size: 13px;
+}
+
+.task-form input:focus,
+.task-form select:focus {
+  outline: none;
+  border-color: #9b6b96;
+  box-shadow: 0 0 0 3px rgba(155, 107, 150, 0.1);
+}
+
+.add-task-btn {
+  height: 43px;
+  padding: 0 18px;
+
+  border: none;
+  border-radius: 9px;
+
+  background: #183b66;
+  color: #fff;
+
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.add-task-btn:hover {
+  background: #244e7d;
+  transform: translateY(-1px);
+}
+
+.tasks-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.task-item {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: 15px;
+
+  padding: 14px 16px;
+
+  background: #fff;
+
+  border: 1px solid #ebe4eb;
+  border-right: 4px solid #8a5a86;
+  border-radius: 11px;
+
+  box-shadow: 0 2px 8px rgba(40, 30, 50, 0.04);
+}
+
+.task-item > div {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.task-item strong {
+  color: #183b66;
+  font-size: 14px;
+}
+
+.task-item small {
+  color: #777;
+  font-size: 11px;
+}
+
+.task-item > span {
+  padding: 7px 12px;
+  border-radius: 20px;
+
+  background: #f2e9f1;
+  color: #71496d;
+
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.task-item button {
+  width: 34px;
+  height: 34px;
+
+  border: none;
+  border-radius: 8px;
+
+  background: #fff1f1;
+  color: #b04a4a;
+
+  cursor: pointer;
+  font-size: 15px;
+}
+
+.task-item button:hover {
+  background: #f9dddd;
+}
+
+/* =====================================================
+   التوقيعات
+   ===================================================== */
+
+.signatures-list {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.signature-member {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  align-items: center;
+
+  padding: 12px 14px;
+
+  background: #faf9fb;
+  border: 1px solid #eee8ed;
+  border-radius: 10px;
+}
+
+.signature-member > div {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.signature-member strong {
+  font-size: 13px;
+  color: #333;
+}
+
+.signature-member small {
+  font-size: 11px;
+  color: #888;
+}
+
+.signature-member input {
+  height: 40px;
+}
+
+/* =====================================================
+   أزرار أسفل المحضر
+   ===================================================== */
+
+.minutes-footer {
+  display: flex;
+  justify-content: flex-start;
+  gap: 10px;
+
+  padding: 20px 26px;
+
+  border-top: 1px solid #eee8ed;
+  background: #faf9fb;
+}
+
+.minutes-footer .save-meeting-btn {
+  min-width: 170px;
+}
+
+.minutes-footer .cancel-meeting-btn {
+  min-width: 90px;
+}
+
+/* =====================================================
+   Responsive
+   ===================================================== */
+
+@media (max-width: 900px) {
+
+  .meetings-dashboard {
+    padding: 25px 20px 50px;
+  }
+
+  .meetings-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .meeting-card {
+    grid-template-columns: 75px 1fr;
+  }
+
+  .meeting-actions {
+    grid-column: 1 / -1;
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 850px) {
+
+  .task-form {
+    grid-template-columns: 1fr;
+  }
+
+  .task-item {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+
+  .minutes-overlay {
+    padding: 10px;
+  }
+
+  .meeting-minutes-modal {
+    width: 100%;
+    max-height: 96vh;
+    border-radius: 16px;
+  }
+
+  .minutes-header {
+    padding: 15px;
+  }
+
+  .minutes-header h2 {
+    font-size: 18px;
+  }
+
+  .minutes-section {
+    margin: 12px;
+    padding: 15px;
+  }
+
+  .attendance-list,
+  .signatures-list {
+    grid-template-columns: 1fr;
+  }
+
+  .task-form {
+    grid-template-columns: 1fr;
+  }
+
+  .task-item {
+    grid-template-columns: 1fr;
+  }
+
+  .minutes-header-actions {
+    gap: 5px;
+  }
+
+  .print-btn {
+    padding: 8px 10px;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 600px) {
+
+  .meetings-header {
+    padding: 25px;
+  }
+
+  .meetings-header h1 {
+    font-size: 26px;
+  }
+
+  .meetings-header-icon {
+    width: 55px;
+    height: 55px;
+    font-size: 28px;
+  }
+
+  .meetings-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .meetings-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 18px;
+  }
+
+  .add-meeting-btn {
+    width: 100%;
+  }
+
+  .meeting-card {
+    grid-template-columns: 1fr;
+  }
+
+  .meeting-number {
+    width: 65px;
+    height: 65px;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .form-group.full {
+    grid-column: auto;
+  }
+
+  .modal-actions {
+    flex-direction: column;
+  }
+
+  .save-meeting-btn,
+  .cancel-meeting-btn {
+    width: 100%;
+  }
+}
+
+/* =====================================================
+   PRINT - A4
+   ===================================================== */
+
+@page {
+  size: A4 portrait;
+  margin: 10mm;
+}
+
+@media print {
+
+  /* =====================================================
+     الصفحة الأساسية
+     ===================================================== */
+
+  html,
+  body {
+    width: 210mm !important;
+    min-width: 210mm !important;
+    max-width: 210mm !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    background: #ffffff !important;
+
+    overflow: visible !important;
+  }
+
+  body {
+    font-family: "Tahoma", "Arial", sans-serif !important;
+    color: #222 !important;
+    direction: rtl !important;
+  }
+
+  /* =====================================================
+     إخفاء التطبيق بالكامل
+     ===================================================== */
+
+  body * {
+    visibility: hidden !important;
+  }
+
+  .meeting-minutes-modal,
+  .meeting-minutes-modal * {
+    visibility: visible !important;
+  }
+
+  /* =====================================================
+     Overlay
+     ===================================================== */
+
+  .minutes-overlay {
+    position: static !important;
+
+    display: block !important;
+
+    width: 190mm !important;
+    min-width: 190mm !important;
+    max-width: 190mm !important;
+
+    margin: 0 auto !important;
+    padding: 0 !important;
+
+    background: #ffffff !important;
+
+    overflow: visible !important;
+  }
+
+  /* =====================================================
+     المحضر
+     ===================================================== */
+
+  .meeting-minutes-modal {
+    position: static !important;
+
+    display: block !important;
+
+    width: 190mm !important;
+    min-width: 190mm !important;
+    max-width: 190mm !important;
+
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+
+    margin: 0 auto !important;
+    padding: 0 !important;
+
+    background: #ffffff !important;
+
+    border: none !important;
+    border-radius: 0 !important;
+
+    box-shadow: none !important;
+
+    overflow: visible !important;
+
+    box-sizing: border-box !important;
+  }
+
+  /* =====================================================
+     رأس المحضر
+     ===================================================== */
+
+  .minutes-header {
+    position: static !important;
+
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+
+    width: 100% !important;
+
+    margin: 0 0 4mm 0 !important;
+    padding: 0 0 3mm 0 !important;
+
+    background: #ffffff !important;
+
+    border: none !important;
+    border-bottom: 1.2px solid #183b66 !important;
+
+    box-shadow: none !important;
+  }
+
+  .minutes-header small {
+    display: block !important;
+
+    margin-bottom: 1mm !important;
+
+    color: #7b5a78 !important;
+
+    font-size: 8px !important;
+  }
+
+  .minutes-header h2 {
+    margin: 0 !important;
+
+    color: #183b66 !important;
+
+    font-size: 16px !important;
+    font-weight: 700 !important;
+  }
+
+  /* =====================================================
+     إخفاء جميع عناصر التحكم
+     ===================================================== */
+
+  .minutes-header-actions,
+  .minutes-footer,
+  .modal-close,
+  .print-btn,
+  .add-item-btn,
+  .remove-item-btn,
+  .add-task-btn,
+  .task-form,
+  .task-item button,
+  .delete-btn {
+    display: none !important;
+  }
+
+  /* =====================================================
+     الأقسام
+     ===================================================== */
+
+  .minutes-section {
+    display: block !important;
+
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+
+    margin: 0 0 3mm 0 !important;
+    padding: 3mm !important;
+
+    background: #ffffff !important;
+
+    border: 0.7px solid #cfcfcf !important;
+    border-radius: 1.5mm !important;
+
+    box-shadow: none !important;
+
+    box-sizing: border-box !important;
+
+    page-break-before: auto !important;
+    page-break-after: auto !important;
+
+    break-before: auto !important;
+    break-after: auto !important;
+
+    page-break-inside: auto !important;
+    break-inside: auto !important;
+  }
+
+  .minutes-section h3 {
+    display: flex !important;
+    align-items: center !important;
+
+    width: 100% !important;
+
+    margin: 0 0 2mm 0 !important;
+    padding: 0 0 1.5mm 0 !important;
+
+    color: #183b66 !important;
+
+    font-size: 11px !important;
+    font-weight: 700 !important;
+
+    border-bottom: 0.8px solid #183b66 !important;
+  }
+
+  /* =====================================================
+     بيانات الاجتماع
+     ===================================================== */
+
+  .form-grid {
+    display: grid !important;
+
+    grid-template-columns: 1fr 1fr !important;
+
+    width: 100% !important;
+
+    gap: 2mm !important;
+  }
+
+  .form-group {
+    width: 100% !important;
+    min-width: 0 !important;
+
+    gap: 1mm !important;
+  }
+
+  .form-group.full {
+    grid-column: 1 / -1 !important;
+  }
+
+  .form-group label {
+    display: block !important;
+
+    margin-bottom: 0.5mm !important;
+
+    color: #555 !important;
+
+    font-size: 7.5px !important;
+    font-weight: 700 !important;
+  }
+
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    display: block !important;
+
+    width: 100% !important;
+    max-width: 100% !important;
+
+    box-sizing: border-box !important;
+
+    padding: 1.2mm 2mm !important;
+
+    background: #ffffff !important;
+
+    border: 0.7px solid #ccc !important;
+    border-radius: 0.8mm !important;
+
+    color: #222 !important;
+
+    font-family: inherit !important;
+    font-size: 7.5px !important;
+  }
+
+  .form-group input,
+  .form-group select {
+    height: 7mm !important;
+    min-height: 7mm !important;
+  }
+
+  .form-group textarea {
+    min-height: 10mm !important;
+    height: auto !important;
+    resize: none !important;
+  }
+
+  /* =====================================================
+     البنود
+     ===================================================== */
+
+  .bullet-items {
+    display: flex !important;
+    flex-direction: column !important;
+
+    width: 100% !important;
+
+    gap: 1mm !important;
+  }
+
+  .bullet-item {
+    display: flex !important;
+    align-items: center !important;
+
+    width: 100% !important;
+
+    margin: 0 !important;
+
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  .bullet-dot {
+    flex: 0 0 auto !important;
+
+    width: 4mm !important;
+    min-width: 4mm !important;
+
+    color: #183b66 !important;
+
+    font-size: 9px !important;
+  }
+
+  .bullet-item input {
+    flex: 1 !important;
+
+    width: auto !important;
+    min-width: 0 !important;
+
+    height: 6mm !important;
+
+    padding: 0.8mm !important;
+
+    background: #ffffff !important;
+
+    border: none !important;
+    border-bottom: 0.6px dotted #aaa !important;
+    border-radius: 0 !important;
+
+    color: #222 !important;
+
+    font-size: 7.5px !important;
+  }
+
+  /* =====================================================
+     الحضور
+     ===================================================== */
+
+  .attendance-list {
+    display: grid !important;
+
+    grid-template-columns: 1fr 1fr !important;
+
+    width: 100% !important;
+
+    gap: 1mm !important;
+  }
+
+  .attendance-member {
+    display: flex !important;
+
+    align-items: center !important;
+    justify-content: space-between !important;
+
+    width: 100% !important;
+
+    box-sizing: border-box !important;
+
+    padding: 1.5mm 2mm !important;
+
+    background: #ffffff !important;
+
+    border: 0.7px solid #d8d8d8 !important;
+    border-radius: 0.8mm !important;
+
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  .attendance-member label {
+    display: flex !important;
+    align-items: center !important;
+
+    gap: 1.5mm !important;
+  }
+
+  .attendance-member input[type="checkbox"] {
+    width: 3mm !important;
+    height: 3mm !important;
+  }
+
+  .attendance-member span {
+    color: #333 !important;
+    font-size: 7px !important;
+  }
+
+  .attendance-member small {
+    color: #777 !important;
+    font-size: 6.5px !important;
+  }
+
+  /* =====================================================
+     المهام
+     ===================================================== */
+
+  .tasks-list {
+    display: flex !important;
+    flex-direction: column !important;
+
+    width: 100% !important;
+
+    gap: 1mm !important;
+
+    margin: 0 !important;
+  }
+
+  .task-item {
+    display: grid !important;
+
+    grid-template-columns: 1fr auto !important;
+
+    width: 100% !important;
+
+    box-sizing: border-box !important;
+
+    gap: 2mm !important;
+
+    padding: 2mm !important;
+
+    margin: 0 !important;
+
+    background: #ffffff !important;
+
+    border: 0.7px solid #d8d8d8 !important;
+    border-right: 1.5px solid #183b66 !important;
+
+    border-radius: 0.8mm !important;
+
+    box-shadow: none !important;
+
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  .task-item > div {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0.5mm !important;
+  }
+
+  .task-item strong {
+    display: block !important;
+
+    color: #183b66 !important;
+
+    font-size: 7.5px !important;
+  }
+
+  .task-item small {
+    display: block !important;
+
+    margin-top: 0.5mm !important;
+
+    color: #777 !important;
+
+    font-size: 6.5px !important;
+  }
+
+  .task-item > span {
+    align-self: center !important;
+
+    padding: 1mm 2mm !important;
+
+    background: #ffffff !important;
+
+    border: 0.7px solid #ccc !important;
+    border-radius: 4mm !important;
+
+    color: #555 !important;
+
+    font-size: 6.5px !important;
+
+    white-space: nowrap !important;
+  }
+
+  /* =====================================================
+     التوقيعات
+     ===================================================== */
+
+  .signatures-list {
+    display: grid !important;
+
+    grid-template-columns: 1fr 1fr !important;
+
+    width: 100% !important;
+
+    gap: 3mm !important;
+  }
+
+  .signature-member {
+    display: flex !important;
+
+    align-items: flex-end !important;
+    justify-content: space-between !important;
+
+    width: 100% !important;
+
+    box-sizing: border-box !important;
+
+    gap: 2mm !important;
+
+    padding: 2mm 0 !important;
+
+    background: #ffffff !important;
+
+    border: none !important;
+    border-bottom: 0.7px solid #ccc !important;
+    border-radius: 0 !important;
+
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  .signature-member > div {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0.5mm !important;
+  }
+
+  .signature-member strong {
+    display: block !important;
+
+    color: #333 !important;
+
+    font-size: 7px !important;
+  }
+
+  .signature-member small {
+    display: block !important;
+
+    margin-top: 0.5mm !important;
+
+    color: #777 !important;
+
+    font-size: 6px !important;
+  }
+
+  .signature-member input {
+    width: 35mm !important;
+    min-width: 35mm !important;
+
+    height: 6mm !important;
+
+    padding: 0.8mm !important;
+
+    background: #ffffff !important;
+
+    border: none !important;
+    border-bottom: 0.7px solid #555 !important;
+    border-radius: 0 !important;
+
+    font-size: 7px !important;
+  }
+
+  /* =====================================================
+     إزالة الـ Scroll من المحضر
+     ===================================================== */
+
+  html,
+  body,
+  .minutes-overlay,
+  .meeting-minutes-modal {
+    overflow: visible !important;
+  }
+
+  /* =====================================================
+     منع العناصر من تجاوز A4
+     ===================================================== */
+
+  .meeting-minutes-modal,
+  .meeting-minutes-modal *,
+  .minutes-overlay,
+  .minutes-overlay * {
+    box-sizing: border-box !important;
+    max-width: 100% !important;
+  }
+
+  /* =====================================================
+     تحسين ألوان الطباعة
+     ===================================================== */
+
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* =====================================================
+     منع بعض العناصر من الانقسام
+     ===================================================== */
+
+  .attendance-member,
+  .bullet-item,
+  .task-item,
+  .signature-member {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+}
