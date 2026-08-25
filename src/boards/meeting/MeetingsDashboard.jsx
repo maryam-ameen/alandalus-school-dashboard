@@ -2,10 +2,6 @@ import React, { useEffect, useRef, useState } from "react";
 import "./MeetingsDashboard.css";
 import { supabase } from "../../lib/supabase";
 
-/* =========================================================
-   بيانات الاجتماع الافتراضية
-========================================================= */
-
 const emptyMeeting = {
   number: "",
   date: "",
@@ -17,7 +13,7 @@ const emptyMeeting = {
 };
 
 /* =========================================================
-   لوحة التوقيع
+   Signature Pad
 ========================================================= */
 
 const SignaturePad = ({
@@ -29,7 +25,6 @@ const SignaturePad = ({
   const drawing = useRef(false);
   const lastPoint = useRef({ x: 0, y: 0 });
 
-  /* تحميل التوقيع الموجود */
   useEffect(() => {
     const canvas = canvasRef.current;
 
@@ -37,12 +32,7 @@ const SignaturePad = ({
 
     const ctx = canvas.getContext("2d");
 
-    ctx.clearRect(
-      0,
-      0,
-      canvas.width,
-      canvas.height
-    );
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     if (!value) return;
 
@@ -68,12 +58,14 @@ const SignaturePad = ({
     img.src = value;
   }, [value]);
 
-  /* حساب مكان المؤشر داخل Canvas */
   const getPoint = (event) => {
     const canvas = canvasRef.current;
 
-    const rect =
-      canvas.getBoundingClientRect();
+    if (!canvas) {
+      return { x: 0, y: 0 };
+    }
+
+    const rect = canvas.getBoundingClientRect();
 
     return {
       x:
@@ -86,7 +78,6 @@ const SignaturePad = ({
     };
   };
 
-  /* بدء الرسم */
   const startDrawing = (event) => {
     if (disabled) return;
 
@@ -97,12 +88,11 @@ const SignaturePad = ({
     drawing.current = true;
     lastPoint.current = point;
 
-    canvasRef.current.setPointerCapture(
+    canvasRef.current?.setPointerCapture?.(
       event.pointerId
     );
   };
 
-  /* الرسم */
   const draw = (event) => {
     if (
       disabled ||
@@ -114,6 +104,9 @@ const SignaturePad = ({
     event.preventDefault();
 
     const canvas = canvasRef.current;
+
+    if (!canvas) return;
+
     const ctx = canvas.getContext("2d");
 
     const point = getPoint(event);
@@ -125,12 +118,9 @@ const SignaturePad = ({
       lastPoint.current.y
     );
 
-    ctx.lineTo(
-      point.x,
-      point.y
-    );
+    ctx.lineTo(point.x, point.y);
 
-    ctx.strokeStyle = "#222";
+    ctx.strokeStyle = "#1e3a8a";
     ctx.lineWidth = 2.5;
     ctx.lineCap = "round";
     ctx.lineJoin = "round";
@@ -140,7 +130,6 @@ const SignaturePad = ({
     lastPoint.current = point;
   };
 
-  /* انتهاء الرسم */
   const stopDrawing = () => {
     if (
       disabled ||
@@ -153,20 +142,22 @@ const SignaturePad = ({
 
     const canvas = canvasRef.current;
 
+    if (!canvas) return;
+
     const signature =
       canvas.toDataURL("image/png");
 
     onSave(signature);
   };
 
-  /* مسح التوقيع */
   const clearSignature = () => {
     if (disabled) return;
 
     const canvas = canvasRef.current;
 
-    const ctx =
-      canvas.getContext("2d");
+    if (!canvas) return;
+
+    const ctx = canvas.getContext("2d");
 
     ctx.clearRect(
       0,
@@ -194,7 +185,9 @@ const SignaturePad = ({
         onPointerMove={draw}
         onPointerUp={stopDrawing}
         onPointerCancel={stopDrawing}
-        onPointerLeave={stopDrawing}
+        style={{
+          touchAction: "none",
+        }}
       />
 
       <button
@@ -203,7 +196,7 @@ const SignaturePad = ({
         onClick={clearSignature}
         disabled={disabled}
       >
-        مسح التوقيع
+        مسح
       </button>
 
     </div>
@@ -216,36 +209,8 @@ const SignaturePad = ({
 
 const MeetingsDashboard = () => {
 
-  /* =======================================================
-     الحالات
-  ======================================================= */
-
-  const [meetings, setMeetings] =
-    useState([]);
-
-  const [members, setMembers] =
-    useState([]);
-
-  const [attendance, setAttendance] =
-    useState([]);
-
-  const [signatures, setSignatures] =
-    useState([]);
-
-  const [tasks, setTasks] =
-    useState([]);
-
-  const [agendaItems, setAgendaItems] =
-    useState([""]);
-
-  const [decisionItems, setDecisionItems] =
-    useState([""]);
-
-  const [meeting, setMeeting] =
-    useState(emptyMeeting);
-
-  const [editingMeeting, setEditingMeeting] =
-    useState(null);
+  const [meetings, setMeetings] = useState([]);
+  const [members, setMembers] = useState([]);
 
   const [showModal, setShowModal] =
     useState(false);
@@ -259,6 +224,27 @@ const MeetingsDashboard = () => {
   const [saving, setSaving] =
     useState(false);
 
+  const [editingMeeting, setEditingMeeting] =
+    useState(null);
+
+  const [meeting, setMeeting] =
+    useState(emptyMeeting);
+
+  const [attendance, setAttendance] =
+    useState([]);
+
+  const [tasks, setTasks] =
+    useState([]);
+
+  const [signatures, setSignatures] =
+    useState([]);
+
+  const [agendaItems, setAgendaItems] =
+    useState([""]);
+
+  const [decisionItems, setDecisionItems] =
+    useState([""]);
+
   const [newTask, setNewTask] =
     useState({
       task: "",
@@ -267,18 +253,18 @@ const MeetingsDashboard = () => {
       status: "لم تبدأ",
     });
 
-  /* =======================================================
-     تحميل البيانات عند فتح الصفحة
-  ======================================================= */
+  /* =========================================================
+     تحميل البيانات
+  ========================================================= */
 
   useEffect(() => {
     loadMeetings();
     loadMembers();
   }, []);
 
-  /* =======================================================
+  /* =========================================================
      الاجتماعات
-  ======================================================= */
+  ========================================================= */
 
   const loadMeetings = async () => {
     setLoading(true);
@@ -305,16 +291,27 @@ const MeetingsDashboard = () => {
       alert(
         "حدث خطأ أثناء تحميل الاجتماعات"
       );
-    } else {
-      setMeetings(data || []);
+
+      setLoading(false);
+      return;
     }
 
+    setMeetings(data || []);
     setLoading(false);
   };
 
-  /* =======================================================
+  /* =========================================================
      الأعضاء
-  ======================================================= */
+
+     مهم جدًا:
+     الجدول الصحيح هو committee_members
+     وليس meeting_members
+
+     والأعمدة:
+     id = UUID
+     full_name = اسم العضوة
+     job_title = الوظيفة
+  ========================================================= */
 
   const loadMembers = async () => {
 
@@ -322,33 +319,52 @@ const MeetingsDashboard = () => {
       data,
       error,
     } = await supabase
-      .from("meeting_members")
-      .select("*")
-      .eq(
-        "is_active",
-        true
+      .from("committee_members")
+      .select(
+        `
+          id,
+          committee_id,
+          full_name,
+          job_title,
+          member_role,
+          phone,
+          email,
+          created_at
+        `
       )
-      .order("name");
+      .order(
+        "full_name",
+        {
+          ascending: true,
+        }
+      );
 
     if (error) {
       console.error(
-        "Load members error:",
+        "Load committee members error:",
         error
       );
 
       alert(
-        "حدث خطأ أثناء تحميل قائمة الأعضاء"
+        "حدث خطأ أثناء تحميل أعضاء اللجنة:\n\n" +
+          error.message
       );
 
+      setMembers([]);
       return;
     }
+
+    console.log(
+      "COMMITTEE MEMBERS:",
+      data
+    );
 
     setMembers(data || []);
   };
 
-  /* =======================================================
+  /* =========================================================
      تغيير بيانات الاجتماع
-  ======================================================= */
+  ========================================================= */
 
   const handleChange = (event) => {
 
@@ -363,15 +379,13 @@ const MeetingsDashboard = () => {
     }));
   };
 
-  /* =======================================================
-     اليوم بالعربي
-  ======================================================= */
+  /* =========================================================
+     اليوم
+  ========================================================= */
 
   const getArabicDay = (date) => {
 
-    if (!date) {
-      return "—";
-    }
+    if (!date) return "—";
 
     const days = [
       "الأحد",
@@ -391,12 +405,11 @@ const MeetingsDashboard = () => {
     return days[d.getDay()];
   };
 
-  /* =======================================================
+  /* =========================================================
      بنود الاجتماع
-  ======================================================= */
+  ========================================================= */
 
   const addAgendaItem = () => {
-
     setAgendaItems((prev) => [
       ...prev,
       "",
@@ -436,9 +449,9 @@ const MeetingsDashboard = () => {
     });
   };
 
-  /* =======================================================
-     القرارات والتوصيات
-  ======================================================= */
+  /* =========================================================
+     القرارات
+  ========================================================= */
 
   const addDecisionItem = () => {
 
@@ -481,9 +494,9 @@ const MeetingsDashboard = () => {
     });
   };
 
-  /* =======================================================
+  /* =========================================================
      إضافة اجتماع
-  ======================================================= */
+  ========================================================= */
 
   const handleAddMeeting =
     async () => {
@@ -533,9 +546,8 @@ const MeetingsDashboard = () => {
 
             notes:
               agendaItems
-                .map(
-                  (item) =>
-                    item.trim()
+                .map((item) =>
+                  item.trim()
                 )
                 .filter(Boolean)
                 .join("\n") ||
@@ -543,9 +555,8 @@ const MeetingsDashboard = () => {
 
             recommendations:
               decisionItems
-                .map(
-                  (item) =>
-                    item.trim()
+                .map((item) =>
+                  item.trim()
                 )
                 .filter(Boolean)
                 .join("\n") ||
@@ -568,7 +579,6 @@ const MeetingsDashboard = () => {
         );
 
         setSaving(false);
-
         return;
       }
 
@@ -585,13 +595,12 @@ const MeetingsDashboard = () => {
       setDecisionItems([""]);
 
       setShowModal(false);
-
       setSaving(false);
     };
 
-  /* =======================================================
+  /* =========================================================
      فتح المحضر
-  ======================================================= */
+  ========================================================= */
 
   const handleOpenMeeting =
     async (item) => {
@@ -634,9 +643,6 @@ const MeetingsDashboard = () => {
         item.notes
           ? item.notes
               .split("\n")
-              .map((v) =>
-                v.trim()
-              )
               .filter(Boolean)
           : [""]
       );
@@ -645,42 +651,35 @@ const MeetingsDashboard = () => {
         item.recommendations
           ? item.recommendations
               .split("\n")
-              .map((v) =>
-                v.trim()
-              )
               .filter(Boolean)
           : [""]
       );
 
-      /* تحميل كل بيانات المحضر */
+      setNewTask({
+        task: "",
+        assigned_to: "",
+        due_date: "",
+        status: "لم تبدأ",
+      });
 
       await Promise.all([
-        loadAttendance(
-          item.id
-        ),
-
-        loadSignatures(
-          item.id
-        ),
-
-        loadTasks(
-          item.id
-        ),
+        loadAttendance(item.id),
+        loadTasks(item.id),
+        loadSignatures(item.id),
       ]);
 
       setShowMinutes(true);
     };
 
-  /* =======================================================
+  /* =========================================================
      تحديث الاجتماع
-  ======================================================= */
+  ========================================================= */
 
   const handleUpdateMeeting =
     async () => {
 
-      if (!editingMeeting) {
+      if (!editingMeeting)
         return;
-      }
 
       setSaving(true);
 
@@ -714,9 +713,8 @@ const MeetingsDashboard = () => {
 
           notes:
             agendaItems
-              .map(
-                (item) =>
-                  item.trim()
+              .map((item) =>
+                item.trim()
               )
               .filter(Boolean)
               .join("\n") ||
@@ -724,9 +722,8 @@ const MeetingsDashboard = () => {
 
           recommendations:
             decisionItems
-              .map(
-                (item) =>
-                  item.trim()
+              .map((item) =>
+                item.trim()
               )
               .filter(Boolean)
               .join("\n") ||
@@ -755,7 +752,6 @@ const MeetingsDashboard = () => {
         );
 
         setSaving(false);
-
         return;
       }
 
@@ -776,64 +772,61 @@ const MeetingsDashboard = () => {
       setSaving(false);
     };
 
-  /* =======================================================
+  /* =========================================================
      حذف الاجتماع
-  ======================================================= */
+  ========================================================= */
 
-  const handleDelete =
-    async (id) => {
+  const handleDelete = async (
+    id
+  ) => {
 
-      if (
-        !window.confirm(
-          "هل تريدين حذف هذا الاجتماع؟"
-        )
-      ) {
-        return;
-      }
+    if (
+      !window.confirm(
+        "هل تريدين حذف هذا الاجتماع؟"
+      )
+    ) {
+      return;
+    }
 
-      const {
-        error,
-      } = await supabase
-        .from("meetings")
-        .delete()
-        .eq("id", id);
+    const {
+      error,
+    } = await supabase
+      .from("meetings")
+      .delete()
+      .eq("id", id);
 
-      if (error) {
+    if (error) {
 
-        console.error(error);
-
-        alert(
-          "حدث خطأ أثناء حذف الاجتماع"
-        );
-
-        return;
-      }
-
-      setMeetings((prev) =>
-        prev.filter(
-          (item) =>
-            item.id !== id
-        )
+      console.error(
+        "Delete meeting error:",
+        error
       );
 
-      if (
-        editingMeeting?.id === id
-      ) {
-        setShowMinutes(false);
-        setEditingMeeting(null);
-      }
-    };
+      alert(
+        "حدث خطأ أثناء حذف الاجتماع"
+      );
 
-  /* =======================================================
+      return;
+    }
+
+    setMeetings((prev) =>
+      prev.filter(
+        (item) =>
+          item.id !== id
+      )
+    );
+
+    if (
+      editingMeeting?.id === id
+    ) {
+      setShowMinutes(false);
+      setEditingMeeting(null);
+    }
+  };
+
+  /* =========================================================
      الحضور
-     
-     مهم:
-     جدولك يستخدم:
-     attendance_status
-     
-     وليس:
-     attended
-  ======================================================= */
+  ========================================================= */
 
   const loadAttendance =
     async (meetingId) => {
@@ -864,8 +857,12 @@ const MeetingsDashboard = () => {
           error
         );
 
-        setAttendance([]);
+        alert(
+          "حدث خطأ أثناء تحميل الحضور:\n\n" +
+            error.message
+        );
 
+        setAttendance([]);
         return;
       }
 
@@ -874,81 +871,165 @@ const MeetingsDashboard = () => {
       );
     };
 
-  /* =======================================================
-     معرفة هل العضو حاضر
-  ======================================================= */
+  /* =========================================================
+     هل العضوة حاضرة؟
+  ========================================================= */
 
-  const isAttended =
-    (memberId) => {
+  const isAttended = (
+    memberId
+  ) => {
 
-      return attendance.some(
-        (item) =>
-          item.member_id ===
-            memberId &&
-          item.attendance_status ===
-            "حاضر"
-      );
-    };
+    return attendance.some(
+      (item) =>
+        String(
+          item.member_id
+        ) ===
+          String(memberId) &&
+        item.attendance_status ===
+          "حاضر"
+    );
+  };
 
-  /* =======================================================
+  /* =========================================================
      تغيير الحضور
-     
-     إذا ضغطت حضرت:
-     attendance_status = حاضر
 
-     إذا ألغت:
-     نحذف سجل الحضور
-     ونحذف التوقيع
-  ======================================================= */
+     مهم:
+     memberId هنا UUID
+     ولا نستخدم Number()
+  ========================================================= */
 
   const toggleAttendance =
     async (memberId) => {
 
       if (!editingMeeting) {
+        alert(
+          "لم يتم تحديد الاجتماع"
+        );
+
         return;
       }
 
-      const currentlyAttended =
-        isAttended(memberId);
+      if (!memberId) {
+        alert(
+          "رقم العضوة غير موجود"
+        );
 
-      /* ---------------------------------
-         إلغاء الحضور
-      --------------------------------- */
+        return;
+      }
 
-      if (currentlyAttended) {
+      const current =
+        attendance.find(
+          (item) =>
+            String(
+              item.member_id
+            ) ===
+            String(memberId)
+        );
 
-        const {
-          error,
-        } = await supabase
-          .from(
-            "meeting_attendance"
-          )
-          .delete()
-          .eq(
-            "meeting_id",
-            editingMeeting.id
-          )
-          .eq(
-            "member_id",
-            memberId
+      const currentlyPresent =
+        current?.attendance_status ===
+        "حاضر";
+
+      const newStatus =
+        currentlyPresent
+          ? "غائب"
+          : "حاضر";
+
+      console.log(
+        "Saving attendance:",
+        {
+          meeting_id:
+            editingMeeting.id,
+
+          member_id:
+            memberId,
+
+          attendance_status:
+            newStatus,
+        }
+      );
+
+      const {
+        data,
+        error,
+      } = await supabase
+        .from("meeting_attendance")
+        .upsert(
+          {
+            meeting_id:
+              editingMeeting.id,
+
+            member_id:
+              memberId,
+
+            attendance_status:
+              newStatus,
+          },
+          {
+            onConflict:
+              "meeting_id,member_id",
+          }
+        )
+        .select()
+        .single();
+
+      if (error) {
+
+        console.error(
+          "Attendance error:",
+          error
+        );
+
+        alert(
+          "حدث خطأ أثناء حفظ الحضور:\n\n" +
+            error.message +
+            "\n\n" +
+            (error.details ||
+              "") +
+            "\n\n" +
+            (error.hint ||
+              "")
+        );
+
+        return;
+      }
+
+      setAttendance((prev) => {
+
+        const exists =
+          prev.some(
+            (item) =>
+              String(
+                item.member_id
+              ) ===
+              String(memberId)
           );
 
-        if (error) {
+        if (exists) {
 
-          console.error(
-            "Delete attendance error:",
-            error
+          return prev.map(
+            (item) =>
+              String(
+                item.member_id
+              ) ===
+              String(memberId)
+                ? data
+                : item
           );
-
-          alert(
-            "حدث خطأ أثناء إلغاء الحضور:\n\n" +
-              error.message
-          );
-
-          return;
         }
 
-        /* حذف التوقيع */
+        return [
+          ...prev,
+          data,
+        ];
+      });
+
+      /* إذا أصبحت غائبة نحذف توقيعها */
+
+      if (
+        newStatus !==
+        "حاضر"
+      ) {
 
         const {
           error:
@@ -967,118 +1048,200 @@ const MeetingsDashboard = () => {
             memberId
           );
 
-        if (signatureError) {
+        if (
+          signatureError
+        ) {
           console.error(
-            "Delete signature error:",
+            "Signature delete error:",
             signatureError
           );
         }
-
-        setAttendance(
-          (prev) =>
-            prev.filter(
-              (item) =>
-                item.member_id !==
-                memberId
-            )
-        );
 
         setSignatures(
           (prev) =>
             prev.filter(
               (item) =>
-                item.member_id !==
-                memberId
+                String(
+                  item.member_id
+                ) !==
+                String(memberId)
             )
         );
-
-        return;
       }
+    };
 
-      /* ---------------------------------
-         تسجيل الحضور
-      --------------------------------- */
+  /* =========================================================
+     المهام
+  ========================================================= */
+
+  const loadTasks =
+    async (meetingId) => {
 
       const {
         data,
         error,
       } = await supabase
-        .from(
-          "meeting_attendance"
+        .from("meeting_tasks")
+        .select("*")
+        .eq(
+          "meeting_id",
+          meetingId
         )
-        .upsert(
+        .order(
+          "created_at",
           {
-            meeting_id:
-              editingMeeting.id,
-
-            member_id:
-              memberId,
-
-            attendance_status:
-              "حاضر",
-          },
-          {
-            onConflict:
-              "meeting_id,member_id",
+            ascending: true,
           }
-        )
-        .select()
-        .single();
+        );
 
       if (error) {
 
         console.error(
-          "Save attendance error:",
+          "Load tasks error:",
+          error
+        );
+
+        setTasks([]);
+        return;
+      }
+
+      setTasks(data || []);
+    };
+
+  const addTask = async () => {
+
+    if (!editingMeeting)
+      return;
+
+    if (
+      !newTask.task.trim()
+    ) {
+      alert(
+        "اكتبي المهمة أولًا"
+      );
+
+      return;
+    }
+
+    const {
+      data,
+      error,
+    } = await supabase
+      .from("meeting_tasks")
+      .insert([
+        {
+          meeting_id:
+            editingMeeting.id,
+
+          task:
+            newTask.task.trim(),
+
+          /*
+            مهم:
+            assigned_to عندك UUID
+            لذلك لا نستخدم Number()
+          */
+
+          assigned_to:
+            newTask.assigned_to ||
+            null,
+
+          due_date:
+            newTask.due_date ||
+            null,
+
+          status:
+            newTask.status,
+        },
+      ])
+      .select()
+      .single();
+
+    if (error) {
+
+      console.error(
+        "Add task error:",
+        error
+      );
+
+      alert(
+        "حدث خطأ أثناء إضافة المهمة:\n\n" +
+          error.message
+      );
+
+      return;
+    }
+
+    setTasks((prev) => [
+      ...prev,
+      data,
+    ]);
+
+    setNewTask({
+      task: "",
+      assigned_to: "",
+      due_date: "",
+      status: "لم تبدأ",
+    });
+  };
+
+  const deleteTask =
+    async (taskId) => {
+
+      const {
+        error,
+      } = await supabase
+        .from("meeting_tasks")
+        .delete()
+        .eq("id", taskId);
+
+      if (error) {
+
+        console.error(
+          "Delete task error:",
           error
         );
 
         alert(
-          "حدث خطأ أثناء حفظ الحضور:\n\n" +
-            error.message
+          "حدث خطأ أثناء حذف المهمة"
         );
 
         return;
       }
 
-      setAttendance(
-        (prev) => {
-
-          const exists =
-            prev.some(
-              (item) =>
-                item.member_id ===
-                memberId
-            );
-
-          if (exists) {
-
-            return prev.map(
-              (item) =>
-                item.member_id ===
-                memberId
-                  ? data
-                  : item
-            );
-          }
-
-          return [
-            ...prev,
-            data,
-          ];
-        }
+      setTasks((prev) =>
+        prev.filter(
+          (item) =>
+            item.id !== taskId
+        )
       );
     };
 
-  /* =======================================================
-     التوقيعات
-     
-     مهم:
-     جدولك يستخدم:
-     signature_data
+  /* =========================================================
+     اسم العضوة
 
-     وليس:
-     signature
-  ======================================================= */
+     الجدول يستخدم full_name
+  ========================================================= */
+
+  const getMemberName =
+    (memberId) => {
+
+      const member =
+        members.find(
+          (item) =>
+            String(item.id) ===
+            String(memberId)
+        );
+
+      return (
+        member?.full_name ||
+        "غير محدد"
+      );
+    };
+
+  /* =========================================================
+     التوقيعات
+  ========================================================= */
 
   const loadSignatures =
     async (meetingId) => {
@@ -1096,6 +1259,7 @@ const MeetingsDashboard = () => {
             meeting_id,
             member_id,
             signer_name,
+            signature,
             signature_data,
             signed_at,
             created_at
@@ -1113,8 +1277,12 @@ const MeetingsDashboard = () => {
           error
         );
 
-        setSignatures([]);
+        alert(
+          "حدث خطأ أثناء تحميل التوقيعات:\n\n" +
+            error.message
+        );
 
+        setSignatures([]);
         return;
       }
 
@@ -1123,28 +1291,28 @@ const MeetingsDashboard = () => {
       );
     };
 
-  /* =======================================================
-     جلب توقيع عضو
-  ======================================================= */
-
   const getSignature =
     (memberId) => {
 
-      return (
+      const item =
         signatures.find(
-          (item) =>
-            item.member_id ===
-            memberId
-        )?.signature_data ||
+          (signature) =>
+            String(
+              signature.member_id
+            ) ===
+            String(memberId)
+        );
+
+      return (
+        item?.signature_data ||
+        item?.signature ||
         ""
       );
     };
 
-  /* =======================================================
+  /* =========================================================
      حفظ التوقيع
-     
-     لا يسمح بالتوقيع إلا بعد الحضور
-  ======================================================= */
+  ========================================================= */
 
   const saveSignature =
     async (
@@ -1153,21 +1321,24 @@ const MeetingsDashboard = () => {
     ) => {
 
       if (!editingMeeting) {
-        return;
-      }
-
-      /* التأكد من الحضور */
-
-      if (!isAttended(memberId)) {
-
         alert(
-          "يجب تسجيل الحضور أولًا قبل التوقيع"
+          "لم يتم تحديد الاجتماع"
         );
 
         return;
       }
 
-      /* إذا مسحت التوقيع */
+      if (
+        !isAttended(memberId)
+      ) {
+        alert(
+          "يجب تسجيل الحضور أولًا"
+        );
+
+        return;
+      }
+
+      /* حذف التوقيع */
 
       if (!signature) {
 
@@ -1195,7 +1366,8 @@ const MeetingsDashboard = () => {
           );
 
           alert(
-            "حدث خطأ أثناء حذف التوقيع"
+            "حدث خطأ أثناء حذف التوقيع:\n\n" +
+              error.message
           );
 
           return;
@@ -1205,24 +1377,48 @@ const MeetingsDashboard = () => {
           (prev) =>
             prev.filter(
               (item) =>
-                item.member_id !==
-                memberId
+                String(
+                  item.member_id
+                ) !==
+                String(memberId)
             )
         );
 
         return;
       }
 
-      /* الحصول على اسم العضو */
-
       const member =
         members.find(
           (item) =>
-            item.id ===
-            memberId
+            String(item.id) ===
+            String(memberId)
         );
 
-      /* حفظ التوقيع */
+      const payload = {
+        meeting_id:
+          editingMeeting.id,
+
+        member_id:
+          memberId,
+
+        signer_name:
+          member?.full_name ||
+          null,
+
+        signature:
+          signature,
+
+        signature_data:
+          signature,
+
+        signed_at:
+          new Date().toISOString(),
+      };
+
+      console.log(
+        "Saving signature:",
+        payload
+      );
 
       const {
         data,
@@ -1232,23 +1428,7 @@ const MeetingsDashboard = () => {
           "meeting_signatures"
         )
         .upsert(
-          {
-            meeting_id:
-              editingMeeting.id,
-
-            member_id:
-              memberId,
-
-            signer_name:
-              member?.name ||
-              "",
-
-            signature_data:
-              signature,
-
-            signed_at:
-              new Date().toISOString(),
-          },
+          payload,
           {
             onConflict:
               "meeting_id,member_id",
@@ -1260,226 +1440,66 @@ const MeetingsDashboard = () => {
       if (error) {
 
         console.error(
-          "Save signature error:",
+          "Signature error:",
           error
         );
 
         alert(
-          "حدث خطأ في حفظ التوقيع:\n\n" +
-            error.message
+          "حدث خطأ أثناء حفظ التوقيع:\n\n" +
+            error.message +
+            "\n\n" +
+            (error.details ||
+              "") +
+            "\n\n" +
+            (error.hint ||
+              "")
         );
 
         return;
       }
 
-      setSignatures(
-        (prev) => {
+      setSignatures((prev) => {
 
-          const exists =
-            prev.some(
-              (item) =>
-                item.member_id ===
-                memberId
-            );
+        const exists =
+          prev.some(
+            (item) =>
+              String(
+                item.member_id
+              ) ===
+              String(memberId)
+          );
 
-          if (exists) {
+        if (exists) {
 
-            return prev.map(
-              (item) =>
-                item.member_id ===
-                memberId
-                  ? data
-                  : item
-            );
-          }
-
-          return [
-            ...prev,
-            data,
-          ];
+          return prev.map(
+            (item) =>
+              String(
+                item.member_id
+              ) ===
+              String(memberId)
+                ? data
+                : item
+          );
         }
-      );
-    };
 
-  /* =======================================================
-     المهام
-  ======================================================= */
-
-  const loadTasks =
-    async (meetingId) => {
-
-      const {
-        data,
-        error,
-      } = await supabase
-        .from(
-          "meeting_tasks"
-        )
-        .select("*")
-        .eq(
-          "meeting_id",
-          meetingId
-        )
-        .order(
-          "created_at",
-          {
-            ascending: true,
-          }
-        );
-
-      if (error) {
-
-        console.error(
-          "Load tasks error:",
-          error
-        );
-
-        setTasks([]);
-
-        return;
-      }
-
-      setTasks(
-        data || []
-      );
-    };
-
-  const addTask =
-    async () => {
-
-      if (!editingMeeting) {
-        return;
-      }
-
-      if (
-        !newTask.task.trim()
-      ) {
-        alert(
-          "اكتبي المهمة أولاً"
-        );
-
-        return;
-      }
-
-      const {
-        data,
-        error,
-      } = await supabase
-        .from(
-          "meeting_tasks"
-        )
-        .insert([
-          {
-            meeting_id:
-              editingMeeting.id,
-
-            task:
-              newTask.task,
-
-            assigned_to:
-              newTask.assigned_to
-                ? newTask.assigned_to
-                : null,
-
-            due_date:
-              newTask.due_date ||
-              null,
-
-            status:
-              newTask.status,
-          },
-        ])
-        .select()
-        .single();
-
-      if (error) {
-
-        console.error(error);
-
-        alert(
-          "حدث خطأ أثناء إضافة المهمة"
-        );
-
-        return;
-      }
-
-      setTasks(
-        (prev) => [
+        return [
           ...prev,
           data,
-        ]
-      );
-
-      setNewTask({
-        task: "",
-        assigned_to: "",
-        due_date: "",
-        status: "لم تبدأ",
+        ];
       });
     };
 
-  const deleteTask =
-    async (taskId) => {
-
-      const {
-        error,
-      } = await supabase
-        .from(
-          "meeting_tasks"
-        )
-        .delete()
-        .eq(
-          "id",
-          taskId
-        );
-
-      if (error) {
-
-        console.error(error);
-
-        alert(
-          "حدث خطأ أثناء حذف المهمة"
-        );
-
-        return;
-      }
-
-      setTasks(
-        (prev) =>
-          prev.filter(
-            (item) =>
-              item.id !== taskId
-          )
-      );
-    };
-
-  const getMemberName =
-    (memberId) => {
-
-      const member =
-        members.find(
-          (item) =>
-            item.id ===
-            memberId
-        );
-
-      return (
-        member?.name ||
-        "غير محدد"
-      );
-    };
-
-  /* =======================================================
+  /* =========================================================
      الطباعة
-  ======================================================= */
+  ========================================================= */
 
   const handlePrint = () => {
     window.print();
   };
 
-  /* =======================================================
-     العرض
-  ======================================================= */
+  /* =========================================================
+     Render
+  ========================================================= */
 
   return (
     <div
@@ -1487,32 +1507,31 @@ const MeetingsDashboard = () => {
       dir="rtl"
     >
 
-      {/* =================================================
+      {/* =====================================================
           HEADER
-      ================================================= */}
+      ===================================================== */}
 
       <header className="meetings-header">
 
         <div>
 
           <h1>
-            اجتماعات متوسطة وثانوية الأندلس
-            الأهلية بالطائف - بنات
+            اجتماعات متوسطة وثانوية الأندلس الأهلية بالطائف - بنات
           </h1>
 
           <p>
-            تنظيم محاضر الاجتماعات ومتابعة
-            القرارات والتوصيات والحضور
-            والتوقيعات والتكليفات في مكان واحد.
+            تنظيم محاضر الاجتماعات ومتابعة القرارات
+            والتوصيات والحضور والتوقيعات والتكليفات
+            في مكان واحد.
           </p>
 
         </div>
 
       </header>
 
-      {/* =================================================
-          STATISTICS
-      ================================================= */}
+      {/* =====================================================
+          STATS
+      ===================================================== */}
 
       <section className="meetings-stats">
 
@@ -1594,9 +1613,9 @@ const MeetingsDashboard = () => {
 
       </section>
 
-      {/* =================================================
+      {/* =====================================================
           TOOLBAR
-      ================================================= */}
+      ===================================================== */}
 
       <section className="meetings-toolbar">
 
@@ -1607,8 +1626,7 @@ const MeetingsDashboard = () => {
           </h2>
 
           <p>
-            أضيفي الاجتماعات وتابعي محاضرها
-            وقراراتها بسهولة.
+            أضيفي الاجتماعات وتابعي محاضرها وقراراتها بسهولة.
           </p>
 
         </div>
@@ -1621,8 +1639,17 @@ const MeetingsDashboard = () => {
               emptyMeeting
             );
 
-            setAgendaItems([""]);
-            setDecisionItems([""]);
+            setAgendaItems([
+              "",
+            ]);
+
+            setDecisionItems([
+              "",
+            ]);
+
+            setEditingMeeting(
+              null
+            );
 
             setShowModal(true);
           }}
@@ -1637,9 +1664,9 @@ const MeetingsDashboard = () => {
 
       </section>
 
-      {/* =================================================
+      {/* =====================================================
           MEETINGS LIST
-      ================================================= */}
+      ===================================================== */}
 
       <section className="meetings-list">
 
@@ -1670,9 +1697,22 @@ const MeetingsDashboard = () => {
             </p>
 
             <button
-              onClick={() =>
-                setShowModal(true)
-              }
+              onClick={() => {
+
+                setMeeting(
+                  emptyMeeting
+                );
+
+                setAgendaItems([
+                  "",
+                ]);
+
+                setDecisionItems([
+                  "",
+                ]);
+
+                setShowModal(true);
+              }}
             >
               إضافة اجتماع
             </button>
@@ -1783,9 +1823,13 @@ const MeetingsDashboard = () => {
                             ) => (
 
                               <li
-                                key={index}
+                                key={
+                                  index
+                                }
                               >
-                                {note}
+                                {
+                                  note
+                                }
                               </li>
 
                             )
@@ -1834,9 +1878,9 @@ const MeetingsDashboard = () => {
 
       </section>
 
-      {/* =================================================
+      {/* =====================================================
           ADD MEETING MODAL
-      ================================================= */}
+      ===================================================== */}
 
       {showModal && (
 
@@ -1849,8 +1893,8 @@ const MeetingsDashboard = () => {
 
           <div
             className="meeting-modal"
-            onClick={(e) =>
-              e.stopPropagation()
+            onClick={(event) =>
+              event.stopPropagation()
             }
           >
 
@@ -1913,9 +1957,11 @@ const MeetingsDashboard = () => {
 
                 <input
                   type="text"
-                  value={getArabicDay(
-                    meeting.date
-                  )}
+                  value={
+                    getArabicDay(
+                      meeting.date
+                    )
+                  }
                   readOnly
                 />
 
@@ -2027,8 +2073,6 @@ const MeetingsDashboard = () => {
 
               </div>
 
-              {/* بنود الاجتماع */}
-
               <div className="form-group full agenda-editor">
 
                 <label>
@@ -2057,14 +2101,17 @@ const MeetingsDashboard = () => {
                         <input
                           type="text"
                           value={item}
-                          onChange={(e) =>
+                          onChange={(
+                            event
+                          ) =>
                             updateAgendaItem(
                               index,
-                              e.target.value
+                              event.target.value
                             )
                           }
                           placeholder={`البند ${
-                            index + 1
+                            index +
+                            1
                           }`}
                         />
 
@@ -2099,8 +2146,6 @@ const MeetingsDashboard = () => {
 
               </div>
 
-              {/* القرارات */}
-
               <div className="form-group full agenda-editor">
 
                 <label>
@@ -2129,14 +2174,17 @@ const MeetingsDashboard = () => {
                         <input
                           type="text"
                           value={item}
-                          onChange={(e) =>
+                          onChange={(
+                            event
+                          ) =>
                             updateDecisionItem(
                               index,
-                              e.target.value
+                              event.target.value
                             )
                           }
                           placeholder={`التوصية / القرار ${
-                            index + 1
+                            index +
+                            1
                           }`}
                         />
 
@@ -2182,9 +2230,11 @@ const MeetingsDashboard = () => {
                 }
                 disabled={saving}
               >
-                {saving
-                  ? "جاري الحفظ..."
-                  : "حفظ الاجتماع"}
+                {
+                  saving
+                    ? "جاري الحفظ..."
+                    : "حفظ الاجتماع"
+                }
               </button>
 
               <button
@@ -2204,9 +2254,9 @@ const MeetingsDashboard = () => {
 
       )}
 
-      {/* =================================================
-          MINUTES MODAL
-      ================================================= */}
+      {/* =====================================================
+          MINUTES
+      ===================================================== */}
 
       {showMinutes &&
         editingMeeting && (
@@ -2220,12 +2270,10 @@ const MeetingsDashboard = () => {
 
             <div
               className="meeting-minutes-modal"
-              onClick={(e) =>
-                e.stopPropagation()
+              onClick={(event) =>
+                event.stopPropagation()
               }
             >
-
-              {/* HEADER */}
 
               <div className="minutes-header">
 
@@ -2270,9 +2318,7 @@ const MeetingsDashboard = () => {
 
               </div>
 
-              {/* =================================================
-                  بيانات الاجتماع
-              ================================================= */}
+              {/* بيانات الاجتماع */}
 
               <section className="minutes-section">
 
@@ -2328,9 +2374,11 @@ const MeetingsDashboard = () => {
 
                     <input
                       type="text"
-                      value={getArabicDay(
-                        meeting.date
-                      )}
+                      value={
+                        getArabicDay(
+                          meeting.date
+                        )
+                      }
                       readOnly
                     />
 
@@ -2425,9 +2473,7 @@ const MeetingsDashboard = () => {
 
               </section>
 
-              {/* =================================================
-                  البنود والقرارات
-              ================================================= */}
+              {/* البنود */}
 
               <section className="minutes-section">
 
@@ -2463,14 +2509,17 @@ const MeetingsDashboard = () => {
                           <input
                             type="text"
                             value={item}
-                            onChange={(e) =>
+                            onChange={(
+                              event
+                            ) =>
                               updateAgendaItem(
                                 index,
-                                e.target.value
+                                event.target.value
                               )
                             }
                             placeholder={`البند ${
-                              index + 1
+                              index +
+                              1
                             }`}
                           />
 
@@ -2533,14 +2582,17 @@ const MeetingsDashboard = () => {
                           <input
                             type="text"
                             value={item}
-                            onChange={(e) =>
+                            onChange={(
+                              event
+                            ) =>
                               updateDecisionItem(
                                 index,
-                                e.target.value
+                                event.target.value
                               )
                             }
                             placeholder={`التوصية / القرار ${
-                              index + 1
+                              index +
+                              1
                             }`}
                           />
 
@@ -2577,9 +2629,7 @@ const MeetingsDashboard = () => {
 
               </section>
 
-              {/* =================================================
-                  المهام
-              ================================================= */}
+              {/* المهام */}
 
               <section className="minutes-section">
 
@@ -2595,11 +2645,13 @@ const MeetingsDashboard = () => {
                     value={
                       newTask.task
                     }
-                    onChange={(e) =>
+                    onChange={(
+                      event
+                    ) =>
                       setNewTask({
                         ...newTask,
                         task:
-                          e.target
+                          event.target
                             .value,
                       })
                     }
@@ -2609,11 +2661,13 @@ const MeetingsDashboard = () => {
                     value={
                       newTask.assigned_to
                     }
-                    onChange={(e) =>
+                    onChange={(
+                      event
+                    ) =>
                       setNewTask({
                         ...newTask,
                         assigned_to:
-                          e.target
+                          event.target
                             .value,
                       })
                     }
@@ -2635,7 +2689,7 @@ const MeetingsDashboard = () => {
                           }
                         >
                           {
-                            member.name
+                            member.full_name
                           }
                         </option>
 
@@ -2649,11 +2703,13 @@ const MeetingsDashboard = () => {
                     value={
                       newTask.due_date
                     }
-                    onChange={(e) =>
+                    onChange={(
+                      event
+                    ) =>
                       setNewTask({
                         ...newTask,
                         due_date:
-                          e.target
+                          event.target
                             .value,
                       })
                     }
@@ -2663,11 +2719,13 @@ const MeetingsDashboard = () => {
                     value={
                       newTask.status
                     }
-                    onChange={(e) =>
+                    onChange={(
+                      event
+                    ) =>
                       setNewTask({
                         ...newTask,
                         status:
-                          e.target
+                          event.target
                             .value,
                       })
                     }
@@ -2688,6 +2746,7 @@ const MeetingsDashboard = () => {
                   </select>
 
                   <button
+                    type="button"
                     onClick={
                       addTask
                     }
@@ -2698,7 +2757,8 @@ const MeetingsDashboard = () => {
 
                 </div>
 
-                {tasks.length > 0 && (
+                {tasks.length >
+                  0 && (
 
                   <div className="tasks-list">
 
@@ -2747,6 +2807,7 @@ const MeetingsDashboard = () => {
                           </span>
 
                           <button
+                            type="button"
                             onClick={() =>
                               deleteTask(
                                 task.id
@@ -2768,103 +2829,83 @@ const MeetingsDashboard = () => {
               </section>
 
               {/* =================================================
-                  الحضور + التوقيع
-                  
-                  هذا هو الجزء المهم
+                  الحضور والتوقيع
               ================================================= */}
 
-              <section className="minutes-section">
+              <section className="minutes-section attendance-signature-section">
 
                 <h3>
                   ✍️ الحضور والتوقيعات
                 </h3>
 
-                <div className="attendance-signatures-table">
+                <p className="attendance-help">
+                  حددي الحاضرة أولًا، وبعدها يصبح مربع التوقيع متاحًا لها.
+                </p>
 
-                  <div className="attendance-signature-header">
+                <div className="signatures-list">
 
-                    <div>
-                      اسم العضوة
+                  {members.length ===
+                  0 ? (
+
+                    <div className="empty-members">
+                      لا توجد عضوات في جدول
+                      committee_members
                     </div>
 
-                    <div>
-                      المسمى الوظيفي
-                    </div>
+                  ) : (
 
-                    <div>
-                      الحضور
-                    </div>
+                    members.map(
+                      (member) => {
 
-                    <div>
-                      التوقيع
-                    </div>
-
-                  </div>
-
-                  {members.map(
-                    (member) => {
-
-                      const attended =
-                        isAttended(
-                          member.id
-                        );
-
-                      const signature =
-                        getSignature(
-                          member.id
-                        );
-
-                      return (
-
-                        <div
-                          className={`attendance-signature-row ${
-                            attended
-                              ? "member-attended"
-                              : "member-absent"
-                          }`}
-                          key={
+                        const attended =
+                          isAttended(
                             member.id
-                          }
-                        >
+                          );
 
-                          {/* الاسم */}
+                        const signature =
+                          getSignature(
+                            member.id
+                          );
 
-                          <div className="member-name-cell">
+                        return (
 
-                            <strong>
-                              {
-                                member.name
-                              }
-                            </strong>
+                          <div
+                            className={`signature-member ${
+                              attended
+                                ? "member-attended"
+                                : "member-absent"
+                            }`}
+                            key={
+                              member.id
+                            }
+                          >
 
-                          </div>
+                            {/* الاسم والوظيفة */}
 
-                          {/* الوظيفة */}
+                            <div className="signature-member-info">
 
-                          <div className="member-job-cell">
+                              <strong>
+                                {
+                                  member.full_name
+                                }
+                              </strong>
 
-                            <span>
-                              {
-                                member.job_title ||
-                                "—"
-                              }
-                            </span>
+                              <small>
+                                {
+                                  member.job_title ||
+                                  member.member_role ||
+                                  "—"
+                                }
+                              </small>
 
-                          </div>
+                            </div>
 
-                          {/* الحضور */}
+                            {/* الحضور */}
 
-                          <div className="attendance-cell">
-
-                            <label
-                              className={`attendance-toggle ${
-                                attended
-                                  ? "checked"
-                                  : ""
-                              }`}
-                            >
+                            <div className="attendance-check">
 
                               <input
+                                id={`attendance-${member.id}`}
                                 type="checkbox"
                                 checked={
                                   attended
@@ -2876,91 +2917,100 @@ const MeetingsDashboard = () => {
                                 }
                               />
 
-                              <span className="attendance-box">
+                              <label
+                                htmlFor={`attendance-${member.id}`}
+                              >
+                                حضرت
+                              </label>
 
-                                {attended
-                                  ? "✓"
-                                  : ""}
+                            </div>
 
-                              </span>
+                            {/* حالة الحضور */}
 
-                              <span className="attendance-label">
+                            <div
+                              className={`attendance-status ${
+                                attended
+                                  ? "present"
+                                  : "not-present"
+                              }`}
+                            >
+                              {attended
+                                ? "✓ حاضرة"
+                                : "لم يتم تسجيل الحضور"}
+                            </div>
 
-                                {attended
-                                  ? "حضرت"
-                                  : "لم تحضر"}
+                            {/* التوقيع */}
 
-                              </span>
+                            <div className="member-signature-area">
 
-                            </label>
+                              <div className="signature-title">
+
+                                <span>
+                                  التوقيع
+                                </span>
+
+                                {!attended && (
+                                  <small>
+                                    سجلي الحضور أولًا
+                                  </small>
+                                )}
+
+                              </div>
+
+                              <SignaturePad
+                                value={
+                                  signature
+                                }
+                                disabled={
+                                  !attended
+                                }
+                                onSave={(
+                                  value
+                                ) =>
+                                  saveSignature(
+                                    member.id,
+                                    value
+                                  )
+                                }
+                              />
+
+                            </div>
 
                           </div>
 
-                          {/* التوقيع */}
+                        );
+                      }
+                    )
 
-                          <div className="signature-cell">
-
-                            <SignaturePad
-                              value={
-                                signature
-                              }
-                              disabled={
-                                !attended
-                              }
-                              onSave={(
-                                signatureValue
-                              ) =>
-                                saveSignature(
-                                  member.id,
-                                  signatureValue
-                                )
-                              }
-                            />
-
-                            {!attended && (
-                              <small className="signature-hint">
-                                سجلي الحضور أولًا
-                              </small>
-                            )}
-
-                            {attended &&
-                              signature && (
-                                <small className="signature-saved">
-                                  ✓ تم حفظ التوقيع
-                                </small>
-                              )}
-
-                          </div>
-
-                        </div>
-
-                      );
-                    }
                   )}
 
                 </div>
 
               </section>
 
-              {/* =================================================
-                  FOOTER
-              ================================================= */}
+              {/* Footer */}
 
               <div className="minutes-footer">
 
                 <button
+                  type="button"
                   className="save-meeting-btn"
                   onClick={
                     handleUpdateMeeting
                   }
-                  disabled={saving}
+                  disabled={
+                    saving
+                  }
                 >
-                  {saving
-                    ? "جاري الحفظ..."
-                    : "💾 حفظ التعديلات"}
+                  {
+                    saving
+                      ? "جاري الحفظ..."
+                      : "💾 حفظ التعديلات"
+                  }
                 </button>
 
                 <button
+                  type="button"
                   className="cancel-meeting-btn"
                   onClick={() =>
                     setShowMinutes(
@@ -2976,6 +3026,7 @@ const MeetingsDashboard = () => {
             </div>
 
           </div>
+
         )}
 
     </div>
