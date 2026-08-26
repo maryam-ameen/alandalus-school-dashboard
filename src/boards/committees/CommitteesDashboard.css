@@ -1,0 +1,4660 @@
+/* =========================================================
+   Committees Dashboard
+   مدارس الأندلس الأهلية بالطائف - بنات
+========================================================= */
+
+:root {
+  --committee-purple: #593582;
+  --committee-purple-dark: #452665;
+  --committee-purple-light: #7350a0;
+
+  --committee-lavender: #f3edfa;
+  --committee-lavender-2: #eee6f8;
+
+  --committee-text: #33234f;
+
+  /* تم جعل النصوص الفاتحة أغمق */
+  --committee-text-light: #000000;
+
+  --committee-border: #e4d9ef;
+
+  --committee-bg: #f6f5fa;
+
+  --committee-white: #ffffff;
+
+  --committee-shadow:
+    0 12px 35px rgba(65, 40, 93, 0.08);
+
+  --committee-shadow-hover:
+    0 18px 42px rgba(65, 40, 93, 0.13);
+
+  font-family:
+    "Tajawal",
+    "Cairo",
+    "Segoe UI",
+    Arial,
+    sans-serif;
+}
+
+
+/* =========================================================
+   Reset
+========================================================= */
+
+* {
+  box-sizing: border-box;
+}
+
+.committees-dashboard,
+.committee-page {
+  min-height: 100vh;
+  width: 100%;
+
+  background:
+    radial-gradient(
+      circle at 10% 20%,
+      rgba(115, 80, 160, 0.06),
+      transparent 30%
+    ),
+    radial-gradient(
+      circle at 90% 10%,
+      rgba(90, 53, 130, 0.05),
+      transparent 28%
+    ),
+    var(--committee-bg);
+
+  color: var(--committee-text);
+}
+
+button {
+  font-family: inherit;
+}
+
+
+/* =========================================================
+   HEADER - الصفحة الرئيسية
+========================================================= */
+
+.committees-header {
+  width: 100%;
+  height: 86px;
+
+  background: rgba(255, 255, 255, 0.97);
+
+  border-bottom: 1px solid var(--committee-border);
+
+  position: relative;
+  z-index: 10;
+}
+
+.committees-header-inner {
+  width: min(1380px, calc(100% - 48px));
+  height: 100%;
+
+  margin: 0 auto;
+
+  display: grid;
+
+  grid-template-columns:
+    1fr
+    auto
+    1fr;
+
+  align-items: center;
+
+  gap: 25px;
+}
+
+
+/* =========================================================
+   Brand
+========================================================= */
+
+.committees-brand {
+  display: flex;
+  align-items: center;
+
+  gap: 12px;
+
+  min-width: 0;
+}
+
+.committees-logo {
+  width: 52px;
+  height: 52px;
+
+  object-fit: contain;
+
+  flex-shrink: 0;
+}
+
+.committees-brand-text {
+  display: flex;
+  flex-direction: column;
+
+  gap: 4px;
+
+  min-width: 0;
+}
+
+.committees-brand-text span {
+  font-size: 13px;
+
+  font-weight: 700;
+
+  color: var(--committee-text);
+
+  white-space: nowrap;
+}
+
+.committees-brand-text small {
+  font-size: 12px;
+
+  color: var(--committee-text-light);
+
+  white-space: nowrap;
+}
+
+
+/* =========================================================
+   Main Header Title
+========================================================= */
+
+.committees-main-title {
+  text-align: center;
+
+  white-space: nowrap;
+}
+
+.committees-main-title span {
+  display: block;
+
+  font-size: 10px;
+
+  font-weight: 700;
+
+  color: var(--committee-purple-light);
+
+  margin-bottom: 3px;
+}
+
+.committees-main-title h1 {
+  margin: 0;
+
+  font-size: 25px;
+
+  line-height: 1.2;
+
+  font-weight: 800;
+
+  color: var(--committee-purple-dark);
+}
+
+.committees-main-title p {
+  margin: 3px 0 0;
+
+  font-size: 12px;
+
+  color: var(--committee-text-light);
+}
+
+
+/* =========================================================
+   Header Back
+========================================================= */
+
+.committees-dashboard-back {
+  justify-self: end;
+
+  border: 1px solid var(--committee-border);
+
+  background: #fff;
+
+  color: var(--committee-purple-dark);
+
+  border-radius: 11px;
+
+  padding: 10px 16px;
+
+  display: inline-flex;
+
+  align-items: center;
+  justify-content: center;
+
+  gap: 10px;
+
+  font-size: 12px;
+
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition: 0.2s ease;
+
+  white-space: nowrap;
+}
+
+.committees-dashboard-back:hover {
+  background: var(--committee-lavender);
+
+  border-color: #d3c1e5;
+
+  transform: translateY(-1px);
+}
+
+.committees-dashboard-back span {
+  font-size: 17px;
+}
+
+
+/* =========================================================
+   MAIN
+========================================================= */
+
+.committees-main {
+  width: min(1200px, calc(100% - 40px));
+
+  margin: 0 auto;
+
+  padding: 32px 0 60px;
+}
+
+
+/* =========================================================
+   HERO
+========================================================= */
+
+.committees-hero {
+  min-height: 270px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #ffffff 0%,
+      #fbf9fd 55%,
+      #f3edf9 100%
+    );
+
+  border: 1px solid #e7ddef;
+
+  border-radius: 24px;
+
+  box-shadow: var(--committee-shadow);
+
+  padding: 34px 46px;
+
+  display: grid;
+
+  grid-template-columns: 1fr 260px;
+
+  align-items: center;
+
+  gap: 30px;
+
+  overflow: hidden;
+
+  position: relative;
+}
+
+.committees-hero::before {
+  content: "";
+
+  position: absolute;
+
+  width: 240px;
+  height: 240px;
+
+  border-radius: 50%;
+
+  background: rgba(115, 80, 160, 0.045);
+
+  left: -100px;
+  bottom: -120px;
+}
+
+
+/* =========================================================
+   Hero Content
+========================================================= */
+
+.committees-hero-content {
+  position: relative;
+  z-index: 2;
+}
+
+.committees-hero-label {
+  display: inline-flex;
+
+  padding: 7px 14px;
+
+  border-radius: 999px;
+
+  background: var(--committee-lavender);
+
+  color: var(--committee-purple);
+
+  font-size: 11px;
+
+  font-weight: 800;
+
+  margin-bottom: 12px;
+}
+
+.committees-hero h2 {
+  margin: 0;
+
+  font-size: 40px;
+
+  line-height: 1.25;
+
+  font-weight: 900;
+
+  color: #30204a;
+}
+
+.committees-hero h2 strong {
+  color: var(--committee-purple-light);
+}
+
+.committees-hero p {
+  margin: 15px 0 0;
+
+  max-width: 700px;
+
+  font-size: 14px;
+
+  line-height: 2;
+
+  color: var(--committee-text-light);
+}
+
+.committees-hero-points {
+  display: flex;
+
+  flex-wrap: wrap;
+
+  gap: 10px 25px;
+
+  margin-top: 18px;
+}
+
+.committees-hero-points span {
+  font-size: 12px;
+
+  font-weight: 700;
+
+  color: var(--committee-text-light);
+}
+
+.committees-hero-points span::first-letter {
+  color: var(--committee-purple);
+}
+
+
+/* =========================================================
+   Hero Visual
+========================================================= */
+
+.committees-hero-visual {
+  height: 190px;
+
+  position: relative;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+}
+
+.hero-document {
+  width: 112px;
+  height: 145px;
+
+  border: 6px solid var(--committee-purple-light);
+
+  border-radius: 16px;
+
+  background: #fff;
+
+  position: relative;
+
+  box-shadow:
+    0 10px 30px rgba(83, 53, 120, 0.12);
+}
+
+.hero-document::before {
+  content: "";
+
+  position: absolute;
+
+  width: 48px;
+  height: 13px;
+
+  background: var(--committee-purple-light);
+
+  border-radius: 8px 8px 3px 3px;
+
+  top: -16px;
+
+  left: 50%;
+
+  transform: translateX(-50%);
+}
+
+.hero-document-top {
+  position: absolute;
+
+  top: 34px;
+  right: 17px;
+
+  width: 68px;
+  height: 5px;
+
+  border-radius: 10px;
+
+  background: #ddd2e9;
+}
+
+.hero-document-line {
+  position: absolute;
+
+  top: 55px;
+  right: 17px;
+
+  width: 55px;
+  height: 5px;
+
+  border-radius: 10px;
+
+  background: #ddd2e9;
+}
+
+.hero-document-line.short {
+  width: 40px;
+  top: 76px;
+}
+
+.hero-document-line:nth-child(4) {
+  top: 97px;
+}
+
+.hero-check {
+  position: absolute;
+
+  width: 38px;
+  height: 38px;
+
+  border-radius: 50%;
+
+  background: #f1fbf6;
+
+  border: 5px solid white;
+
+  color: #43a87a;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  font-size: 20px;
+
+  bottom: 15px;
+  left: 52px;
+
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+}
+
+.hero-target {
+  position: absolute;
+
+  width: 45px;
+  height: 45px;
+
+  border-radius: 13px;
+
+  background: #fff6df;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  font-size: 22px;
+
+  right: 30px;
+  bottom: 10px;
+
+  box-shadow: 0 7px 20px rgba(0, 0, 0, 0.06);
+}
+
+
+/* =========================================================
+   INFO CARD
+========================================================= */
+
+.committees-info-card {
+  margin-top: 22px;
+
+  min-height: 100px;
+
+  background: #fff;
+
+  border: 1px solid var(--committee-border);
+
+  border-radius: 18px;
+
+  box-shadow: 0 8px 25px rgba(67, 45, 91, 0.055);
+
+  padding: 20px 25px;
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 18px;
+}
+
+.info-card-icon {
+  width: 50px;
+  height: 50px;
+
+  border-radius: 15px;
+
+  background: var(--committee-lavender);
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  font-size: 23px;
+
+  flex-shrink: 0;
+}
+
+.info-card-content {
+  min-width: 0;
+}
+
+.info-card-content > span {
+  display: block;
+
+  font-size: 11px;
+
+  font-weight: 800;
+
+  color: var(--committee-purple-light);
+
+  margin-bottom: 3px;
+}
+
+.info-card-content h2 {
+  margin: 0;
+
+  font-size: 17px;
+
+  color: var(--committee-purple-dark);
+}
+
+.info-card-content p {
+  margin: 7px 0 0;
+
+  font-size: 13px;
+
+  line-height: 1.8;
+
+  color: var(--committee-text-light);
+}
+
+
+/* =========================================================
+   مؤشرات السجل
+========================================================= */
+
+.committees-indicators {
+  margin-top: 18px;
+
+  display: flex;
+
+  justify-content: flex-start;
+}
+
+.committee-indicator-card {
+  width: 220px;
+
+  min-height: 92px;
+
+  background: #fff;
+
+  border: 1px solid var(--committee-border);
+
+  border-radius: 16px;
+
+  padding: 15px 18px;
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 14px;
+
+  box-shadow:
+    0 7px 20px rgba(67, 45, 91, 0.055);
+}
+
+.committee-indicator-icon {
+  width: 48px;
+  height: 48px;
+
+  border-radius: 14px;
+
+  background: var(--committee-lavender);
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  font-size: 22px;
+
+  flex-shrink: 0;
+}
+
+.committee-indicator-content {
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: flex-start;
+}
+
+.committee-indicator-content > span {
+  font-size: 10px;
+
+  font-weight: 800;
+
+  color: var(--committee-purple-light);
+}
+
+.committee-indicator-content strong {
+  margin-top: 2px;
+
+  font-size: 25px;
+
+  line-height: 1;
+
+  color: var(--committee-purple-dark);
+}
+
+.committee-indicator-content p {
+  margin: 4px 0 0;
+
+  font-size: 12px;
+
+  font-weight: 700;
+
+  color: #000;
+}
+
+
+/* =========================================================
+   Section Heading
+========================================================= */
+
+.committees-section-heading {
+  margin-top: 35px;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 20px;
+}
+
+.committees-section-heading > div:first-child > span {
+  font-size: 11px;
+
+  font-weight: 800;
+
+  color: var(--committee-purple-light);
+}
+
+.committees-section-heading h2 {
+  margin: 4px 0 3px;
+
+  font-size: 25px;
+
+  color: var(--committee-purple-dark);
+}
+
+.committees-section-heading p {
+  margin: 0;
+
+  font-size: 12px;
+
+  color: var(--committee-text-light);
+}
+
+.committees-count-badge {
+  width: 65px;
+  height: 65px;
+
+  border-radius: 17px;
+
+  background: var(--committee-purple);
+
+  color: white;
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+  justify-content: center;
+
+  box-shadow:
+    0 10px 20px rgba(89, 53, 130, 0.2);
+}
+
+.committees-count-badge strong {
+  font-size: 23px;
+
+  line-height: 1;
+}
+
+.committees-count-badge span {
+  font-size: 9px;
+
+  margin-top: 5px;
+}
+
+
+/* =========================================================
+   Committees Grid
+========================================================= */
+
+.committees-grid {
+  margin-top: 18px;
+
+  display: grid;
+
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+
+  gap: 15px;
+}
+
+
+/* =========================================================
+   Committee Card
+========================================================= */
+
+.committee-card {
+  min-height: 205px;
+
+  background: #fff;
+
+  border: 1px solid var(--committee-border);
+
+  border-top: 3px solid var(--committee-purple-light);
+
+  border-radius: 16px;
+
+  padding: 16px;
+
+  display: flex;
+
+  flex-direction: column;
+
+  box-shadow:
+    0 7px 20px rgba(67, 45, 91, 0.055);
+
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.committee-card:hover {
+  transform: translateY(-4px);
+
+  box-shadow: var(--committee-shadow-hover);
+
+  border-color: #d8c9e7;
+}
+
+
+/* =========================================================
+   Card Top
+========================================================= */
+
+.committee-card-top {
+  display: flex;
+
+  align-items: center;
+  justify-content: space-between;
+}
+
+.committee-card-icon {
+  width: 43px;
+  height: 43px;
+
+  border-radius: 13px;
+
+  background: var(--committee-lavender);
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  font-size: 20px;
+}
+
+.committee-card-number {
+  font-size: 10px;
+
+  font-weight: 900;
+
+  color: #000;
+}
+
+
+/* =========================================================
+   Card Body
+========================================================= */
+
+.committee-card-body {
+  margin-top: 13px;
+
+  flex: 1;
+}
+
+.committee-card-body h3 {
+  margin: 0;
+
+  font-size: 16px;
+
+  line-height: 1.5;
+
+  color: var(--committee-purple-dark);
+}
+
+.committee-card-body p {
+  margin: 7px 0 0;
+
+  font-size: 12px;
+
+  line-height: 1.8;
+
+  color: var(--committee-text-light);
+}
+
+
+/* =========================================================
+   Card Footer
+========================================================= */
+
+.committee-card-footer {
+  margin-top: 13px;
+
+  padding-top: 11px;
+
+  border-top: 1px solid #eee8f3;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 10px;
+}
+
+.committee-card-footer > span {
+  font-size: 10px;
+
+  color: #000;
+
+  font-weight: 700;
+}
+
+.committee-open-button {
+  border: 0;
+
+  background: var(--committee-purple);
+
+  color: white;
+
+  border-radius: 8px;
+
+  padding: 8px 12px;
+
+  font-size: 10px;
+
+  font-weight: 800;
+
+  display: inline-flex;
+
+  align-items: center;
+
+  gap: 8px;
+
+  cursor: pointer;
+
+  transition: 0.2s ease;
+}
+
+.committee-open-button:hover {
+  background: var(--committee-purple-dark);
+
+  transform: translateX(-2px);
+}
+
+.committee-open-button span {
+  font-size: 14px;
+}
+
+
+/* =========================================================
+   توثيق أعمال اللجان - آخر الصفحة
+========================================================= */
+
+.committees-documentation {
+  margin-top: 38px;
+}
+
+.committees-documentation-heading {
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  margin-bottom: 16px;
+}
+
+.committees-documentation-heading span {
+  font-size: 11px;
+
+  font-weight: 800;
+
+  color: var(--committee-purple-light);
+}
+
+.committees-documentation-heading h2 {
+  margin: 4px 0 3px;
+
+  font-size: 24px;
+
+  color: var(--committee-purple-dark);
+}
+
+.committees-documentation-heading p {
+  margin: 0;
+
+  font-size: 12px;
+
+  color: #000;
+}
+
+.committees-documentation-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+
+  gap: 16px;
+}
+
+.committee-document-card {
+  min-height: 105px;
+
+  border: 1px solid var(--committee-border);
+
+  background: #fff;
+
+  border-radius: 16px;
+
+  padding: 14px 16px;
+
+  display: grid;
+
+  grid-template-columns:
+    48px
+    1fr
+    30px;
+
+  align-items: center;
+
+  gap: 13px;
+
+  text-align: right;
+
+  color: var(--committee-text);
+
+  cursor: default;
+
+  box-shadow:
+    0 6px 18px rgba(67, 45, 91, 0.045);
+
+  transition:
+    0.2s ease;
+}
+
+.committee-document-card:hover {
+  border-color: #d6c4e5;
+
+  transform: translateY(-2px);
+
+  box-shadow:
+    0 10px 24px rgba(67, 45, 91, 0.08);
+}
+
+.committee-document-icon {
+  width: 48px;
+  height: 48px;
+
+  border-radius: 14px;
+
+  background: var(--committee-lavender);
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  font-size: 21px;
+}
+
+.committee-document-content {
+  min-width: 0;
+}
+
+.committee-document-content > span {
+  display: block;
+
+  font-size: 9px;
+
+  font-weight: 900;
+
+  color: #000;
+
+  margin-bottom: 2px;
+}
+
+.committee-document-content h3 {
+  margin: 0;
+
+  font-size: 14px;
+
+  color: var(--committee-purple-dark);
+}
+
+.committee-document-content p {
+  margin: 4px 0 0;
+
+  font-size: 11px;
+
+  line-height: 1.7;
+
+  color: #000;
+}
+
+.committee-document-arrow {
+  width: 30px;
+  height: 30px;
+
+  border-radius: 9px;
+
+  background: var(--committee-lavender);
+
+  color: var(--committee-purple);
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  font-size: 15px;
+}
+
+
+/* =========================================================
+   Bottom Note
+========================================================= */
+
+.committees-bottom-note {
+  margin-top: 20px;
+
+  background: #fff;
+
+  border: 1px solid var(--committee-border);
+
+  border-radius: 15px;
+
+  padding: 15px 18px;
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 13px;
+}
+
+.bottom-note-icon {
+  width: 40px;
+  height: 40px;
+
+  background: var(--committee-lavender);
+
+  border-radius: 12px;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  font-size: 19px;
+
+  flex-shrink: 0;
+}
+
+.committees-bottom-note strong {
+  font-size: 12px;
+
+  color: var(--committee-purple-dark);
+}
+
+.committees-bottom-note p {
+  margin: 3px 0 0;
+
+  font-size: 11px;
+
+  color: #000;
+}
+
+
+/* =========================================================
+   =========================================================
+   صفحة اللجنة الداخلية
+   =========================================================
+   ========================================================= */
+
+.committee-page {
+  background:
+    radial-gradient(
+      circle at 5% 15%,
+      rgba(115, 80, 160, 0.06),
+      transparent 30%
+    ),
+    radial-gradient(
+      circle at 95% 10%,
+      rgba(89, 53, 130, 0.05),
+      transparent 30%
+    ),
+    var(--committee-bg);
+}
+
+
+/* =========================================================
+   Inner Header
+========================================================= */
+
+.committee-inner-header {
+  width: 100%;
+
+  min-height: 84px;
+
+  background: rgba(255, 255, 255, 0.98);
+
+  border-bottom: 1px solid var(--committee-border);
+
+  box-shadow:
+    0 4px 20px rgba(60, 40, 85, 0.035);
+
+  position: sticky;
+
+  top: 0;
+
+  z-index: 20;
+}
+
+.committee-inner-header-content {
+  width: min(1300px, calc(100% - 42px));
+
+  min-height: 84px;
+
+  margin: 0 auto;
+
+  display: grid;
+
+  grid-template-columns:
+    1fr
+    auto
+    1fr;
+
+  align-items: center;
+
+  gap: 20px;
+}
+
+
+/* =========================================================
+   Inner Brand
+========================================================= */
+
+.committee-school-brand {
+  display: flex;
+
+  align-items: center;
+
+  gap: 11px;
+
+  min-width: 0;
+}
+
+.committee-school-logo {
+  width: 48px;
+  height: 48px;
+
+  object-fit: contain;
+
+  flex-shrink: 0;
+}
+
+.committee-school-info {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 4px;
+
+  min-width: 0;
+}
+
+.committee-school-info span {
+  font-size: 12px;
+
+  font-weight: 800;
+
+  color: var(--committee-text);
+
+  white-space: nowrap;
+}
+
+.committee-school-info small {
+  font-size: 11px;
+
+  color: var(--committee-text-light);
+
+  white-space: nowrap;
+}
+
+
+/* =========================================================
+   Inner Title
+========================================================= */
+
+.committee-inner-title {
+  text-align: center;
+
+  white-space: nowrap;
+}
+
+.committee-inner-title span {
+  display: block;
+
+  font-size: 9px;
+
+  font-weight: 800;
+
+  color: var(--committee-purple-light);
+}
+
+.committee-inner-title h1 {
+  margin: 2px 0 0;
+
+  font-size: 22px;
+
+  font-weight: 900;
+
+  color: var(--committee-purple-dark);
+}
+
+
+/* =========================================================
+   Back Button
+========================================================= */
+
+.committee-back-button {
+  justify-self: end;
+
+  border: 1px solid #dccce9;
+
+  background: #fff;
+
+  color: var(--committee-purple-dark);
+
+  border-radius: 10px;
+
+  padding: 9px 14px;
+
+  font-size: 11px;
+
+  font-weight: 800;
+
+  cursor: pointer;
+
+  display: inline-flex;
+
+  align-items: center;
+  justify-content: center;
+
+  gap: 8px;
+
+  transition: 0.2s ease;
+
+  white-space: nowrap;
+}
+
+.committee-back-button:hover {
+  background: var(--committee-lavender);
+
+  border-color: #cdb8df;
+
+  transform: translateY(-1px);
+}
+
+.committee-back-button span {
+  font-size: 15px;
+}
+
+
+/* =========================================================
+   Inner Container
+========================================================= */
+
+.committee-page-container {
+  width: min(1050px, calc(100% - 40px));
+
+  margin: 0 auto;
+
+  padding: 22px 0 55px;
+}
+
+
+/* =========================================================
+   Breadcrumb
+========================================================= */
+
+.committee-breadcrumb {
+  display: flex;
+
+  align-items: center;
+
+  gap: 8px;
+
+  margin-bottom: 18px;
+
+  font-size: 11px;
+
+  color: var(--committee-text-light);
+}
+
+.committee-breadcrumb b {
+  color: #000;
+}
+
+.committee-breadcrumb strong {
+  color: var(--committee-purple);
+}
+
+
+/* =========================================================
+   Inner Hero
+========================================================= */
+
+.committee-inner-hero {
+  background:
+    linear-gradient(
+      135deg,
+      #fff,
+      #faf7fd
+    );
+
+  border: 1px solid var(--committee-border);
+
+  border-radius: 20px;
+
+  min-height: 155px;
+
+  padding: 25px 30px;
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 20px;
+
+  box-shadow: var(--committee-shadow);
+}
+
+.committee-inner-hero-icon {
+  width: 76px;
+  height: 76px;
+
+  background: var(--committee-lavender);
+
+  border-radius: 22px;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  font-size: 36px;
+
+  flex-shrink: 0;
+}
+
+.committee-inner-hero-content {
+  min-width: 0;
+}
+
+.committee-inner-label {
+  display: inline-block;
+
+  font-size: 11px;
+
+  font-weight: 800;
+
+  color: var(--committee-purple-light);
+
+  margin-bottom: 3px;
+}
+
+.committee-inner-hero-content h2 {
+  margin: 0;
+
+  font-size: 29px;
+
+  font-weight: 900;
+
+  color: var(--committee-purple-dark);
+}
+
+.committee-inner-hero-content p {
+  margin: 7px 0 0;
+
+  font-size: 13px;
+
+  line-height: 1.8;
+
+  color: var(--committee-text-light);
+}
+
+
+/* =========================================================
+   Sections Heading
+========================================================= */
+
+.committee-sections-heading {
+  margin-top: 30px;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 15px;
+}
+
+.committee-sections-heading > div:first-child span {
+  font-size: 11px;
+
+  color: var(--committee-purple-light);
+
+  font-weight: 800;
+}
+
+.committee-sections-heading h2 {
+  margin: 3px 0 0;
+
+  font-size: 23px;
+
+  color: var(--committee-purple-dark);
+}
+
+.committee-sections-count {
+  width: 58px;
+  height: 58px;
+
+  border-radius: 15px;
+
+  background: var(--committee-purple);
+
+  color: white;
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+  justify-content: center;
+
+  font-size: 20px;
+
+  font-weight: 900;
+}
+
+.committee-sections-count small {
+  font-size: 8px;
+
+  font-weight: 700;
+
+  margin-top: 2px;
+}
+
+
+/* =========================================================
+   Sections List
+========================================================= */
+
+.committee-sections-list {
+  margin-top: 15px;
+
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 10px;
+}
+
+
+/* =========================================================
+   Section Card
+========================================================= */
+
+.committee-section-card {
+  width: 100%;
+
+  min-height: 82px;
+
+  border: 1px solid var(--committee-border);
+
+  background: #fff;
+
+  border-radius: 13px;
+
+  padding: 10px 14px;
+
+  display: grid;
+
+  grid-template-columns:
+    35px
+    46px
+    1fr
+    30px;
+
+  align-items: center;
+
+  gap: 12px;
+
+  text-align: right;
+
+  cursor: pointer;
+
+  color: var(--committee-text);
+
+  box-shadow:
+    0 5px 16px rgba(67, 45, 91, 0.04);
+
+  transition: 0.2s ease;
+}
+
+.committee-section-card:hover {
+  border-color: #cdb9df;
+
+  background: #fdfbff;
+
+  transform: translateX(-3px);
+
+  box-shadow:
+    0 9px 24px rgba(67, 45, 91, 0.08);
+}
+
+
+/* =========================================================
+   Number
+========================================================= */
+
+.committee-section-number {
+  font-size: 10px;
+
+  font-weight: 900;
+
+  color: #000;
+
+  text-align: center;
+}
+
+
+/* =========================================================
+   Icon
+========================================================= */
+
+.committee-section-icon {
+  width: 42px;
+  height: 42px;
+
+  border-radius: 12px;
+
+  background: var(--committee-lavender);
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  font-size: 19px;
+}
+
+
+/* =========================================================
+   Text
+========================================================= */
+
+.committee-section-text {
+  min-width: 0;
+}
+
+.committee-section-text > span {
+  display: block;
+
+  font-size: 9px;
+
+  color: var(--committee-purple-light);
+
+  font-weight: 800;
+
+  margin-bottom: 2px;
+}
+
+.committee-section-text h3 {
+  margin: 0;
+
+  font-size: 14px;
+
+  line-height: 1.5;
+
+  color: var(--committee-purple-dark);
+}
+
+.committee-section-text p {
+  margin: 3px 0 0;
+
+  font-size: 10px;
+
+  line-height: 1.6;
+
+  color: var(--committee-text-light);
+}
+
+
+/* =========================================================
+   Arrow
+========================================================= */
+
+.committee-section-arrow {
+  width: 28px;
+  height: 28px;
+
+  border-radius: 8px;
+
+  background: var(--committee-lavender);
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  color: var(--committee-purple);
+
+  font-size: 15px;
+
+  transition: 0.2s ease;
+}
+
+.committee-section-card:hover .committee-section-arrow {
+  background: var(--committee-purple);
+
+  color: white;
+}
+
+
+/* =========================================================
+   Bottom Action
+========================================================= */
+
+.committee-bottom-action {
+  display: flex;
+
+  justify-content: center;
+
+  margin-top: 25px;
+}
+
+.committee-back-button.bottom {
+  min-width: 250px;
+
+  justify-self: center;
+}
+
+
+/* =========================================================
+   Responsive
+========================================================= */
+
+@media (max-width: 1000px) {
+
+  .committees-grid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+
+  .committees-documentation-grid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+
+  .committees-hero {
+    grid-template-columns: 1fr 190px;
+
+    padding: 28px;
+  }
+
+  .committees-hero h2 {
+    font-size: 32px;
+  }
+
+  .committee-inner-header-content {
+    grid-template-columns:
+      1fr
+      auto;
+  }
+
+  .committee-inner-title {
+    display: none;
+  }
+
+}
+
+
+@media (max-width: 700px) {
+
+  .committees-header {
+    height: auto;
+  }
+
+  .committees-header-inner {
+    width: calc(100% - 24px);
+
+    padding: 12px 0;
+
+    grid-template-columns: 1fr auto;
+
+    gap: 10px;
+  }
+
+  .committees-main-title {
+    display: none;
+  }
+
+  .committees-brand-text span {
+    font-size: 10px;
+  }
+
+  .committees-brand-text small {
+    font-size: 9px;
+  }
+
+  .committees-logo {
+    width: 42px;
+    height: 42px;
+  }
+
+  .committees-dashboard-back {
+    padding: 8px 10px;
+
+    font-size: 9px;
+  }
+
+  .committees-main {
+    width: calc(100% - 24px);
+
+    padding-top: 18px;
+  }
+
+  .committees-hero {
+    grid-template-columns: 1fr;
+
+    padding: 25px 20px;
+
+    text-align: center;
+  }
+
+  .committees-hero h2 {
+    font-size: 28px;
+  }
+
+  .committees-hero p {
+    font-size: 12px;
+  }
+
+  .committees-hero-points {
+    justify-content: center;
+
+    gap: 8px 14px;
+  }
+
+  .committees-hero-visual {
+    height: 145px;
+  }
+
+  .committees-info-card {
+    padding: 16px;
+  }
+
+  .committees-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .committees-documentation-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .committee-card {
+    min-height: 185px;
+  }
+
+  .committee-inner-header {
+    position: relative;
+  }
+
+  .committee-inner-header-content {
+    width: calc(100% - 24px);
+
+    grid-template-columns: 1fr auto;
+
+    padding: 10px 0;
+  }
+
+  .committee-school-info span {
+    font-size: 9px;
+  }
+
+  .committee-school-info small {
+    font-size: 9px;
+  }
+
+  .committee-school-logo {
+    width: 40px;
+    height: 40px;
+  }
+
+  .committee-back-button {
+    padding: 8px 9px;
+
+    font-size: 8px;
+  }
+
+  .committee-page-container {
+    width: calc(100% - 24px);
+
+    padding-top: 15px;
+  }
+
+  .committee-inner-hero {
+    padding: 18px;
+
+    min-height: 130px;
+  }
+
+  .committee-inner-hero-icon {
+    width: 58px;
+    height: 58px;
+
+    font-size: 27px;
+
+    border-radius: 17px;
+  }
+
+  .committee-inner-hero-content h2 {
+    font-size: 22px;
+  }
+
+  .committee-inner-hero-content p {
+    font-size: 11px;
+  }
+
+  .committee-section-card {
+    grid-template-columns:
+      28px
+      40px
+      1fr
+      26px;
+
+    gap: 8px;
+
+    min-height: 74px;
+
+    padding: 9px;
+  }
+
+  .committee-section-icon {
+    width: 37px;
+    height: 37px;
+
+    font-size: 17px;
+  }
+
+  .committee-section-text h3 {
+    font-size: 12px;
+  }
+
+  .committee-section-text p {
+    font-size: 9px;
+  }
+
+  .committee-indicator-card {
+    width: 100%;
+  }
+
+}
+
+
+/* =========================================================
+   Large Screens
+========================================================= */
+
+@media (min-width: 1500px) {
+
+  .committees-main {
+    width: 1200px;
+  }
+
+  .committees-grid {
+    grid-template-columns:
+      repeat(5, minmax(0, 1fr));
+  }
+
+  .committee-card {
+    min-height: 220px;
+  }
+
+}
+/* =========================================================
+   مؤشر الاجتماعات
+========================================================= */
+
+.committees-indicators {
+  margin-top: 20px;
+
+  display: flex;
+
+  justify-content: flex-start;
+}
+
+.committee-indicator-card {
+  width: 230px;
+
+  background: #ffffff;
+
+  border: 1px solid var(--committee-border);
+
+  border-radius: 16px;
+
+  padding: 14px 18px;
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 14px;
+
+  box-shadow:
+    0 7px 20px rgba(67, 45, 91, 0.055);
+}
+
+.committee-indicator-icon {
+  width: 45px;
+  height: 45px;
+
+  border-radius: 13px;
+
+  background: var(--committee-lavender);
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  font-size: 21px;
+
+  flex-shrink: 0;
+}
+
+.committee-indicator-content {
+  display: flex;
+
+  flex-direction: column;
+}
+
+.committee-indicator-content span {
+  font-size: 9px;
+
+  color: var(--committee-purple-light);
+
+  font-weight: 800;
+}
+
+.committee-indicator-content strong {
+  margin-top: 2px;
+
+  font-size: 24px;
+
+  line-height: 1;
+
+  color: var(--committee-purple-dark);
+}
+
+.committee-indicator-content p {
+  margin: 3px 0 0;
+
+  font-size: 9px;
+
+  color: #000000;
+}
+
+
+/* =========================================================
+   صفحات الأقسام الداخلية
+========================================================= */
+
+.committee-section-page {
+  width: 100%;
+}
+
+.committee-section-page-header {
+  background:
+    linear-gradient(
+      135deg,
+      #ffffff,
+      #faf7fd
+    );
+
+  border: 1px solid var(--committee-border);
+
+  border-radius: 20px;
+
+  padding: 22px 25px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  gap: 20px;
+
+  box-shadow: var(--committee-shadow);
+
+  margin-bottom: 20px;
+}
+
+.committee-section-page-header > div {
+  flex: 1;
+}
+
+.committee-section-page-header > div > span {
+  font-size: 10px;
+
+  color: var(--committee-purple-light);
+
+  font-weight: 800;
+}
+
+.committee-section-page-header h2 {
+  margin: 4px 0;
+
+  font-size: 26px;
+
+  color: var(--committee-purple-dark);
+
+  font-weight: 900;
+}
+
+.committee-section-page-header p {
+  margin: 0;
+
+  font-size: 11px;
+
+  line-height: 1.8;
+
+  color: #000000;
+}
+
+.committee-section-return {
+  border: 1px solid var(--committee-border);
+
+  background: #ffffff;
+
+  color: var(--committee-purple-dark);
+
+  border-radius: 10px;
+
+  padding: 9px 13px;
+
+  font-size: 10px;
+
+  font-weight: 800;
+
+  cursor: pointer;
+
+  display: inline-flex;
+
+  align-items: center;
+
+  gap: 7px;
+
+  white-space: nowrap;
+
+  transition: 0.2s ease;
+}
+
+.committee-section-return:hover {
+  background: var(--committee-lavender);
+
+  transform: translateY(-1px);
+}
+
+.committee-section-return span {
+  font-size: 14px;
+}
+
+
+/* =========================================================
+   بطاقات المحتوى
+========================================================= */
+
+.committee-content-stack {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 18px;
+}
+
+.committee-content-card {
+  background: #ffffff;
+
+  border: 1px solid var(--committee-border);
+
+  border-radius: 18px;
+
+  padding: 22px;
+
+  box-shadow:
+    0 7px 22px rgba(67, 45, 91, 0.055);
+}
+
+.committee-content-card-title {
+  display: flex;
+
+  align-items: center;
+
+  gap: 12px;
+
+  margin-bottom: 18px;
+}
+
+.committee-content-card-title > span {
+  width: 42px;
+  height: 42px;
+
+  border-radius: 12px;
+
+  background: var(--committee-lavender);
+
+  color: var(--committee-purple);
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  font-size: 11px;
+
+  font-weight: 900;
+}
+
+.committee-content-card-title small {
+  display: block;
+
+  color: var(--committee-purple-light);
+
+  font-size: 9px;
+
+  font-weight: 800;
+}
+
+.committee-content-card-title h3 {
+  margin: 3px 0 0;
+
+  color: var(--committee-purple-dark);
+
+  font-size: 18px;
+
+  font-weight: 900;
+}
+
+
+/* =========================================================
+   الأهداف
+========================================================= */
+
+.committee-goals-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+
+  gap: 12px;
+}
+
+.committee-goal-item {
+  min-height: 85px;
+
+  border: 1px solid #eee8f3;
+
+  background: #fdfbff;
+
+  border-radius: 13px;
+
+  padding: 13px;
+
+  display: flex;
+
+  align-items: flex-start;
+
+  gap: 10px;
+}
+
+.committee-goal-item > span {
+  width: 27px;
+  height: 27px;
+
+  flex-shrink: 0;
+
+  border-radius: 9px;
+
+  background: var(--committee-purple);
+
+  color: #ffffff;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  font-size: 10px;
+
+  font-weight: 900;
+}
+
+.committee-goal-item p {
+  margin: 2px 0 0;
+
+  font-size: 11px;
+
+  line-height: 1.9;
+
+  color: #000000;
+}
+
+
+/* =========================================================
+   القواعد
+========================================================= */
+
+.committee-rules-list {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 10px;
+}
+
+.committee-rule-item {
+  display: flex;
+
+  align-items: center;
+
+  gap: 11px;
+
+  border-bottom: 1px solid #eee8f3;
+
+  padding: 10px 0;
+}
+
+.committee-rule-item:last-child {
+  border-bottom: 0;
+}
+
+.committee-rule-item > span {
+  width: 28px;
+  height: 28px;
+
+  border-radius: 9px;
+
+  background: var(--committee-lavender);
+
+  color: var(--committee-purple);
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  font-size: 10px;
+
+  font-weight: 900;
+
+  flex-shrink: 0;
+}
+
+.committee-rule-item p {
+  margin: 0;
+
+  font-size: 11px;
+
+  color: #000000;
+
+  line-height: 1.8;
+}
+
+
+/* =========================================================
+   المهام
+========================================================= */
+
+.committee-tasks-list {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 9px;
+}
+
+.committee-task-item {
+  display: flex;
+
+  align-items: center;
+
+  gap: 12px;
+
+  padding: 13px;
+
+  background: #fdfbff;
+
+  border: 1px solid #eee8f3;
+
+  border-radius: 12px;
+}
+
+.committee-task-item > span {
+  font-size: 10px;
+
+  font-weight: 900;
+
+  color: var(--committee-purple-light);
+
+  min-width: 25px;
+}
+
+.committee-task-item p {
+  margin: 0;
+
+  font-size: 11px;
+
+  line-height: 1.8;
+
+  color: #000000;
+}
+
+
+/* =========================================================
+   قرار التشكيل
+========================================================= */
+
+.committee-decision-info {
+  display: grid;
+
+  grid-template-columns:
+    repeat(3, 1fr);
+
+  gap: 12px;
+
+  margin-bottom: 18px;
+}
+
+.committee-decision-info > div {
+  background: var(--committee-lavender);
+
+  border-radius: 12px;
+
+  padding: 12px;
+
+  text-align: center;
+}
+
+.committee-decision-info span {
+  display: block;
+
+  font-size: 9px;
+
+  color: var(--committee-purple-light);
+
+  font-weight: 800;
+
+  margin-bottom: 5px;
+}
+
+.committee-decision-info strong {
+  display: block;
+
+  font-size: 12px;
+
+  color: var(--committee-purple-dark);
+}
+
+.committee-decision-text {
+  margin: 0 0 18px;
+
+  font-size: 11px;
+
+  line-height: 2;
+
+  color: #000000;
+
+  text-align: right;
+}
+
+.committee-table-wrapper {
+  width: 100%;
+
+  overflow-x: auto;
+}
+
+.committee-members-table {
+  width: 100%;
+
+  border-collapse: collapse;
+
+  font-size: 10px;
+}
+
+.committee-members-table th {
+  background: #d9e2f3;
+
+  color: #000000;
+
+  font-weight: 900;
+
+  padding: 10px;
+
+  border: 1px solid #9eb6d8;
+}
+
+.committee-members-table td {
+  padding: 9px;
+
+  border: 1px solid #b7c8df;
+
+  color: #000000;
+
+  text-align: center;
+}
+
+.committee-members-table tbody tr:nth-child(even) {
+  background: #f8f9fc;
+}
+
+.committee-manager-signature {
+  margin-top: 25px;
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: flex-end;
+
+  gap: 7px;
+}
+
+.committee-manager-signature span {
+  font-size: 10px;
+
+  color: #000000;
+}
+
+.committee-manager-signature strong {
+  font-size: 14px;
+
+  color: var(--committee-purple-dark);
+}
+
+
+/* =========================================================
+   صفحة الاجتماعات
+========================================================= */
+
+.committee-meetings-page {
+  width: 100%;
+}
+
+.committee-meetings-top {
+  background: #ffffff;
+
+  border: 1px solid var(--committee-border);
+
+  border-radius: 18px;
+
+  padding: 20px 22px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  gap: 20px;
+
+  box-shadow:
+    0 7px 22px rgba(67, 45, 91, 0.055);
+}
+
+.committee-meetings-top > div:first-child > span {
+  color: var(--committee-purple-light);
+
+  font-size: 9px;
+
+  font-weight: 800;
+}
+
+.committee-meetings-top h2 {
+  margin: 4px 0;
+
+  font-size: 22px;
+
+  color: var(--committee-purple-dark);
+
+  font-weight: 900;
+}
+
+.committee-meetings-top p {
+  margin: 0;
+
+  font-size: 10px;
+
+  line-height: 1.8;
+
+  color: #000000;
+}
+
+.committee-meetings-counter {
+  width: 85px;
+  height: 85px;
+
+  border-radius: 20px;
+
+  background: var(--committee-purple);
+
+  color: #ffffff;
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+  justify-content: center;
+
+  flex-shrink: 0;
+}
+
+.committee-meetings-counter strong {
+  font-size: 29px;
+
+  line-height: 1;
+}
+
+.committee-meetings-counter span {
+  margin-top: 5px;
+
+  font-size: 8px;
+}
+
+
+/* =========================================================
+   زر إضافة اجتماع
+========================================================= */
+
+.committee-meetings-actions {
+  margin-top: 15px;
+
+  display: flex;
+
+  justify-content: flex-start;
+}
+
+.committee-add-meeting {
+  border: 0;
+
+  background: var(--committee-purple);
+
+  color: #ffffff;
+
+  border-radius: 10px;
+
+  padding: 10px 15px;
+
+  font-size: 10px;
+
+  font-weight: 800;
+
+  cursor: pointer;
+
+  display: inline-flex;
+
+  align-items: center;
+
+  gap: 6px;
+
+  transition: 0.2s ease;
+}
+
+.committee-add-meeting:hover {
+  background: var(--committee-purple-dark);
+
+  transform: translateY(-1px);
+}
+
+.committee-add-meeting span {
+  font-size: 16px;
+}
+
+
+/* =========================================================
+   بطاقات الاجتماعات
+========================================================= */
+
+.committee-meetings-grid {
+  margin-top: 15px;
+
+  display: grid;
+
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+
+  gap: 12px;
+}
+
+.committee-meeting-card {
+  background: #ffffff;
+
+  border: 1px solid var(--committee-border);
+
+  border-top: 3px solid #c8bbd6;
+
+  border-radius: 14px;
+
+  padding: 15px;
+
+  box-shadow:
+    0 6px 18px rgba(67, 45, 91, 0.045);
+
+  transition: 0.2s ease;
+}
+
+.committee-meeting-card:hover {
+  transform: translateY(-2px);
+
+  box-shadow:
+    0 10px 24px rgba(67, 45, 91, 0.08);
+}
+
+.committee-meeting-card.completed {
+  border-top-color: #43a87a;
+}
+
+.committee-meeting-card-top {
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  gap: 10px;
+}
+
+.committee-meeting-card-top > span {
+  color: #a99bb8;
+
+  font-size: 9px;
+
+  font-weight: 900;
+}
+
+.committee-meeting-card-top b {
+  border-radius: 999px;
+
+  padding: 5px 8px;
+
+  font-size: 8px;
+}
+
+.status-done {
+  background: #eef9f3;
+
+  color: #32825e;
+}
+
+.status-pending {
+  background: #f5f1f8;
+
+  color: #756b82;
+}
+
+.committee-meeting-card h3 {
+  margin: 12px 0;
+
+  font-size: 14px;
+
+  color: var(--committee-purple-dark);
+}
+
+.committee-meeting-meta {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 6px;
+
+  margin-bottom: 13px;
+}
+
+.committee-meeting-meta span {
+  font-size: 9px;
+
+  color: #000000;
+}
+
+.committee-open-meeting {
+  width: 100%;
+
+  border: 0;
+
+  background: var(--committee-lavender);
+
+  color: var(--committee-purple-dark);
+
+  border-radius: 9px;
+
+  padding: 8px;
+
+  font-size: 9px;
+
+  font-weight: 800;
+
+  cursor: pointer;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  gap: 6px;
+}
+
+.committee-open-meeting:hover {
+  background: var(--committee-purple);
+
+  color: #ffffff;
+}
+
+
+/* =========================================================
+   محرر الاجتماع
+========================================================= */
+
+.committee-meeting-editor {
+  margin-top: 20px;
+
+  background: #ffffff;
+
+  border: 1px solid var(--committee-border);
+
+  border-radius: 18px;
+
+  padding: 20px;
+
+  box-shadow: var(--committee-shadow);
+}
+
+.committee-editor-header {
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  gap: 15px;
+
+  padding-bottom: 15px;
+
+  border-bottom: 1px solid #eee8f3;
+
+  margin-bottom: 18px;
+}
+
+.committee-editor-header span {
+  display: block;
+
+  font-size: 9px;
+
+  color: var(--committee-purple-light);
+
+  font-weight: 800;
+}
+
+.committee-editor-header h3 {
+  margin: 3px 0 0;
+
+  font-size: 18px;
+
+  color: var(--committee-purple-dark);
+}
+
+.committee-editor-header button {
+  width: 32px;
+  height: 32px;
+
+  border: 0;
+
+  background: #f5f1f8;
+
+  color: var(--committee-purple-dark);
+
+  border-radius: 9px;
+
+  font-size: 20px;
+
+  cursor: pointer;
+}
+
+.committee-editor-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+
+  gap: 12px;
+}
+
+.committee-editor-grid label,
+.committee-editor-full label {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 6px;
+}
+
+.committee-editor-grid label > span,
+.committee-editor-full label > span {
+  font-size: 9px;
+
+  color: #000000;
+
+  font-weight: 800;
+}
+
+.committee-editor-grid input,
+.committee-editor-grid select,
+.committee-editor-full textarea {
+  width: 100%;
+
+  border: 1px solid var(--committee-border);
+
+  background: #fdfbff;
+
+  color: #000000;
+
+  border-radius: 9px;
+
+  padding: 9px;
+
+  font-family: inherit;
+
+  font-size: 10px;
+
+  outline: none;
+}
+
+.committee-editor-grid input:focus,
+.committee-editor-grid select:focus,
+.committee-editor-full textarea:focus {
+  border-color: var(--committee-purple-light);
+
+  background: #ffffff;
+}
+
+.committee-editor-full {
+  margin-top: 15px;
+
+  display: grid;
+
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+
+  gap: 13px;
+}
+
+.committee-editor-full textarea {
+  min-height: 105px;
+
+  resize: vertical;
+
+  line-height: 1.8;
+}
+
+.committee-editor-actions {
+  margin-top: 18px;
+
+  padding-top: 15px;
+
+  border-top: 1px solid #eee8f3;
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 10px;
+}
+
+.committee-save-meeting {
+  border: 0;
+
+  background: var(--committee-purple);
+
+  color: #ffffff;
+
+  border-radius: 9px;
+
+  padding: 9px 18px;
+
+  font-size: 10px;
+
+  font-weight: 800;
+
+  cursor: pointer;
+}
+
+.committee-save-meeting:hover {
+  background: var(--committee-purple-dark);
+}
+
+.committee-delete-meeting {
+  border: 1px solid #ead6d6;
+
+  background: #fff7f7;
+
+  color: #a54b4b;
+
+  border-radius: 9px;
+
+  padding: 9px 15px;
+
+  font-size: 10px;
+
+  font-weight: 800;
+
+  cursor: pointer;
+}
+
+
+/* =========================================================
+   تحسين النصوص الرمادية
+========================================================= */
+
+.committee-page p,
+.committees-dashboard p {
+  color: #000000;
+}
+
+
+/* =========================================================
+   Responsive
+========================================================= */
+
+@media (max-width: 900px) {
+
+  .committee-goals-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .committee-meetings-grid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+
+  .committee-editor-grid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+
+}
+
+
+@media (max-width: 700px) {
+
+  .committees-indicators {
+    justify-content: center;
+  }
+
+  .committee-indicator-card {
+    width: 100%;
+  }
+
+  .committee-section-page-header {
+    flex-direction: column;
+
+    align-items: stretch;
+  }
+
+  .committee-section-return {
+    align-self: flex-start;
+  }
+
+  .committee-decision-info {
+    grid-template-columns: 1fr;
+  }
+
+  .committee-meetings-top {
+    flex-direction: column;
+
+    align-items: stretch;
+  }
+
+  .committee-meetings-counter {
+    width: 100%;
+    height: 70px;
+
+    flex-direction: row;
+
+    gap: 10px;
+  }
+
+  .committee-meetings-counter span {
+    margin-top: 0;
+  }
+
+  .committee-meetings-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .committee-editor-grid,
+  .committee-editor-full {
+    grid-template-columns: 1fr;
+  }
+
+  .committee-editor-actions {
+    flex-direction: column;
+
+    align-items: stretch;
+  }
+
+  .committee-save-meeting,
+  .committee-delete-meeting {
+    width: 100%;
+  }
+
+}
+/* =========================================================
+   تكبير الخط في جميع صفحات اللجان
+========================================================= */
+
+/* النصوص الصغيرة */
+.committees-dashboard,
+.committee-page,
+.committee-section-page {
+  font-size: 15px;
+}
+
+/* الصفحة الرئيسية */
+.committees-brand-text span {
+  font-size: 15px;
+}
+
+.committees-brand-text small {
+  font-size: 13px;
+}
+
+.committees-main-title span {
+  font-size: 12px;
+}
+
+.committees-main-title h1 {
+  font-size: 28px;
+}
+
+.committees-main-title p {
+  font-size: 14px;
+}
+
+.committees-dashboard-back {
+  font-size: 14px;
+}
+
+.committees-hero-label {
+  font-size: 13px;
+}
+
+.committees-hero h2 {
+  font-size: 42px;
+}
+
+.committees-hero p {
+  font-size: 16px;
+}
+
+.committees-hero-points span {
+  font-size: 14px;
+}
+
+/* بطاقة المعلومات */
+.info-card-content > span {
+  font-size: 13px;
+}
+
+.info-card-content h2 {
+  font-size: 20px;
+}
+
+.info-card-content p {
+  font-size: 15px;
+}
+
+/* المؤشرات */
+.committee-indicator-content > span {
+  font-size: 12px;
+}
+
+.committee-indicator-content strong {
+  font-size: 28px;
+}
+
+.committee-indicator-content p {
+  font-size: 13px;
+}
+
+/* عناوين الأقسام */
+.committees-section-heading > div:first-child > span {
+  font-size: 13px;
+}
+
+.committees-section-heading h2 {
+  font-size: 28px;
+}
+
+.committees-section-heading p {
+  font-size: 14px;
+}
+
+.committees-count-badge span {
+  font-size: 11px;
+}
+
+/* بطاقات اللجان */
+.committee-card-number {
+  font-size: 12px;
+}
+
+.committee-card-body h3 {
+  font-size: 19px;
+}
+
+.committee-card-body p {
+  font-size: 14px;
+}
+
+.committee-card-footer > span {
+  font-size: 12px;
+}
+
+.committee-open-button {
+  font-size: 13px;
+}
+
+/* توثيق أعمال اللجان */
+.committees-documentation-heading span {
+  font-size: 13px;
+}
+
+.committees-documentation-heading h2 {
+  font-size: 27px;
+}
+
+.committees-documentation-heading p {
+  font-size: 14px;
+}
+
+.committee-document-content > span {
+  font-size: 11px;
+}
+
+.committee-document-content h3 {
+  font-size: 17px;
+}
+
+.committee-document-content p {
+  font-size: 13px;
+}
+
+.committees-bottom-note strong {
+  font-size: 14px;
+}
+
+.committees-bottom-note p {
+  font-size: 13px;
+}
+
+
+/* =========================================================
+   الصفحات الداخلية
+========================================================= */
+
+.committee-school-info span {
+  font-size: 14px;
+}
+
+.committee-school-info small {
+  font-size: 13px;
+}
+
+.committee-inner-title span {
+  font-size: 12px;
+}
+
+.committee-inner-title h1 {
+  font-size: 25px;
+}
+
+.committee-back-button {
+  font-size: 13px;
+}
+
+.committee-breadcrumb {
+  font-size: 13px;
+}
+
+.committee-inner-label {
+  font-size: 13px;
+}
+
+.committee-inner-hero-content h2 {
+  font-size: 32px;
+}
+
+.committee-inner-hero-content p {
+  font-size: 15px;
+}
+
+/* عناوين الأقسام الداخلية */
+.committee-sections-heading > div:first-child span {
+  font-size: 13px;
+}
+
+.committee-sections-heading h2 {
+  font-size: 26px;
+}
+
+.committee-sections-count small {
+  font-size: 10px;
+}
+
+/* بطاقات الأقسام */
+.committee-section-number {
+  font-size: 12px;
+}
+
+.committee-section-text > span {
+  font-size: 11px;
+}
+
+.committee-section-text h3 {
+  font-size: 17px;
+}
+
+.committee-section-text p {
+  font-size: 13px;
+}
+
+
+/* =========================================================
+   صفحات محتوى اللجنة
+========================================================= */
+
+.committee-section-page-header > div > span {
+  font-size: 12px;
+}
+
+.committee-section-page-header h2 {
+  font-size: 29px;
+}
+
+.committee-section-page-header p {
+  font-size: 14px;
+}
+
+.committee-section-return {
+  font-size: 13px;
+}
+
+.committee-content-card-title small {
+  font-size: 11px;
+}
+
+.committee-content-card-title h3 {
+  font-size: 21px;
+}
+
+.committee-goal-item p {
+  font-size: 14px;
+}
+
+.committee-rule-item p {
+  font-size: 14px;
+}
+
+.committee-task-item > span {
+  font-size: 12px;
+}
+
+.committee-task-item p {
+  font-size: 14px;
+}
+
+
+/* =========================================================
+   قرار التشكيل
+========================================================= */
+
+.committee-decision-info span {
+  font-size: 11px;
+}
+
+.committee-decision-info strong {
+  font-size: 14px;
+}
+
+.committee-decision-text {
+  font-size: 14px;
+}
+
+.committee-members-table {
+  font-size: 13px;
+}
+
+.committee-members-table th,
+.committee-members-table td {
+  padding: 12px;
+}
+
+.committee-manager-signature span {
+  font-size: 12px;
+}
+
+.committee-manager-signature strong {
+  font-size: 16px;
+}
+
+
+/* =========================================================
+   صفحة الاجتماعات
+========================================================= */
+
+.committee-meetings-top > div:first-child > span {
+  font-size: 12px;
+}
+
+.committee-meetings-top h2 {
+  font-size: 27px;
+}
+
+.committee-meetings-top p {
+  font-size: 14px;
+}
+
+.committee-meetings-counter strong {
+  font-size: 32px;
+}
+
+.committee-meetings-counter span {
+  font-size: 11px;
+}
+
+.committee-add-meeting {
+  font-size: 13px;
+}
+
+.committee-meeting-card-top > span {
+  font-size: 11px;
+}
+
+.committee-meeting-card-top b {
+  font-size: 10px;
+}
+
+.committee-meeting-card h3 {
+  font-size: 18px;
+}
+
+.committee-meeting-meta span {
+  font-size: 13px;
+}
+
+.committee-open-meeting {
+  font-size: 12px;
+}
+
+
+/* =========================================================
+   محرر الاجتماع
+========================================================= */
+
+.committee-editor-header span {
+  font-size: 12px;
+}
+
+.committee-editor-header h3 {
+  font-size: 21px;
+}
+
+.committee-editor-grid label > span,
+.committee-editor-full label > span {
+  font-size: 12px;
+}
+
+.committee-editor-grid input,
+.committee-editor-grid select,
+.committee-editor-full textarea {
+  font-size: 13px;
+  padding: 11px;
+}
+
+.committee-editor-full textarea {
+  line-height: 1.9;
+}
+
+.committee-save-meeting,
+.committee-delete-meeting {
+  font-size: 13px;
+}
+/* =========================================================
+   القرار الإداري - الحقول التفاعلية
+========================================================= */
+
+.committee-decision-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.committee-decision-field span {
+  font-size: 13px;
+  color: #6d528f;
+  font-weight: 700;
+}
+
+.committee-decision-field input {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  text-align: center;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  color: #3d2765;
+  outline: none;
+}
+
+.committee-decision-field input[type="date"] {
+  cursor: pointer;
+}
+
+
+/* =========================================================
+   حقول الجدول
+========================================================= */
+
+.committee-table-input {
+  width: 100%;
+  min-height: 38px;
+  border: 1px solid transparent;
+  background: transparent;
+  text-align: center;
+  font-family: inherit;
+  font-size: 14px;
+  color: #333;
+  outline: none;
+  border-radius: 6px;
+  padding: 5px 8px;
+  box-sizing: border-box;
+}
+
+.committee-table-input:hover,
+.committee-table-input:focus {
+  border-color: #cdb8e5;
+  background: #faf7fd;
+}
+
+.committee-table-input::placeholder {
+  color: #aaa;
+}
+
+.signature-input {
+  color: #4d3272;
+}
+
+
+/* =========================================================
+   اسم المديرة
+========================================================= */
+
+.committee-manager-name-input {
+  display: block;
+  margin-top: 8px;
+  border: 0;
+  border-bottom: 1px dashed #bda8d3;
+  background: transparent;
+  color: #42256e;
+  font-family: inherit;
+  font-size: 18px;
+  font-weight: 700;
+  text-align: center;
+  outline: none;
+  padding: 5px 10px;
+}
+
+
+/* =========================================================
+   توقيع المديرة
+========================================================= */
+
+.manager-signature-field {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.manager-signature-field span {
+  color: #6d528f;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.manager-signature-field input {
+  border: 0;
+  border-bottom: 1px dashed #bda8d3;
+  background: transparent;
+  font-family: inherit;
+  outline: none;
+  padding: 5px 10px;
+  min-width: 180px;
+}
+
+
+/* =========================================================
+   زر الطباعة
+========================================================= */
+
+.committee-print-button {
+  border: 0;
+  border-radius: 12px;
+  padding: 12px 24px;
+  background: #eee5f7;
+  color: #4b2b70;
+  font-family: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.committee-print-button:hover {
+  background: #dfd0ed;
+}
+
+
+/* =========================================================
+   معاينة القرار
+========================================================= */
+
+.committee-decision-preview {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 25px;
+  margin-bottom: 25px;
+  background: #faf7fd;
+  border-radius: 18px;
+  border: 1px solid #eee4f6;
+}
+
+.committee-decision-preview-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #eee5f7;
+  font-size: 28px;
+}
+
+.committee-decision-preview h3 {
+  margin: 0 0 8px;
+  color: #402568;
+}
+
+.committee-decision-preview p {
+  margin: 0;
+  color: #777;
+  line-height: 1.8;
+}
+
+
+/* =========================================================
+   الطباعة
+========================================================= */
+
+@media print {
+
+  body {
+    background: white !important;
+  }
+
+  body * {
+    visibility: hidden;
+  }
+
+  .committee-print-area,
+  .committee-print-area * {
+    visibility: visible;
+  }
+
+  .committee-print-area {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    margin: 0;
+    padding: 25px;
+    background: white !important;
+    box-shadow: none !important;
+    border: none !important;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  .committee-table-input,
+  .committee-decision-field input,
+  .committee-manager-name-input,
+  .manager-signature-field input {
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  .committee-table-input::placeholder,
+  .manager-signature-field input::placeholder {
+    color: transparent !important;
+  }
+
+  @page {
+    size: A4 portrait;
+    margin: 12mm;
+  }
+}
+/* =========================================================
+   نموذج الاجتماع الجديد
+========================================================= */
+
+.meeting-form-section {
+  background: #ffffff;
+  border: 1px solid #eadff4;
+  border-radius: 18px;
+  padding: 24px;
+  margin-top: 22px;
+  box-shadow: 0 5px 20px rgba(70, 40, 100, 0.05);
+}
+
+.meeting-form-section-title {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 22px;
+}
+
+.meeting-form-section-title > span {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: #f1e8f8;
+  color: #4a2372;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+}
+
+.meeting-form-section-title small {
+  display: block;
+  color: #8a6a9e;
+  font-size: 12px;
+  margin-bottom: 4px;
+}
+
+.meeting-form-section-title h4 {
+  margin: 0;
+  color: #3f1d64;
+  font-size: 18px;
+}
+
+
+/* =========================================================
+   الحضور
+========================================================= */
+
+.attendance-actions {
+  display: flex;
+  justify-content: flex-start;
+  margin-bottom: 15px;
+}
+
+.attendance-actions button {
+  border: none;
+  background: #4b2372;
+  color: white;
+  padding: 11px 20px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-family: inherit;
+  font-weight: 600;
+}
+
+.attendance-actions button:hover {
+  background: #381954;
+}
+
+.attendance-table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.attendance-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  overflow: hidden;
+  border: 1px solid #e4d8ee;
+  border-radius: 14px;
+}
+
+.attendance-table th {
+  background: #eee6f6;
+  color: #3f1d64;
+  padding: 14px 10px;
+  font-size: 14px;
+  text-align: center;
+  border-bottom: 1px solid #d9c9e5;
+}
+
+.attendance-table td {
+  padding: 10px;
+  text-align: center;
+  border-bottom: 1px solid #eee8f3;
+  vertical-align: middle;
+  background: #fff;
+}
+
+.attendance-table tr:last-child td {
+  border-bottom: none;
+}
+
+.attendance-input {
+  width: 100%;
+  min-width: 150px;
+  height: 42px;
+  padding: 8px 12px;
+  border: 1px solid #ddd1e8;
+  border-radius: 9px;
+  outline: none;
+  font-family: inherit;
+  box-sizing: border-box;
+  text-align: right;
+}
+
+.attendance-input:focus {
+  border-color: #76519a;
+  box-shadow: 0 0 0 3px rgba(118, 81, 154, 0.1);
+}
+
+.delete-attendee {
+  border: none;
+  background: #fff0f0;
+  color: #b52d2d;
+  border-radius: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+
+/* =========================================================
+   لوحة التوقيع
+========================================================= */
+
+.signature-pad-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  min-width: 210px;
+}
+
+.signature-pad {
+  width: 210px;
+  height: 75px;
+  background: #ffffff;
+  border: 1px dashed #bda8cc;
+  border-radius: 8px;
+  cursor: crosshair;
+  touch-action: none;
+  display: block;
+}
+
+.signature-clear {
+  border: none;
+  background: transparent;
+  color: #8b6a9e;
+  font-family: inherit;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.signature-clear:hover {
+  color: #b42f55;
+}
+
+.empty-attendance {
+  padding: 30px !important;
+  color: #927ba1;
+}
+
+
+/* =========================================================
+   Textarea
+========================================================= */
+
+.meeting-large-textarea {
+  width: 100%;
+  min-height: 150px;
+  resize: vertical;
+  border: 1px solid #ddd1e8;
+  border-radius: 12px;
+  padding: 15px;
+  box-sizing: border-box;
+  font-family: inherit;
+  font-size: 15px;
+  line-height: 2;
+  outline: none;
+  background: #fcfbfd;
+}
+
+.meeting-large-textarea:focus {
+  border-color: #76519a;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(118, 81, 154, 0.08);
+}
+
+
+/* =========================================================
+   أزرار المحضر
+========================================================= */
+
+.committee-print-meeting {
+  border: none;
+  background: #eee6f6;
+  color: #4b2372;
+  padding: 12px 22px;
+  border-radius: 10px;
+  font-family: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.committee-print-meeting:hover {
+  background: #dfd1eb;
+}
+
+
+/* =========================================================
+   محضر الطباعة
+========================================================= */
+
+.print-minutes {
+  display: none;
+}
+
+.print-minutes-page {
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  background: white;
+  padding: 30px;
+  box-sizing: border-box;
+  color: #222;
+  font-family: Arial, "Tahoma", sans-serif;
+}
+
+.print-school-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 25px;
+  text-align: center;
+}
+
+.print-school-header img {
+  width: 95px;
+  height: 95px;
+  object-fit: contain;
+}
+
+.print-school-header h1 {
+  margin: 0 0 10px;
+  font-size: 22px;
+  color: #3f1d64;
+}
+
+.print-school-header h2 {
+  margin: 0 0 7px;
+  font-size: 19px;
+  color: #555;
+}
+
+.print-school-header h3 {
+  margin: 0;
+  font-size: 20px;
+  color: #3f1d64;
+}
+
+.print-divider {
+  height: 2px;
+  background: #4b2372;
+  margin: 22px 0;
+}
+
+.print-section {
+  margin-top: 24px;
+  page-break-inside: avoid;
+}
+
+.print-section h4 {
+  margin: 0 0 12px;
+  padding: 10px 14px;
+  background: #eee6f6;
+  color: #3f1d64;
+  border-right: 5px solid #4b2372;
+  font-size: 17px;
+}
+
+.print-info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  border: 1px solid #ddd;
+}
+
+.print-info-grid > div {
+  padding: 12px 15px;
+  border: 1px solid #eee;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.print-info-grid span {
+  font-size: 12px;
+  color: #777;
+}
+
+.print-info-grid strong {
+  font-size: 14px;
+}
+
+.print-attendance-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.print-attendance-table th,
+.print-attendance-table td {
+  border: 1px solid #aaa;
+  padding: 8px;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.print-attendance-table th {
+  background: #eee6f6;
+  color: #3f1d64;
+}
+
+.print-attendance-table td {
+  min-height: 55px;
+}
+
+.printed-signature {
+  width: 110px;
+  height: 45px;
+  object-fit: contain;
+}
+
+.print-text-box {
+  min-height: 90px;
+  border: 1px solid #aaa;
+  padding: 15px;
+  line-height: 2;
+  white-space: pre-wrap;
+  font-size: 14px;
+}
+
+.print-manager-approval {
+  margin-top: 45px;
+  margin-right: auto;
+  width: 230px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.print-manager-approval span {
+  font-size: 14px;
+}
+
+.print-manager-approval strong {
+  color: #3f1d64;
+}
+
+
+/* =========================================================
+   الطباعة
+========================================================= */
+
+@media print {
+
+  body * {
+    visibility: hidden !important;
+  }
+
+  .print-minutes,
+  .print-minutes * {
+    visibility: visible !important;
+  }
+
+  .print-minutes {
+    display: block !important;
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    background: white;
+  }
+
+  .print-minutes-page {
+    width: 100%;
+    max-width: none;
+    min-height: 100vh;
+    padding: 15mm;
+  }
+
+  @page {
+    size: A4;
+    margin: 0;
+  }
+
+}
+
+
+/* =========================================================
+   الجوال
+========================================================= */
+
+@media (max-width: 800px) {
+
+  .committee-editor-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .attendance-table {
+    min-width: 850px;
+  }
+
+  .attendance-table-wrapper {
+    overflow-x: auto;
+  }
+
+  .signature-pad {
+    width: 180px;
+  }
+
+  .print-info-grid {
+    grid-template-columns: 1fr;
+  }
+
+}
+/* =========================================================
+   القرار الإداري - الخانات والتوقيع
+========================================================= */
+
+.committee-decision-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.committee-decision-field span {
+  font-size: 14px;
+  font-weight: 700;
+  color: #4b3478;
+}
+
+.committee-decision-field input {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #ddd3ed;
+  background: #fff;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-family: inherit;
+  font-size: 14px;
+  color: #30205f;
+  outline: none;
+}
+
+.committee-decision-field input:focus {
+  border-color: #8d73bd;
+  box-shadow: 0 0 0 3px rgba(141, 115, 189, 0.12);
+}
+
+
+/* =========================================================
+   خانات أعضاء اللجنة
+========================================================= */
+
+.committee-member-input {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid transparent;
+  background: transparent;
+  border-radius: 8px;
+  padding: 9px 8px;
+  text-align: center;
+  font-family: inherit;
+  font-size: 14px;
+  color: #30205f;
+  outline: none;
+  transition: 0.2s ease;
+}
+
+.committee-member-input:hover {
+  background: #faf8fd;
+  border-color: #e5dcf0;
+}
+
+.committee-member-input:focus {
+  background: #fff;
+  border-color: #8d73bd;
+  box-shadow: 0 0 0 3px rgba(141, 115, 189, 0.1);
+}
+
+.committee-member-input::placeholder {
+  color: #aaa0b8;
+}
+
+
+/* =========================================================
+   صندوق التوقيع
+========================================================= */
+
+.committee-signature-box {
+  width: 100%;
+  min-width: 220px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+}
+
+.committee-signature-canvas {
+  width: 220px;
+  height: 68px;
+  background: #fff;
+  border: 1px dashed #cfc1e2;
+  border-radius: 8px;
+  cursor: crosshair;
+  touch-action: none;
+  display: block;
+}
+
+.committee-signature-line {
+  width: 190px;
+  height: 1px;
+  background: #a99bb8;
+}
+
+.committee-clear-signature {
+  border: 0;
+  background: transparent;
+  color: #8a6baa;
+  font-family: inherit;
+  font-size: 11px;
+  cursor: pointer;
+  padding: 2px 8px;
+}
+
+.committee-clear-signature:hover {
+  color: #5d3f89;
+}
+
+
+/* =========================================================
+   أزرار القرار
+========================================================= */
+
+.committee-decision-actions {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  margin-top: 28px;
+  padding-top: 20px;
+  border-top: 1px solid #eee8f5;
+}
+
+.committee-save-decision,
+.committee-print-decision {
+  border: 0;
+  border-radius: 10px;
+  padding: 11px 22px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.committee-save-decision {
+  background: #4c357b;
+  color: white;
+}
+
+.committee-save-decision:hover {
+  background: #39265f;
+  transform: translateY(-1px);
+}
+
+.committee-print-decision {
+  background: #eee8f7;
+  color: #4c357b;
+}
+
+.committee-print-decision:hover {
+  background: #e3d9f0;
+  transform: translateY(-1px);
+}
+
+
+/* =========================================================
+   رسالة الحفظ
+========================================================= */
+
+.committee-saved-message {
+  margin: 14px auto 0;
+  width: fit-content;
+  background: #edf8f1;
+  color: #287044;
+  border: 1px solid #cce8d5;
+  border-radius: 8px;
+  padding: 8px 18px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+
+/* =========================================================
+   الطباعة
+========================================================= */
+
+@media print {
+
+  @page {
+    size: A4 portrait;
+    margin: 12mm;
+  }
+
+  body {
+    background: white !important;
+  }
+
+  /* إخفاء كل عناصر الصفحة غير القرار */
+
+  .committee-page {
+    background: white !important;
+  }
+
+  .committee-inner-header,
+  .committee-breadcrumb,
+  .committee-section-page-header,
+  .committee-section-return,
+  .committee-decision-actions,
+  .committee-saved-message {
+    display: none !important;
+  }
+
+  .committee-page-container {
+    width: 100% !important;
+    max-width: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  .committee-section-page {
+    width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  .committee-content-card {
+    box-shadow: none !important;
+    border: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+  }
+
+  .committee-decision-print-area {
+    display: block !important;
+  }
+
+  /* شعار المدرسة في الطباعة */
+
+  .committee-decision-print-area::before {
+    content: "";
+    display: block;
+    width: 105px;
+    height: 105px;
+    margin: 0 auto 8px;
+    background-image: url("/src/assets/logo.png");
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+  }
+
+  /* عنوان القرار */
+
+  .committee-content-card-title {
+    display: block !important;
+    text-align: center !important;
+    margin-bottom: 18px !important;
+  }
+
+  .committee-content-card-title > span {
+    display: none !important;
+  }
+
+  .committee-content-card-title small {
+    display: block !important;
+    font-size: 14px !important;
+    margin-bottom: 5px !important;
+  }
+
+  .committee-content-card-title h3 {
+    font-size: 20px !important;
+    color: #30205f !important;
+  }
+
+  /* بيانات القرار */
+
+  .committee-decision-info {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 10px !important;
+    margin-bottom: 18px !important;
+  }
+
+  .committee-decision-field input {
+    border: 0 !important;
+    padding: 4px !important;
+    background: transparent !important;
+    text-align: center !important;
+  }
+
+  .committee-decision-field span {
+    text-align: center !important;
+  }
+
+  /* النص */
+
+  .committee-decision-text {
+    font-size: 13px !important;
+    line-height: 2 !important;
+    margin: 12px 0 18px !important;
+  }
+
+  /* الجدول */
+
+  .committee-table-wrapper {
+    overflow: visible !important;
+    width: 100% !important;
+  }
+
+  .committee-members-table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+  }
+
+  .committee-members-table th,
+  .committee-members-table td {
+    border: 1px solid #555 !important;
+    color: #000 !important;
+    padding: 6px !important;
+  }
+
+  .committee-members-table th {
+    background: #e5e5e5 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    font-weight: 700 !important;
+  }
+
+  .committee-member-input {
+    border: 0 !important;
+    background: transparent !important;
+    color: #000 !important;
+    padding: 3px !important;
+  }
+
+  .committee-signature-canvas {
+    border: 0 !important;
+    width: 170px !important;
+    height: 55px !important;
+  }
+
+  .committee-clear-signature {
+    display: none !important;
+  }
+
+  .committee-signature-line {
+    display: none !important;
+  }
+
+  /* اعتماد المديرة */
+
+  .committee-manager-signature {
+    margin-top: 30px !important;
+    text-align: right !important;
+  }
+
+  .committee-manager-signature span,
+  .committee-manager-signature strong {
+    color: #000 !important;
+  }
+
+}
+/* =========================================================
+   طباعة القرار الإداري
+========================================================= */
+
+@media print {
+
+  /* إخفاء كل شيء في الصفحة */
+  body * {
+    visibility: hidden !important;
+  }
+
+  /* إظهار القرار فقط */
+  .committee-content-card,
+  .committee-content-card * {
+    visibility: visible !important;
+  }
+
+  /* القرار يأخذ الصفحة كاملة */
+  .committee-content-card {
+    position: absolute !important;
+    top: 0 !important;
+    right: 0 !important;
+    left: 0 !important;
+
+    width: 100% !important;
+    max-width: none !important;
+
+    margin: 0 !important;
+    padding: 25px !important;
+
+    background: white !important;
+    box-shadow: none !important;
+    border: none !important;
+
+    direction: rtl !important;
+  }
+
+  /* إخفاء زر الطباعة */
+  .no-print {
+    display: none !important;
+  }
+
+  /* إخفاء الهيدر والبريدكرم وأي عناصر خارج القرار */
+  .committee-inner-header,
+  .committee-breadcrumb,
+  .committee-section-page-header,
+  .committee-bottom-action {
+    display: none !important;
+  }
+
+  /* المحافظة على شكل الجدول */
+  .committee-members-table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+  }
+
+  .committee-members-table th,
+  .committee-members-table td {
+    border: 1px solid #9fb6dc !important;
+    padding: 10px !important;
+    color: #000 !important;
+  }
+
+  .committee-members-table th {
+    background: #d9e4f5 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* مربعات بيانات القرار */
+  .committee-decision-info {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 15px !important;
+    margin-bottom: 20px !important;
+  }
+
+  .committee-decision-info > div {
+    background: #f4effb !important;
+    border-radius: 12px !important;
+    padding: 15px !important;
+    text-align: center !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* النص */
+  .committee-decision-text {
+    color: #000 !important;
+    font-size: 15px !important;
+    line-height: 2 !important;
+  }
+
+  /* توقيع المديرة */
+  .committee-manager-signature {
+    margin-top: 25px !important;
+    color: #000 !important;
+  }
+
+  .committee-manager-signature strong {
+    display: block !important;
+    margin-top: 8px !important;
+    color: #43206b !important;
+  }
+
+  /* منع تقسيم الجدول بين الصفحات */
+  .committee-table-wrapper {
+    page-break-inside: avoid !important;
+  }
+
+  .committee-members-table tr {
+    page-break-inside: avoid !important;
+  }
+
+  @page {
+    size: A4 portrait;
+    margin: 12mm;
+  }
+}

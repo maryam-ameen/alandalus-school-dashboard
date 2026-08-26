@@ -2,7 +2,7 @@ import background from "./assets/background.jpg";
 import logo from "./assets/logo.png";
 import { useMemo, useState } from "react";
 
-import CommitteesDashboard from "./boards/CommitteesDashboard.jsx";
+import CommitteesDashboard from "./boards/committees/CommitteesDashboard.jsx";
 import MeetingsDashboard from "./boards/meeting/MeetingsDashboard.jsx";
 import TeacherDashboard from "./boards/teacher/teacherDashboard.jsx";
 
