@@ -300,10 +300,14 @@ const defaultMeetings = [
    التخزين
 ========================================================= */
 
-const STORAGE_KEY = "alandalus-committee-meetings-v2";
+const LEGACY_STORAGE_KEY =
+  "alandalus-committee-meetings-v2";
+
+const getMeetingsStorageKey = (committeeId) =>
+  `alandalus-committee-meetings-v2-${committeeId}`;
 
 const getDecisionStorageKey = (committeeId) =>
-  `alandalus-committee-decision-${committeeId}`;
+  `alandalus-committee-decision-v2-${committeeId}`;
 
 /* =========================================================
    القرار الإداري
@@ -313,12 +317,14 @@ const createDefaultDecision = (committee) => {
   const isAdministrative = committee.id === 1;
 
   const defaultMembers = isAdministrative
-    ? administrativeCommitteeData.members.map((member) => ({
-        name: member.name || "",
-        job: member.job || "",
-        role: member.role || "عضوة",
-        signature: "",
-      }))
+    ? administrativeCommitteeData.members.map(
+        (member) => ({
+          name: member.name || "",
+          job: member.job || "",
+          role: member.role || "عضوة",
+          signature: "",
+        })
+      )
     : [
         {
           name: "",
@@ -386,18 +392,23 @@ const loadCommitteeDecision = (committee) => {
 
     if (saved) {
       const parsed = JSON.parse(saved);
+      const defaultDecision =
+        createDefaultDecision(committee);
 
       return {
-        ...createDefaultDecision(committee),
+        ...defaultDecision,
         ...parsed,
         members:
           parsed.members?.length > 0
             ? parsed.members
-            : createDefaultDecision(committee).members,
+            : defaultDecision.members,
       };
     }
   } catch (error) {
-    console.error(error);
+    console.error(
+      "خطأ في تحميل القرار:",
+      error
+    );
   }
 
   return createDefaultDecision(committee);
@@ -416,6 +427,7 @@ function SignaturePad({ value, onChange }) {
 
   useEffect(() => {
     const canvas = canvasRef.current;
+
     if (!canvas) return;
 
     const ctx = canvas.getContext("2d");
@@ -462,7 +474,8 @@ function SignaturePad({ value, onChange }) {
       canvas.getBoundingClientRect();
 
     const touch =
-      event.touches && event.touches.length
+      event.touches &&
+      event.touches.length
         ? event.touches[0]
         : null;
 
@@ -491,6 +504,7 @@ function SignaturePad({ value, onChange }) {
     event.preventDefault();
 
     const canvas = canvasRef.current;
+
     if (!canvas) return;
 
     const ctx = canvas.getContext("2d");
@@ -515,6 +529,7 @@ function SignaturePad({ value, onChange }) {
     event.preventDefault();
 
     const canvas = canvasRef.current;
+
     if (!canvas) return;
 
     const ctx = canvas.getContext("2d");
@@ -532,6 +547,7 @@ function SignaturePad({ value, onChange }) {
     drawingRef.current = false;
 
     const canvas = canvasRef.current;
+
     if (!canvas) return;
 
     onChange(
@@ -541,6 +557,7 @@ function SignaturePad({ value, onChange }) {
 
   const clearSignature = () => {
     const canvas = canvasRef.current;
+
     if (!canvas) return;
 
     const ctx = canvas.getContext("2d");
@@ -603,6 +620,7 @@ function CommitteeDecisionSection({
     setDecision(
       loadCommitteeDecision(committee)
     );
+
     setSavedMessage(false);
   }, [committee.id]);
 
@@ -771,7 +789,9 @@ function CommitteeDecisionSection({
               <th>الوصف الوظيفي</th>
               <th>العمل المكلف به</th>
               <th>التوقيع</th>
-              <th className="no-print">حذف</th>
+              <th className="no-print">
+                حذف
+              </th>
             </tr>
           </thead>
 
@@ -908,7 +928,7 @@ function CommitteeDecisionSection({
 }
 
 /* =========================================================
-   المحضر - بيانات افتراضية
+   المحضر
 ========================================================= */
 
 const createDefaultAttendee = () => ({
@@ -938,38 +958,15 @@ function CommitteesDashboard() {
     setSelectedSection,
   ] = useState(null);
 
+  /*
+    مهم جدًا:
+    هذه الحالات موجودة مرة واحدة فقط.
+    الاجتماعات تعتمد على اللجنة المختارة.
+  */
   const [
     meetings,
     setMeetings,
-  ] = useState(() => {
-    try {
-      const saved =
-        localStorage.getItem(
-          STORAGE_KEY
-        );
-
-      if (saved) {
-        const parsed =
-          JSON.parse(saved);
-
-        return parsed.map(
-          (meeting) => ({
-            ...meeting,
-            attendees:
-              Array.isArray(
-                meeting.attendees
-              )
-                ? meeting.attendees
-                : [],
-          })
-        );
-      }
-
-      return defaultMeetings;
-    } catch {
-      return defaultMeetings;
-    }
-  });
+  ] = useState([]);
 
   const [
     selectedMeeting,
@@ -982,15 +979,174 @@ function CommitteesDashboard() {
   ] = useState(null);
 
   /* =======================================================
-     حفظ الاجتماعات
+     تحميل اجتماعات اللجنة الحالية
   ======================================================= */
 
   useEffect(() => {
+    if (!selectedCommittee) {
+      setMeetings([]);
+      setSelectedMeeting(null);
+      setMeetingForm(null);
+      return;
+    }
+
+    const committeeStorageKey =
+      getMeetingsStorageKey(
+        selectedCommittee.id
+      );
+
+    try {
+      const saved =
+        localStorage.getItem(
+          committeeStorageKey
+        );
+
+      if (saved) {
+        const parsed =
+          JSON.parse(saved);
+
+        if (Array.isArray(parsed)) {
+          setMeetings(
+            parsed.map(
+              (meeting) => ({
+                ...meeting,
+                attendees:
+                  Array.isArray(
+                    meeting.attendees
+                  )
+                    ? meeting.attendees
+                    : [],
+              })
+            )
+          );
+        } else {
+          setMeetings(
+            defaultMeetings.map(
+              (meeting) => ({
+                ...meeting,
+                attendees: [],
+              })
+            )
+          );
+        }
+
+        setSelectedMeeting(null);
+        setMeetingForm(null);
+
+        return;
+      }
+
+      /*
+        ترحيل الاجتماعات القديمة:
+        الاجتماعات القديمة يتم نقلها للجنة الإدارية فقط.
+      */
+
+      if (
+        selectedCommittee.id === 1
+      ) {
+        const oldSaved =
+          localStorage.getItem(
+            LEGACY_STORAGE_KEY
+          );
+
+        if (oldSaved) {
+          const parsed =
+            JSON.parse(oldSaved);
+
+          const migrated =
+            Array.isArray(parsed)
+              ? parsed.map(
+                  (meeting) => ({
+                    ...meeting,
+                    attendees:
+                      Array.isArray(
+                        meeting.attendees
+                      )
+                        ? meeting.attendees
+                        : [],
+                  })
+                )
+              : defaultMeetings.map(
+                  (meeting) => ({
+                    ...meeting,
+                    attendees: [],
+                  })
+                );
+
+          setMeetings(migrated);
+
+          localStorage.setItem(
+            committeeStorageKey,
+            JSON.stringify(migrated)
+          );
+
+          setSelectedMeeting(null);
+          setMeetingForm(null);
+
+          return;
+        }
+      }
+
+      /*
+        كل لجنة أخرى تحصل على اجتماعاتها الخاصة.
+        نستخدم نسخة جديدة حتى لا تتشارك اللجان نفس البيانات.
+      */
+
+      const freshMeetings =
+        defaultMeetings.map(
+          (meeting) => ({
+            ...meeting,
+            attendees: [],
+          })
+        );
+
+      setMeetings(
+        freshMeetings
+      );
+
+      setSelectedMeeting(null);
+      setMeetingForm(null);
+
+    } catch (error) {
+      console.error(
+        "خطأ في تحميل اجتماعات اللجنة:",
+        error
+      );
+
+      const freshMeetings =
+        defaultMeetings.map(
+          (meeting) => ({
+            ...meeting,
+            attendees: [],
+          })
+        );
+
+      setMeetings(
+        freshMeetings
+      );
+
+      setSelectedMeeting(null);
+      setMeetingForm(null);
+    }
+  }, [selectedCommittee]);
+
+  /* =======================================================
+     حفظ اجتماعات اللجنة الحالية
+  ======================================================= */
+
+  useEffect(() => {
+    if (!selectedCommittee) return;
+
     localStorage.setItem(
-      STORAGE_KEY,
+      getMeetingsStorageKey(
+        selectedCommittee.id
+      ),
       JSON.stringify(meetings)
     );
-  }, [meetings]);
+  }, [
+    meetings,
+    selectedCommittee,
+  ]);
 
   /* =======================================================
      مؤشر الاجتماعات
@@ -1158,22 +1314,23 @@ function CommitteesDashboard() {
   const saveMeeting = () => {
     if (!meetingForm) return;
 
+    const updatedMeeting = {
+      ...meetingForm,
+      attendees:
+        meetingForm.attendees || [],
+    };
+
     setMeetings((prev) =>
       prev.map((meeting) =>
         meeting.id ===
-        meetingForm.id
-          ? {
-              ...meetingForm,
-              attendees:
-                meetingForm.attendees ||
-                [],
-            }
+        updatedMeeting.id
+          ? updatedMeeting
           : meeting
       )
     );
 
     setSelectedMeeting(
-      meetingForm
+      updatedMeeting
     );
 
     alert(
@@ -1680,6 +1837,7 @@ function CommitteesDashboard() {
                             }
                           >
                             فتح المحضر
+
                             <span>
                               ←
                             </span>
@@ -2137,8 +2295,6 @@ function CommitteesDashboard() {
                                 اضغطي على «إضافة حاضر» لإضافة أسماء الحاضرين
                                 وتوقيعاتهم.
                               </p>
-
-                             
                             </div>
                           )}
                         </div>
@@ -2397,6 +2553,7 @@ function CommitteesDashboard() {
             }
           >
             العودة للوحات الرئيسية
+
             <span>←</span>
           </button>
         </div>
@@ -2439,9 +2596,13 @@ function CommitteesDashboard() {
           <div className="committees-hero-visual">
             <div className="hero-document">
               <div className="hero-document-top" />
+
               <div className="hero-document-line" />
+
               <div className="hero-document-line short" />
+
               <div className="hero-document-line" />
+
               <div className="hero-document-line short" />
             </div>
 
@@ -2578,6 +2739,7 @@ function CommitteesDashboard() {
                     }
                   >
                     عرض اللجنة
+
                     <span>
                       ←
                     </span>
