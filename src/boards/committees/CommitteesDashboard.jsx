@@ -254,9 +254,9 @@ const excellenceCommitteeData = {
    الاجتماعات الافتراضية
 ========================================================= */
 
-const defaultMeetings = [
+const createDefaultMeetings = (committeeId) => [
   {
-    id: 1,
+    id: `${committeeId}-1`,
     title: "الاجتماع الشهري الأول",
     date: "",
     day: "",
@@ -269,7 +269,7 @@ const defaultMeetings = [
     attendees: [],
   },
   {
-    id: 2,
+    id: `${committeeId}-2`,
     title: "الاجتماع الشهري الثاني",
     date: "",
     day: "",
@@ -282,7 +282,7 @@ const defaultMeetings = [
     attendees: [],
   },
   {
-    id: 3,
+    id: `${committeeId}-3`,
     title: "الاجتماع الشهري الثالث",
     date: "",
     day: "",
@@ -1021,7 +1021,7 @@ function CommitteesDashboard() {
           );
         } else {
           setMeetings(
-            defaultMeetings.map(
+            createDefaultMeetings(selectedCommittee.id).map(
               (meeting) => ({
                 ...meeting,
                 attendees: [],
@@ -1066,7 +1066,7 @@ function CommitteesDashboard() {
                         : [],
                   })
                 )
-              : defaultMeetings.map(
+              : createDefaultMeetings(selectedCommittee.id).map(
                   (meeting) => ({
                     ...meeting,
                     attendees: [],
@@ -1093,7 +1093,7 @@ function CommitteesDashboard() {
       */
 
       const freshMeetings =
-        defaultMeetings.map(
+        createDefaultMeetings(selectedCommittee.id).map(
           (meeting) => ({
             ...meeting,
             attendees: [],
@@ -1114,7 +1114,7 @@ function CommitteesDashboard() {
       );
 
       const freshMeetings =
-        defaultMeetings.map(
+        createDefaultMeetings(selectedCommittee.id).map(
           (meeting) => ({
             ...meeting,
             attendees: [],
