@@ -109,46 +109,14 @@ const administrativeCommitteeData = {
   ],
 
   members: [
-    {
-      name: "",
-      job: "مديرة المدرسة",
-      role: "رئيسة",
-    },
-    {
-      name: "",
-      job: "وكيلة شؤون الطالبات",
-      role: "عضوة",
-    },
-    {
-      name: "",
-      job: "وكيلة شؤون الطالبات",
-      role: "عضوة",
-    },
-    {
-      name: "",
-      job: "الموجهة الطلابية",
-      role: "عضوة",
-    },
-    {
-      name: "",
-      job: "رائدة النشاط",
-      role: "عضوة",
-    },
-    {
-      name: "",
-      job: "معلمة",
-      role: "عضوة",
-    },
-    {
-      name: "",
-      job: "معلمة",
-      role: "عضوة",
-    },
-    {
-      name: "",
-      job: "معلمة",
-      role: "عضوة",
-    },
+    { name: "", job: "مديرة المدرسة", role: "رئيسة" },
+    { name: "", job: "وكيلة شؤون الطالبات", role: "عضوة" },
+    { name: "", job: "وكيلة شؤون الطالبات", role: "عضوة" },
+    { name: "", job: "الموجهة الطلابية", role: "عضوة" },
+    { name: "", job: "رائدة النشاط", role: "عضوة" },
+    { name: "", job: "معلمة", role: "عضوة" },
+    { name: "", job: "معلمة", role: "عضوة" },
+    { name: "", job: "معلمة", role: "عضوة" },
   ],
 };
 
@@ -213,6 +181,7 @@ const safetyCommitteeData = {
     "التأكد من مراعاة احتياجات الأمن والسلامة للطلاب ذوي الإعاقة في المدارس التي فيها برامج التربية الخاصة.",
   ],
 };
+
 /* =========================================================
    بيانات لجنة التوجيه والإرشاد
 ========================================================= */
@@ -244,6 +213,7 @@ const guidanceCommitteeData = {
     "التوصية بالإجراءات المناسبة للحالات الطلابية التي تحتاج إلى تدخل من الجهات المختصة.",
   ],
 };
+
 /* =========================================================
    بيانات لجنة التميز
 ========================================================= */
@@ -279,6 +249,7 @@ const excellenceCommitteeData = {
     "ترشيح منسوبي المدرسة لجوائز التميز على المستوى المحلي والإقليمي والعالمي والرفع لمدير المدرسة لعرض ما يلزم على اللجنة الإدارية.",
   ],
 };
+
 /* =========================================================
    الاجتماعات الافتراضية
 ========================================================= */
@@ -326,38 +297,25 @@ const defaultMeetings = [
 ];
 
 /* =========================================================
-   مفاتيح التخزين
+   التخزين
 ========================================================= */
 
-const STORAGE_KEY = "alandalus-administrative-committee-meetings";
-
-/*
-  مهم:
-  القرار الإداري له تخزين مستقل لكل لجنة.
-  مثال:
-  اللجنة 1 => alandalus-committee-decision-1
-  اللجنة 2 => alandalus-committee-decision-2
-*/
+const STORAGE_KEY = "alandalus-committee-meetings-v2";
 
 const getDecisionStorageKey = (committeeId) =>
   `alandalus-committee-decision-${committeeId}`;
 
 /* =========================================================
-   إنشاء بيانات القرار لكل لجنة
+   القرار الإداري
 ========================================================= */
 
 const createDefaultDecision = (committee) => {
-  /*
-    اللجنة الإدارية تحتفظ بنفس الهيكل الموجود عندك.
-    باقي اللجان تبدأ بخانات مستقلة وفارغة.
-  */
-
   const isAdministrative = committee.id === 1;
 
   const defaultMembers = isAdministrative
     ? administrativeCommitteeData.members.map((member) => ({
         name: member.name || "",
-        job: member.job || member.name || "",
+        job: member.job || "",
         role: member.role || "عضوة",
         signature: "",
       }))
@@ -415,19 +373,16 @@ const createDefaultDecision = (committee) => {
   return {
     day: "",
     date: "",
-    schoolYear: "عام دراسي",
+    schoolYear: "1448 / 1449",
     members: defaultMembers,
   };
 };
 
-/* =========================================================
-   تحميل قرار اللجنة
-========================================================= */
-
 const loadCommitteeDecision = (committee) => {
   try {
-    const key = getDecisionStorageKey(committee.id);
-    const saved = localStorage.getItem(key);
+    const saved = localStorage.getItem(
+      getDecisionStorageKey(committee.id)
+    );
 
     if (saved) {
       const parsed = JSON.parse(saved);
@@ -442,36 +397,25 @@ const loadCommitteeDecision = (committee) => {
       };
     }
   } catch (error) {
-    console.error(
-      "خطأ في تحميل بيانات القرار:",
-      error
-    );
+    console.error(error);
   }
 
   return createDefaultDecision(committee);
 };
 
 /* =========================================================
-   مكوّن التوقيع
+   لوحة التوقيع
 ========================================================= */
 
-function SignaturePad({
-  value,
-  onChange,
-}) {
+function SignaturePad({ value, onChange }) {
   const canvasRef = useRef(null);
   const drawingRef = useRef(false);
 
-  const canvasWidth = 260;
-  const canvasHeight = 80;
-
-  /* -------------------------------------------------------
-     رسم التوقيع المحفوظ
-  ------------------------------------------------------- */
+  const canvasWidth = 240;
+  const canvasHeight = 75;
 
   useEffect(() => {
     const canvas = canvasRef.current;
-
     if (!canvas) return;
 
     const ctx = canvas.getContext("2d");
@@ -507,39 +451,28 @@ function SignaturePad({
     image.src = value;
   }, [value]);
 
-  /* -------------------------------------------------------
-     تحديد موقع الرسم
-  ------------------------------------------------------- */
-
   const getPosition = (event) => {
     const canvas = canvasRef.current;
 
     if (!canvas) {
-      return {
-        x: 0,
-        y: 0,
-      };
+      return { x: 0, y: 0 };
     }
 
     const rect =
       canvas.getBoundingClientRect();
 
-    let clientX;
-    let clientY;
+    const touch =
+      event.touches && event.touches.length
+        ? event.touches[0]
+        : null;
 
-    if (
-      event.touches &&
-      event.touches.length > 0
-    ) {
-      clientX =
-        event.touches[0].clientX;
+    const clientX = touch
+      ? touch.clientX
+      : event.clientX;
 
-      clientY =
-        event.touches[0].clientY;
-    } else {
-      clientX = event.clientX;
-      clientY = event.clientY;
-    }
+    const clientY = touch
+      ? touch.clientY
+      : event.clientY;
 
     return {
       x:
@@ -554,15 +487,10 @@ function SignaturePad({
     };
   };
 
-  /* -------------------------------------------------------
-     بداية الرسم
-  ------------------------------------------------------- */
-
   const startDrawing = (event) => {
     event.preventDefault();
 
     const canvas = canvasRef.current;
-
     if (!canvas) return;
 
     const ctx = canvas.getContext("2d");
@@ -578,12 +506,8 @@ function SignaturePad({
     ctx.lineWidth = 2.5;
     ctx.lineCap = "round";
     ctx.lineJoin = "round";
-    ctx.strokeStyle = "#30205f";
+    ctx.strokeStyle = "#39246b";
   };
-
-  /* -------------------------------------------------------
-     الرسم
-  ------------------------------------------------------- */
 
   const draw = (event) => {
     if (!drawingRef.current) return;
@@ -591,7 +515,6 @@ function SignaturePad({
     event.preventDefault();
 
     const canvas = canvasRef.current;
-
     if (!canvas) return;
 
     const ctx = canvas.getContext("2d");
@@ -603,17 +526,12 @@ function SignaturePad({
     ctx.stroke();
   };
 
-  /* -------------------------------------------------------
-     نهاية الرسم
-  ------------------------------------------------------- */
-
   const stopDrawing = () => {
     if (!drawingRef.current) return;
 
     drawingRef.current = false;
 
     const canvas = canvasRef.current;
-
     if (!canvas) return;
 
     onChange(
@@ -621,13 +539,8 @@ function SignaturePad({
     );
   };
 
-  /* -------------------------------------------------------
-     مسح التوقيع
-  ------------------------------------------------------- */
-
   const clearSignature = () => {
     const canvas = canvasRef.current;
-
     if (!canvas) return;
 
     const ctx = canvas.getContext("2d");
@@ -644,7 +557,6 @@ function SignaturePad({
 
   return (
     <div className="committee-signature-box">
-
       <canvas
         ref={canvasRef}
         width={canvasWidth}
@@ -668,44 +580,31 @@ function SignaturePad({
       >
         مسح
       </button>
-
     </div>
   );
 }
 
 /* =========================================================
-   مكوّن القرار الإداري
+   القرار الإداري
 ========================================================= */
 
 function CommitteeDecisionSection({
   committee,
 }) {
-  const [
-    decision,
-    setDecision,
-  ] = useState(() =>
-    loadCommitteeDecision(committee)
-  );
+  const [decision, setDecision] =
+    useState(() =>
+      loadCommitteeDecision(committee)
+    );
 
   const [savedMessage, setSavedMessage] =
     useState(false);
-
-  /*
-    كلما تغيرت اللجنة:
-    نحمل قرار اللجنة الجديدة فقط.
-  */
 
   useEffect(() => {
     setDecision(
       loadCommitteeDecision(committee)
     );
-
     setSavedMessage(false);
   }, [committee.id]);
-
-  /* -------------------------------------------------------
-     تعديل بيانات القرار
-  ------------------------------------------------------- */
 
   const handleDecisionChange = (
     field,
@@ -716,10 +615,6 @@ function CommitteeDecisionSection({
       [field]: value,
     }));
   };
-
-  /* -------------------------------------------------------
-     تعديل عضو
-  ------------------------------------------------------- */
 
   const handleMemberChange = (
     index,
@@ -743,43 +638,48 @@ function CommitteeDecisionSection({
     });
   };
 
-  /* -------------------------------------------------------
-     حفظ القرار
-  ------------------------------------------------------- */
-
-  const saveDecision = () => {
-    try {
-      localStorage.setItem(
-        getDecisionStorageKey(
-          committee.id
-        ),
-        JSON.stringify(decision)
-      );
-
-      setSavedMessage(true);
-
-      setTimeout(() => {
-        setSavedMessage(false);
-      }, 2500);
-    } catch (error) {
-      console.error(
-        "خطأ في حفظ القرار:",
-        error
-      );
-    }
+  const addDecisionMember = () => {
+    setDecision((prev) => ({
+      ...prev,
+      members: [
+        ...prev.members,
+        {
+          name: "",
+          job: "",
+          role: "عضوة",
+          signature: "",
+        },
+      ],
+    }));
   };
 
-  /* -------------------------------------------------------
-     الطباعة
-  ------------------------------------------------------- */
+  const removeDecisionMember = (
+    index
+  ) => {
+    setDecision((prev) => ({
+      ...prev,
+      members: prev.members.filter(
+        (_, i) => i !== index
+      ),
+    }));
+  };
+
+  const saveDecision = () => {
+    localStorage.setItem(
+      getDecisionStorageKey(
+        committee.id
+      ),
+      JSON.stringify(decision)
+    );
+
+    setSavedMessage(true);
+
+    setTimeout(() => {
+      setSavedMessage(false);
+    }, 2500);
+  };
 
   const printDecision = () => {
-  window.print();
-
-    /*
-      نحفظ آخر تعديل قبل الطباعة
-    */
-
     localStorage.setItem(
       getDecisionStorageKey(
         committee.id
@@ -792,19 +692,10 @@ function CommitteeDecisionSection({
 
   return (
     <section className="committee-content-card committee-decision-print-area">
-
-      {/* =================================================
-          عنوان القرار
-      ================================================= */}
-
       <div className="committee-content-card-title">
-
-        <span>
-          01
-        </span>
+        <span>01</span>
 
         <div>
-
           <small>
             القرار الإداري
           </small>
@@ -812,23 +703,12 @@ function CommitteeDecisionSection({
           <h3>
             قرار إداري بشأن تشكيل فريق عمل اللجنة
           </h3>
-
         </div>
-
       </div>
 
-
-      {/* =================================================
-          بيانات القرار
-      ================================================= */}
-
       <div className="committee-decision-info">
-
         <label className="committee-decision-field">
-
-          <span>
-            اليوم
-          </span>
+          <span>اليوم</span>
 
           <input
             type="text"
@@ -841,15 +721,10 @@ function CommitteeDecisionSection({
             }
             placeholder="مثال: الأحد"
           />
-
         </label>
 
-
         <label className="committee-decision-field">
-
-          <span>
-            التاريخ
-          </span>
+          <span>التاريخ</span>
 
           <input
             type="date"
@@ -861,15 +736,10 @@ function CommitteeDecisionSection({
               )
             }
           />
-
         </label>
 
-
         <label className="committee-decision-field">
-
-          <span>
-            العام الدراسي
-          </span>
+          <span>العام الدراسي</span>
 
           <input
             type="text"
@@ -881,79 +751,38 @@ function CommitteeDecisionSection({
               )
             }
           />
-
         </label>
-
       </div>
 
-
-      {/* =================================================
-          نص القرار
-      ================================================= */}
-
       <p className="committee-decision-text">
-
-        بشأن : تشكيل فريق عمل{" "}
-
+        بشأن تشكيل فريق عمل{" "}
         <strong>
           {committee.title}
         </strong>{" "}
-
         وفق المهام والمسؤوليات المعتمدة بالمدرسة،
         وتحديد أعضاء اللجنة وأدوارهم خلال العام الدراسي.
-
       </p>
 
-
-      {/* =================================================
-          جدول الأعضاء
-      ================================================= */}
-
       <div className="committee-table-wrapper">
-
         <table className="committee-members-table">
-
           <thead>
-
             <tr>
-
-              <th>
-                الاسم
-              </th>
-
-              <th>
-                الوصف الوظيفي
-              </th>
-
-              <th>
-                العمل المكلف به
-              </th>
-
-              <th>
-                التوقيع
-              </th>
-
+              <th>الاسم</th>
+              <th>الوصف الوظيفي</th>
+              <th>العمل المكلف به</th>
+              <th>التوقيع</th>
+              <th className="no-print">حذف</th>
             </tr>
-
           </thead>
 
-
           <tbody>
-
             {decision.members.map(
               (member, index) => (
-
                 <tr key={index}>
-
-                  {/* الاسم */}
-
                   <td>
-
                     <input
                       type="text"
-                      value={
-                        member.name
-                      }
+                      value={member.name}
                       onChange={(e) =>
                         handleMemberChange(
                           index,
@@ -964,19 +793,12 @@ function CommitteeDecisionSection({
                       placeholder="اكتبي الاسم"
                       className="committee-member-input"
                     />
-
                   </td>
 
-
-                  {/* الوصف الوظيفي */}
-
                   <td>
-
                     <input
                       type="text"
-                      value={
-                        member.job
-                      }
+                      value={member.job}
                       onChange={(e) =>
                         handleMemberChange(
                           index,
@@ -986,19 +808,12 @@ function CommitteeDecisionSection({
                       }
                       className="committee-member-input"
                     />
-
                   </td>
 
-
-                  {/* العمل المكلف به */}
-
                   <td>
-
                     <input
                       type="text"
-                      value={
-                        member.role
-                      }
+                      value={member.role}
                       onChange={(e) =>
                         handleMemberChange(
                           index,
@@ -1008,14 +823,9 @@ function CommitteeDecisionSection({
                       }
                       className="committee-member-input"
                     />
-
                   </td>
 
-
-                  {/* التوقيع */}
-
                   <td>
-
                     <SignaturePad
                       value={
                         member.signature
@@ -1028,44 +838,49 @@ function CommitteeDecisionSection({
                         )
                       }
                     />
-
                   </td>
 
+                  <td className="no-print">
+                    <button
+                      type="button"
+                      className="committee-remove-member"
+                      onClick={() =>
+                        removeDecisionMember(
+                          index
+                        )
+                      }
+                    >
+                      🗑️
+                    </button>
+                  </td>
                 </tr>
-
               )
             )}
-
           </tbody>
-
         </table>
-
       </div>
 
-
-      {/* =================================================
-          اعتماد المديرة
-      ================================================= */}
+      <div className="committee-add-member-area no-print">
+        <button
+          type="button"
+          className="committee-add-member-button"
+          onClick={addDecisionMember}
+        >
+          ＋ إضافة عضو
+        </button>
+      </div>
 
       <div className="committee-manager-signature">
-
         <span>
-          يعتمد مديرة المدرسة
+          تعتمد مديرة المدرسة
         </span>
 
         <strong>
           خيرية الخالدي
         </strong>
-
       </div>
 
-
-      {/* =================================================
-          أزرار القرار
-      ================================================= */}
-
       <div className="committee-decision-actions no-print">
-
         <button
           type="button"
           className="committee-save-decision"
@@ -1074,42 +889,45 @@ function CommitteeDecisionSection({
           💾 حفظ القرار
         </button>
 
-
-        
-  <button
-    type="button"
-    className="committee-print-button"
-    onClick={printDecision}
-  >
-    🖨️ طباعة القرار
-  </button>
-</div>
-
-
-      {/* =================================================
-          رسالة الحفظ
-      ================================================= */}
+        <button
+          type="button"
+          className="committee-print-button"
+          onClick={printDecision}
+        >
+          🖨️ طباعة القرار
+        </button>
+      </div>
 
       {savedMessage && (
-
         <div className="committee-saved-message">
-
           تم حفظ بيانات القرار بنجاح ✓
-
         </div>
-
       )}
-
     </section>
   );
 }
+
+/* =========================================================
+   المحضر - بيانات افتراضية
+========================================================= */
+
+const createDefaultAttendee = () => ({
+  id:
+    Date.now() +
+    Math.random(),
+
+  name: "",
+
+  job: "",
+
+  signature: "",
+});
 
 /* =========================================================
    المكوّن الرئيسي
 ========================================================= */
 
 function CommitteesDashboard() {
-
   const [
     selectedCommittee,
     setSelectedCommittee,
@@ -1124,24 +942,33 @@ function CommitteesDashboard() {
     meetings,
     setMeetings,
   ] = useState(() => {
-
     try {
-
       const saved =
         localStorage.getItem(
           STORAGE_KEY
         );
 
       if (saved) {
-        return JSON.parse(saved);
+        const parsed =
+          JSON.parse(saved);
+
+        return parsed.map(
+          (meeting) => ({
+            ...meeting,
+            attendees:
+              Array.isArray(
+                meeting.attendees
+              )
+                ? meeting.attendees
+                : [],
+          })
+        );
       }
 
       return defaultMeetings;
-
     } catch {
       return defaultMeetings;
     }
-
   });
 
   const [
@@ -1154,35 +981,44 @@ function CommitteesDashboard() {
     setMeetingForm,
   ] = useState(null);
 
-
   /* =======================================================
      حفظ الاجتماعات
   ======================================================= */
 
   useEffect(() => {
-
     localStorage.setItem(
       STORAGE_KEY,
       JSON.stringify(meetings)
     );
-
   }, [meetings]);
 
-
   /* =======================================================
-     مؤشر الاجتماعات المنفذة
+     مؤشر الاجتماعات
   ======================================================= */
 
   const completedMeetings =
     useMemo(() => {
-
       return meetings.filter(
         (meeting) =>
-          meeting.status === "منفذ"
+          meeting.status ===
+          "منفذ"
       ).length;
-
     }, [meetings]);
 
+  /* =======================================================
+     بيانات اللجنة الحالية
+  ======================================================= */
+
+  const currentCommitteeData =
+    selectedCommittee?.id === 2
+      ? guidanceCommitteeData
+      : selectedCommittee?.id === 3
+      ? academicAchievementCommitteeData
+      : selectedCommittee?.id === 4
+      ? safetyCommitteeData
+      : selectedCommittee?.id === 5
+      ? excellenceCommitteeData
+      : administrativeCommitteeData;
 
   /* =======================================================
      فتح قسم
@@ -1191,7 +1027,6 @@ function CommitteesDashboard() {
   const openSection = (
     section
   ) => {
-
     setSelectedSection(
       section
     );
@@ -1203,16 +1038,13 @@ function CommitteesDashboard() {
     setMeetingForm(
       null
     );
-
   };
 
-
   /* =======================================================
-     العودة لأقسام اللجنة
+     العودة
   ======================================================= */
 
   const closeSection = () => {
-
     setSelectedSection(
       null
     );
@@ -1224,9 +1056,7 @@ function CommitteesDashboard() {
     setMeetingForm(
       null
     );
-
   };
-
 
   /* =======================================================
      فتح اجتماع
@@ -1235,17 +1065,16 @@ function CommitteesDashboard() {
   const openMeeting = (
     meeting
   ) => {
-
     setSelectedMeeting(
       meeting
     );
 
     setMeetingForm({
       ...meeting,
+      attendees:
+        meeting.attendees || [],
     });
-
   };
-
 
   /* =======================================================
      تغيير بيانات الاجتماع
@@ -1255,28 +1084,90 @@ function CommitteesDashboard() {
     field,
     value
   ) => {
-
     setMeetingForm((prev) => ({
       ...prev,
       [field]: value,
     }));
-
   };
 
+  /* =======================================================
+     تغيير بيانات حاضر
+  ======================================================= */
+
+  const handleAttendeeChange = (
+    attendeeId,
+    field,
+    value
+  ) => {
+    setMeetingForm((prev) => ({
+      ...prev,
+
+      attendees:
+        prev.attendees.map(
+          (attendee) =>
+            attendee.id ===
+            attendeeId
+              ? {
+                  ...attendee,
+                  [field]:
+                    value,
+                }
+              : attendee
+        ),
+    }));
+  };
+
+  /* =======================================================
+     إضافة حاضر
+  ======================================================= */
+
+  const addAttendee = () => {
+    setMeetingForm((prev) => ({
+      ...prev,
+
+      attendees: [
+        ...(prev.attendees || []),
+        createDefaultAttendee(),
+      ],
+    }));
+  };
+
+  /* =======================================================
+     حذف حاضر
+  ======================================================= */
+
+  const deleteAttendee = (
+    attendeeId
+  ) => {
+    setMeetingForm((prev) => ({
+      ...prev,
+
+      attendees:
+        prev.attendees.filter(
+          (attendee) =>
+            attendee.id !==
+            attendeeId
+        ),
+    }));
+  };
 
   /* =======================================================
      حفظ الاجتماع
   ======================================================= */
 
   const saveMeeting = () => {
-
     if (!meetingForm) return;
 
     setMeetings((prev) =>
       prev.map((meeting) =>
         meeting.id ===
         meetingForm.id
-          ? meetingForm
+          ? {
+              ...meetingForm,
+              attendees:
+                meetingForm.attendees ||
+                [],
+            }
           : meeting
       )
     );
@@ -1285,15 +1176,16 @@ function CommitteesDashboard() {
       meetingForm
     );
 
+    alert(
+      "تم حفظ محضر الاجتماع بنجاح ✓"
+    );
   };
-
 
   /* =======================================================
      إضافة اجتماع
   ======================================================= */
 
   const addMeeting = () => {
-
     const newId =
       meetings.length > 0
         ? Math.max(
@@ -1304,7 +1196,6 @@ function CommitteesDashboard() {
         : 1;
 
     const newMeeting = {
-
       id: newId,
 
       title:
@@ -1328,7 +1219,6 @@ function CommitteesDashboard() {
       recommendations: "",
 
       attendees: [],
-
     };
 
     setMeetings((prev) => [
@@ -1343,9 +1233,7 @@ function CommitteesDashboard() {
     setMeetingForm({
       ...newMeeting,
     });
-
   };
-
 
   /* =======================================================
      حذف اجتماع
@@ -1354,7 +1242,6 @@ function CommitteesDashboard() {
   const deleteMeeting = (
     id
   ) => {
-
     const confirmed =
       window.confirm(
         "هل أنتِ متأكدة من حذف هذا الاجتماع؟"
@@ -1376,33 +1263,42 @@ function CommitteesDashboard() {
     setMeetingForm(
       null
     );
-
   };
 
+  /* =======================================================
+     طباعة المحضر
+  ======================================================= */
+
+  const printMeeting = () => {
+    if (!meetingForm) return;
+
+    setMeetings((prev) =>
+      prev.map((meeting) =>
+        meeting.id ===
+        meetingForm.id
+          ? meetingForm
+          : meeting
+      )
+    );
+
+    setTimeout(() => {
+      window.print();
+    }, 100);
+  };
 
   /* =========================================================
-     صفحة اللجنة الداخلية
+     صفحة اللجنة
   ========================================================= */
 
   if (selectedCommittee) {
-
     return (
-
       <div
         className="committee-page"
         dir="rtl"
       >
-
-        {/* =================================================
-            الهيدر
-        ================================================= */}
-
         <header className="committee-inner-header">
-
           <div className="committee-inner-header-content">
-
             <div className="committee-school-brand">
-
               <img
                 src={logo}
                 alt="شعار مدارس الأندلس"
@@ -1410,7 +1306,6 @@ function CommitteesDashboard() {
               />
 
               <div className="committee-school-info">
-
                 <span>
                   متوسطة وثانوية الأندلس بالطائف - بنات
                 </span>
@@ -1418,25 +1313,18 @@ function CommitteesDashboard() {
                 <small>
                   ملف مهام واختصاصات اللجان وفرق العمل المدرسية
                 </small>
-
               </div>
-
             </div>
-
 
             <div className="committee-inner-title">
-
               <h1>
-                سجل اللجان ,فرق العمل المدرسية
+                سجل اللجان وفرق العمل المدرسية
               </h1>
-
             </div>
-
 
             <button
               className="committee-back-button"
               onClick={() => {
-
                 setSelectedCommittee(
                   null
                 );
@@ -1452,67 +1340,37 @@ function CommitteesDashboard() {
                 setMeetingForm(
                   null
                 );
-
               }}
               type="button"
             >
-
-              <span>
-                ←
-              </span>
-
+              <span>←</span>
               العودة إلى ملف اللجان وفرق العمل
-
             </button>
-
           </div>
-
         </header>
 
-
         <div className="committee-page-container">
-
-
-          {/* =================================================
-              Breadcrumb
-          ================================================= */}
-
           <div className="committee-breadcrumb">
-
             <span>
               اللوحات الرئيسية
             </span>
 
-            <b>
-              /
-            </b>
+            <b>/</b>
 
             <span>
               ملف اللجان وفرق العمل
             </span>
 
-            <b>
-              /
-            </b>
+            <b>/</b>
 
             <strong>
               {selectedCommittee.title}
             </strong>
-
           </div>
 
-
-          {/* =================================================
-              إذا كان هناك قسم مفتوح
-          ================================================= */}
-
           {selectedSection ? (
-
             <section className="committee-section-page">
-
-
               <div className="committee-section-page-header">
-
                 <button
                   type="button"
                   className="committee-section-return"
@@ -1520,18 +1378,11 @@ function CommitteesDashboard() {
                     closeSection
                   }
                 >
-
-                  <span>
-                    →
-                  </span>
-
+                  <span>→</span>
                   العودة لأقسام اللجنة
-
                 </button>
 
-
                 <div>
-
                   <span>
                     {selectedCommittee.title}
                   </span>
@@ -1543,31 +1394,21 @@ function CommitteesDashboard() {
                   <p>
                     {selectedSection.description}
                   </p>
-
                 </div>
-
               </div>
 
-
               {/* =================================================
-                  الهدف وقواعد التشكيل
+                  الأهداف
               ================================================= */}
 
-              {selectedSection.id === 1 && (
-
+              {selectedSection.id ===
+                1 && (
                 <div className="committee-content-stack">
-
-
                   <section className="committee-content-card">
-
                     <div className="committee-content-card-title">
-
-                      <span>
-                        01
-                      </span>
+                      <span>01</span>
 
                       <div>
-
                         <small>
                           أهداف اللجنة
                         </small>
@@ -1575,59 +1416,38 @@ function CommitteesDashboard() {
                         <h3>
                           أهداف اللجنة
                         </h3>
-
                       </div>
-
                     </div>
 
-
                     <div className="committee-goals-grid">
-
-                      {(selectedCommittee.id === 2
-  ? guidanceCommitteeData.goals
-  : selectedCommittee.id === 3
-  ? academicAchievementCommitteeData.goals
-  : selectedCommittee.id === 4
-  ? safetyCommitteeData.goals
-  : selectedCommittee.id === 5
-  ? excellenceCommitteeData.goals
-  : administrativeCommitteeData.goals
-).map(
-                        (goal, index) => (
-
+                      {currentCommitteeData.goals.map(
+                        (
+                          goal,
+                          index
+                        ) => (
                           <div
                             className="committee-goal-item"
                             key={index}
                           >
-
                             <span>
-                              {index + 1}
+                              {index +
+                                1}
                             </span>
 
                             <p>
                               {goal}
                             </p>
-
                           </div>
-
                         )
                       )}
-
                     </div>
-
                   </section>
 
-
                   <section className="committee-content-card">
-
                     <div className="committee-content-card-title">
-
-                      <span>
-                        02
-                      </span>
+                      <span>02</span>
 
                       <div>
-
                         <small>
                           التشكيل
                         </small>
@@ -1635,60 +1455,41 @@ function CommitteesDashboard() {
                         <h3>
                           قواعد تشكيل اللجنة
                         </h3>
-
                       </div>
-
                     </div>
 
-
                     <div className="committee-rules-list">
-
-                     {(selectedCommittee.id === 2
-  ? guidanceCommitteeData.formationRules
-  : selectedCommittee.id === 3
-  ? academicAchievementCommitteeData.formationRules
-  : selectedCommittee.id === 4
-  ? safetyCommitteeData.formationRules
-  : selectedCommittee.id === 5
-  ? excellenceCommitteeData.formationRules
-  : administrativeCommitteeData.formationRules
-).map(
-                        (rule, index) => (
-
+                      {currentCommitteeData.formationRules.map(
+                        (
+                          rule,
+                          index
+                        ) => (
                           <div
                             key={index}
                             className="committee-rule-item"
                           >
-
                             <span>
-                              {index + 1}
+                              {index +
+                                1}
                             </span>
 
                             <p>
                               {rule}
                             </p>
-
                           </div>
-
                         )
                       )}
-
                     </div>
-
                   </section>
-
                 </div>
-
               )}
 
-
               {/* =================================================
-                  القرار الإداري
-                  تم فصله بالكامل لكل لجنة
+                  القرار
               ================================================= */}
 
-              {selectedSection.id === 2 && (
-
+              {selectedSection.id ===
+                2 && (
                 <CommitteeDecisionSection
                   key={
                     selectedCommittee.id
@@ -1697,26 +1498,19 @@ function CommitteesDashboard() {
                     selectedCommittee
                   }
                 />
-
               )}
 
-
               {/* =================================================
-                  مهام اللجنة
+                  المهام
               ================================================= */}
 
-              {selectedSection.id === 3 && (
-
+              {selectedSection.id ===
+                3 && (
                 <section className="committee-content-card">
-
                   <div className="committee-content-card-title">
-
-                    <span>
-                      01
-                    </span>
+                    <span>01</span>
 
                     <div>
-
                       <small>
                         المسؤوليات
                       </small>
@@ -1724,34 +1518,23 @@ function CommitteesDashboard() {
                       <h3>
                         مهام اللجنة
                       </h3>
-
                     </div>
-
                   </div>
 
-
                   <div className="committee-tasks-list">
-
-                    {(selectedCommittee.id === 2
-  ? guidanceCommitteeData.tasks
-  : selectedCommittee.id === 3
-  ? academicAchievementCommitteeData.tasks
-  : selectedCommittee.id === 4
-  ? safetyCommitteeData.tasks
-  : selectedCommittee.id === 5
-  ? excellenceCommitteeData.tasks
-  : administrativeCommitteeData.tasks
-).map(
-                      (task, index) => (
-
+                    {currentCommitteeData.tasks.map(
+                      (
+                        task,
+                        index
+                      ) => (
                         <div
                           key={index}
                           className="committee-task-item"
                         >
-
                           <span>
                             {String(
-                              index + 1
+                              index +
+                                1
                             ).padStart(
                               2,
                               "0"
@@ -1761,50 +1544,37 @@ function CommitteesDashboard() {
                           <p>
                             {task}
                           </p>
-
                         </div>
-
                       )
                     )}
-
                   </div>
-
                 </section>
-
               )}
 
-
               {/* =================================================
-                  تنظيم الاجتماعات
-                  بدون تغيير
+                  الاجتماعات والمحاضر
               ================================================= */}
 
-              {selectedSection.id === 4 && (
-
+              {selectedSection.id ===
+                4 && (
                 <section className="committee-meetings-page">
-
                   <div className="committee-meetings-top">
-
                     <div>
-
                       <span>
                         متابعة الاجتماعات
                       </span>
 
                       <h2>
-                        الاجتماعات المنفذة
+                        اجتماعات اللجنة ومحاضرها
                       </h2>
 
                       <p>
-                        تسجيل اجتماعات اللجنة ومتابعة محاضرها
-                        وتوصياتها وقراراتها.
+                        تسجيل اجتماعات اللجنة وتوثيق الحضور
+                        والتوقيعات والقرارات والتوصيات.
                       </p>
-
                     </div>
 
-
                     <div className="committee-meetings-counter">
-
                       <strong>
                         {completedMeetings}
                       </strong>
@@ -1812,14 +1582,10 @@ function CommitteesDashboard() {
                       <span>
                         من {meetings.length} اجتماع
                       </span>
-
                     </div>
-
                   </div>
 
-
                   <div className="committee-meetings-actions">
-
                     <button
                       type="button"
                       className="committee-add-meeting"
@@ -1827,23 +1593,19 @@ function CommitteesDashboard() {
                         addMeeting
                       }
                     >
-
                       <span>
                         ＋
                       </span>
 
                       إضافة اجتماع
-
                     </button>
-
                   </div>
 
-
                   <div className="committee-meetings-grid">
-
                     {meetings.map(
-                      (meeting) => (
-
+                      (
+                        meeting
+                      ) => (
                         <article
                           key={
                             meeting.id
@@ -1855,9 +1617,7 @@ function CommitteesDashboard() {
                               : ""
                           }`}
                         >
-
                           <div className="committee-meeting-card-top">
-
                             <span>
                               {String(
                                 meeting.id
@@ -1875,33 +1635,40 @@ function CommitteesDashboard() {
                                   : "status-pending"
                               }
                             >
-                              {meeting.status}
+                              {
+                                meeting.status
+                              }
                             </b>
-
                           </div>
 
-
                           <h3>
-                            {meeting.title}
+                            {
+                              meeting.title
+                            }
                           </h3>
 
-
                           <div className="committee-meeting-meta">
-
                             <span>
-                              📅
+                              📅{" "}
                               {meeting.date ||
                                 "لم يحدد التاريخ"}
                             </span>
 
                             <span>
-                              📍
+                              📍{" "}
                               {meeting.place ||
                                 "لم يحدد المكان"}
                             </span>
 
+                            <span>
+                              👥{" "}
+                              {
+                                meeting.attendees
+                                  ?.length || 0
+                              }{" "}
+                              حاضر
+                            </span>
                           </div>
-
 
                           <button
                             type="button"
@@ -1912,38 +1679,27 @@ function CommitteesDashboard() {
                               )
                             }
                           >
-
-                            فتح الاجتماع
-
+                            فتح المحضر
                             <span>
                               ←
                             </span>
-
                           </button>
-
                         </article>
-
                       )
                     )}
-
                   </div>
 
-
                   {/* =================================================
-                      نموذج الاجتماع
+                      محرر المحضر
                   ================================================= */}
 
                   {selectedMeeting &&
                     meetingForm && (
-
                       <div className="committee-meeting-editor">
-
                         <div className="committee-editor-header">
-
                           <div>
-
                             <span>
-                              تحرير الاجتماع
+                              محضر اجتماع اللجنة
                             </span>
 
                             <h3>
@@ -1951,14 +1707,11 @@ function CommitteesDashboard() {
                                 meetingForm.title
                               }
                             </h3>
-
                           </div>
-
 
                           <button
                             type="button"
                             onClick={() => {
-
                               setSelectedMeeting(
                                 null
                               );
@@ -1966,231 +1719,465 @@ function CommitteesDashboard() {
                               setMeetingForm(
                                 null
                               );
-
                             }}
                           >
                             ×
                           </button>
-
                         </div>
 
+                        {/* بيانات الاجتماع */}
 
-                        <div className="committee-editor-grid">
-
-                          <label>
-
+                        <div className="committee-meeting-form-section">
+                          <div className="committee-form-section-title">
                             <span>
-                              اسم الاجتماع
+                              01
                             </span>
 
-                            <input
-                              value={
-                                meetingForm.title
-                              }
-                              onChange={(e) =>
-                                handleMeetingChange(
-                                  "title",
-                                  e.target.value
-                                )
-                              }
-                            />
+                            <div>
+                              <small>
+                                البيانات الأساسية
+                              </small>
 
-                          </label>
+                              <h4>
+                                بيانات الاجتماع
+                              </h4>
+                            </div>
+                          </div>
 
+                          <div className="committee-editor-grid">
+                            <label>
+                              <span>
+                                اسم الاجتماع
+                              </span>
 
-                          <label>
+                              <input
+                                value={
+                                  meetingForm.title
+                                }
+                                onChange={(
+                                  e
+                                ) =>
+                                  handleMeetingChange(
+                                    "title",
+                                    e.target
+                                      .value
+                                  )
+                                }
+                              />
+                            </label>
 
+                            <label>
+                              <span>
+                                التاريخ
+                              </span>
+
+                              <input
+                                type="date"
+                                value={
+                                  meetingForm.date
+                                }
+                                onChange={(
+                                  e
+                                ) =>
+                                  handleMeetingChange(
+                                    "date",
+                                    e.target
+                                      .value
+                                  )
+                                }
+                              />
+                            </label>
+
+                            <label>
+                              <span>
+                                اليوم
+                              </span>
+
+                              <input
+                                value={
+                                  meetingForm.day
+                                }
+                                onChange={(
+                                  e
+                                ) =>
+                                  handleMeetingChange(
+                                    "day",
+                                    e.target
+                                      .value
+                                  )
+                                }
+                                placeholder="مثال: الأحد"
+                              />
+                            </label>
+
+                            <label>
+                              <span>
+                                مكان الاجتماع
+                              </span>
+
+                              <input
+                                value={
+                                  meetingForm.place
+                                }
+                                onChange={(
+                                  e
+                                ) =>
+                                  handleMeetingChange(
+                                    "place",
+                                    e.target
+                                      .value
+                                  )
+                                }
+                                placeholder="مثال: قاعة الاجتماعات"
+                              />
+                            </label>
+
+                            <label>
+                              <span>
+                                حالة الاجتماع
+                              </span>
+
+                              <select
+                                value={
+                                  meetingForm.status
+                                }
+                                onChange={(
+                                  e
+                                ) =>
+                                  handleMeetingChange(
+                                    "status",
+                                    e.target
+                                      .value
+                                  )
+                                }
+                              >
+                                <option value="لم يُنفذ">
+                                  لم يُنفذ
+                                </option>
+
+                                <option value="منفذ">
+                                  منفذ
+                                </option>
+                              </select>
+                            </label>
+                          </div>
+                        </div>
+
+                        {/* محاور الاجتماع */}
+
+                        <div className="committee-meeting-form-section">
+                          <div className="committee-form-section-title">
                             <span>
-                              التاريخ
+                              02
                             </span>
 
-                            <input
-                              type="date"
-                              value={
-                                meetingForm.date
-                              }
-                              onChange={(e) =>
-                                handleMeetingChange(
-                                  "date",
-                                  e.target.value
-                                )
-                              }
-                            />
+                            <div>
+                              <small>
+                                محاور المحضر
+                              </small>
 
-                          </label>
+                              <h4>
+                                تفاصيل الاجتماع
+                              </h4>
+                            </div>
+                          </div>
 
+                          <div className="committee-editor-full">
+                            <label>
+                              <span>
+                                جدول الأعمال
+                              </span>
 
-                          <label>
+                              <textarea
+                                value={
+                                  meetingForm.agenda
+                                }
+                                onChange={(
+                                  e
+                                ) =>
+                                  handleMeetingChange(
+                                    "agenda",
+                                    e.target
+                                      .value
+                                  )
+                                }
+                                placeholder="اكتبي جدول أعمال الاجتماع..."
+                              />
+                            </label>
 
+                            <label>
+                              <span>
+                                أبرز ما تمت مناقشته
+                              </span>
+
+                              <textarea
+                                value={
+                                  meetingForm.discussion
+                                }
+                                onChange={(
+                                  e
+                                ) =>
+                                  handleMeetingChange(
+                                    "discussion",
+                                    e.target
+                                      .value
+                                  )
+                                }
+                                placeholder="اكتبي أبرز الموضوعات والمناقشات..."
+                              />
+                            </label>
+
+                            <label>
+                              <span>
+                                القرارات
+                              </span>
+
+                              <textarea
+                                value={
+                                  meetingForm.decisions
+                                }
+                                onChange={(
+                                  e
+                                ) =>
+                                  handleMeetingChange(
+                                    "decisions",
+                                    e.target
+                                      .value
+                                  )
+                                }
+                                placeholder="اكتبي القرارات..."
+                              />
+                            </label>
+
+                            <label>
+                              <span>
+                                التوصيات
+                              </span>
+
+                              <textarea
+                                value={
+                                  meetingForm.recommendations
+                                }
+                                onChange={(
+                                  e
+                                ) =>
+                                  handleMeetingChange(
+                                    "recommendations",
+                                    e.target
+                                      .value
+                                  )
+                                }
+                                placeholder="اكتبي التوصيات..."
+                              />
+                            </label>
+                          </div>
+                        </div>
+
+                        {/* الحضور */}
+
+                        <div className="committee-meeting-form-section committee-attendance-section">
+                          <div className="committee-form-section-title">
                             <span>
-                              اليوم
+                              03
                             </span>
 
-                            <input
-                              value={
-                                meetingForm.day
-                              }
-                              onChange={(e) =>
-                                handleMeetingChange(
-                                  "day",
-                                  e.target.value
-                                )
-                              }
-                              placeholder="مثال: الأحد"
-                            />
+                            <div>
+                              <small>
+                                التوثيق
+                              </small>
 
-                          </label>
+                              <h4>
+                                سجل الحضور والتوقيع
+                              </h4>
+                            </div>
 
-
-                          <label>
-
-                            <span>
-                              مكان الاجتماع
-                            </span>
-
-                            <input
-                              value={
-                                meetingForm.place
-                              }
-                              onChange={(e) =>
-                                handleMeetingChange(
-                                  "place",
-                                  e.target.value
-                                )
-                              }
-                              placeholder="مكان الاجتماع"
-                            />
-
-                          </label>
-
-
-                          <label>
-
-                            <span>
-                              حالة الاجتماع
-                            </span>
-
-                            <select
-                              value={
-                                meetingForm.status
-                              }
-                              onChange={(e) =>
-                                handleMeetingChange(
-                                  "status",
-                                  e.target.value
-                                )
+                            <button
+                              type="button"
+                              className="committee-add-attendee-button no-print"
+                              onClick={
+                                addAttendee
                               }
                             >
+                              ＋ إضافة حاضر
+                            </button>
+                          </div>
 
-                              <option value="لم يُنفذ">
-                                لم يُنفذ
-                              </option>
+                          {meetingForm.attendees
+                            ?.length >
+                          0 ? (
+                            <div className="committee-attendance-table-wrapper">
+                              <table className="committee-attendance-table">
+                                <thead>
+                                  <tr>
+                                    <th>
+                                      #
+                                    </th>
 
-                              <option value="منفذ">
-                                منفذ
-                              </option>
+                                    <th>
+                                      اسم الحاضر
+                                    </th>
 
-                            </select>
+                                    <th>
+                                      المسمى الوظيفي
+                                    </th>
 
-                          </label>
+                                    <th>
+                                      التوقيع
+                                    </th>
 
+                                    <th className="no-print">
+                                      إجراء
+                                    </th>
+                                  </tr>
+                                </thead>
+
+                                <tbody>
+                                  {meetingForm.attendees.map(
+                                    (
+                                      attendee,
+                                      index
+                                    ) => (
+                                      <tr
+                                        key={
+                                          attendee.id
+                                        }
+                                      >
+                                        <td>
+                                          {index +
+                                            1}
+                                        </td>
+
+                                        <td>
+                                          <input
+                                            type="text"
+                                            value={
+                                              attendee.name
+                                            }
+                                            onChange={(
+                                              e
+                                            ) =>
+                                              handleAttendeeChange(
+                                                attendee.id,
+                                                "name",
+                                                e.target
+                                                  .value
+                                              )
+                                            }
+                                            placeholder="اسم الحاضر"
+                                          />
+                                        </td>
+
+                                        <td>
+                                          <input
+                                            type="text"
+                                            value={
+                                              attendee.job
+                                            }
+                                            onChange={(
+                                              e
+                                            ) =>
+                                              handleAttendeeChange(
+                                                attendee.id,
+                                                "job",
+                                                e.target
+                                                  .value
+                                              )
+                                            }
+                                            placeholder="المسمى الوظيفي"
+                                          />
+                                        </td>
+
+                                        <td>
+                                          <SignaturePad
+                                            value={
+                                              attendee.signature
+                                            }
+                                            onChange={(
+                                              signature
+                                            ) =>
+                                              handleAttendeeChange(
+                                                attendee.id,
+                                                "signature",
+                                                signature
+                                              )
+                                            }
+                                          />
+                                        </td>
+
+                                        <td className="no-print">
+                                          <button
+                                            type="button"
+                                            className="committee-delete-attendee"
+                                            onClick={() =>
+                                              deleteAttendee(
+                                                attendee.id
+                                              )
+                                            }
+                                          >
+                                            🗑️ حذف
+                                          </button>
+                                        </td>
+                                      </tr>
+                                    )
+                                  )}
+                                </tbody>
+                              </table>
+                            </div>
+                          ) : (
+                            <div className="committee-no-attendees">
+                              <div>
+                                👥
+                              </div>
+
+                              <strong>
+                                لم تتم إضافة الحضور بعد
+                              </strong>
+
+                              <p>
+                                اضغطي على «إضافة حاضر» لإضافة أسماء الحاضرين
+                                وتوقيعاتهم.
+                              </p>
+
+                             
+                            </div>
+                          )}
                         </div>
 
+                        {/* اعتماد المحضر */}
 
-                        <div className="committee-editor-full">
-
-                          <label>
-
+                        <div className="committee-minutes-footer">
+                          <div>
                             <span>
-                              جدول الأعمال
+                              رئيسة اللجنة
                             </span>
 
-                            <textarea
-                              value={
-                                meetingForm.agenda
-                              }
-                              onChange={(e) =>
-                                handleMeetingChange(
-                                  "agenda",
-                                  e.target.value
-                                )
-                              }
-                              placeholder="اكتبي جدول أعمال الاجتماع..."
-                            />
+                            <strong>
+                              مديرة المدرسة
+                            </strong>
+                          </div>
 
-                          </label>
-
-
-                          <label>
-
+                          <div>
                             <span>
-                              أبرز ما تمت مناقشته
+                              الاسم
                             </span>
 
-                            <textarea
-                              value={
-                                meetingForm.discussion
-                              }
-                              onChange={(e) =>
-                                handleMeetingChange(
-                                  "discussion",
-                                  e.target.value
-                                )
-                              }
-                              placeholder="اكتبي أبرز الموضوعات والمناقشات..."
-                            />
+                            <strong>
+                              خيرية الخالدي
+                            </strong>
+                          </div>
 
-                          </label>
-
-
-                          <label>
-
+                          <div>
                             <span>
-                              القرارات
+                              التوقيع
                             </span>
 
-                            <textarea
-                              value={
-                                meetingForm.decisions
-                              }
-                              onChange={(e) =>
-                                handleMeetingChange(
-                                  "decisions",
-                                  e.target.value
-                                )
-                              }
-                              placeholder="اكتبي القرارات..."
-                            />
-
-                          </label>
-
-
-                          <label>
-
-                            <span>
-                              التوصيات
-                            </span>
-
-                            <textarea
-                              value={
-                                meetingForm.recommendations
-                              }
-                              onChange={(e) =>
-                                handleMeetingChange(
-                                  "recommendations",
-                                  e.target.value
-                                )
-                              }
-                              placeholder="اكتبي التوصيات..."
-                            />
-
-                          </label>
-
+                            <div className="minutes-sign-line" />
+                          </div>
                         </div>
 
+                        {/* أزرار */}
 
-                        <div className="committee-editor-actions">
-
+                        <div className="committee-editor-actions no-print">
                           <button
                             type="button"
                             className="committee-save-meeting"
@@ -2198,9 +2185,18 @@ function CommitteesDashboard() {
                               saveMeeting
                             }
                           >
-                            حفظ الاجتماع
+                            💾 حفظ المحضر
                           </button>
 
+                          <button
+                            type="button"
+                            className="committee-print-meeting"
+                            onClick={
+                              printMeeting
+                            }
+                          >
+                            🖨️ طباعة محضر الاجتماع
+                          </button>
 
                           <button
                             type="button"
@@ -2211,63 +2207,44 @@ function CommitteesDashboard() {
                               )
                             }
                           >
-                            حذف الاجتماع
+                            🗑️ حذف الاجتماع
                           </button>
-
                         </div>
-
                       </div>
-
                     )}
-
                 </section>
-
               )}
-
             </section>
-
           ) : (
-
             <>
-
-              {/* =================================================
-                  مقدمة اللجنة
-              ================================================= */}
-
               <section className="committee-inner-hero">
-
                 <div className="committee-inner-hero-icon">
-                  {selectedCommittee.icon}
+                  {
+                    selectedCommittee.icon
+                  }
                 </div>
 
-
                 <div className="committee-inner-hero-content">
-
                   <span className="committee-inner-label">
                     اللجنة المدرسية
                   </span>
 
                   <h2>
-                    {selectedCommittee.title}
+                    {
+                      selectedCommittee.title
+                    }
                   </h2>
 
                   <p>
-                    {selectedCommittee.description}
+                    {
+                      selectedCommittee.description
+                    }
                   </p>
-
                 </div>
-
               </section>
 
-
-              {/* =================================================
-                  عنوان الأقسام
-              ================================================= */}
-
               <div className="committee-sections-heading">
-
                 <div>
-
                   <span>
                     ملف اللجنة
                   </span>
@@ -2275,12 +2252,9 @@ function CommitteesDashboard() {
                   <h2>
                     أقسام ملف اللجنة
                   </h2>
-
                 </div>
 
-
                 <div className="committee-sections-count">
-
                   {
                     committeeSections.length
                   }
@@ -2288,21 +2262,14 @@ function CommitteesDashboard() {
                   <small>
                     أقسام
                   </small>
-
                 </div>
-
               </div>
 
-
-              {/* =================================================
-                  أقسام اللجنة
-              ================================================= */}
-
               <section className="committee-sections-list">
-
                 {committeeSections.map(
-                  (section) => (
-
+                  (
+                    section
+                  ) => (
                     <button
                       key={
                         section.id
@@ -2315,7 +2282,6 @@ function CommitteesDashboard() {
                         )
                       }
                     >
-
                       <div className="committee-section-number">
                         {String(
                           section.id
@@ -2325,19 +2291,18 @@ function CommitteesDashboard() {
                         )}
                       </div>
 
-
                       <div className="committee-section-icon">
                         {
                           section.icon
                         }
                       </div>
 
-
                       <div className="committee-section-text">
-
                         <span>
                           القسم{" "}
-                          {section.id}
+                          {
+                            section.id
+                          }
                         </span>
 
                         <h3>
@@ -2351,28 +2316,17 @@ function CommitteesDashboard() {
                             section.description
                           }
                         </p>
-
                       </div>
-
 
                       <div className="committee-section-arrow">
                         ←
                       </div>
-
                     </button>
-
                   )
                 )}
-
               </section>
 
-
-              {/* =================================================
-                  العودة
-              ================================================= */}
-
               <div className="committee-bottom-action">
-
                 <button
                   className="committee-back-button bottom"
                   onClick={() =>
@@ -2382,46 +2336,32 @@ function CommitteesDashboard() {
                   }
                   type="button"
                 >
-
                   <span>
                     ←
                   </span>
 
                   العودة إلى ملف اللجان وفرق العمل
-
                 </button>
-
               </div>
-
             </>
-
           )}
-
         </div>
-
       </div>
-
     );
   }
 
-
   /* =========================================================
-     الصفحة الرئيسية لسجل اللجان
+     الصفحة الرئيسية
   ========================================================= */
 
   return (
-
     <div
       className="committees-dashboard"
       dir="rtl"
     >
-
       <header className="committees-header">
-
         <div className="committees-header-inner">
-
           <div className="committees-brand">
-
             <img
               src={logo}
               alt="شعار مدارس الأندلس"
@@ -2429,7 +2369,6 @@ function CommitteesDashboard() {
             />
 
             <div className="committees-brand-text">
-
               <span>
                 متوسطة وثانوية الأندلس بالطائف - بنات
               </span>
@@ -2437,14 +2376,10 @@ function CommitteesDashboard() {
               <small>
                 سجل اللجان وفرق العمل المدرسية
               </small>
-
             </div>
-
           </div>
 
-
           <div className="committees-main-title">
-
             <h1>
               سجل اللجان وفرق العمل المدرسية
             </h1>
@@ -2452,9 +2387,7 @@ function CommitteesDashboard() {
             <p>
               مهام واختصاصات اللجان وفرق العمل المدرسية
             </p>
-
           </div>
-
 
           <button
             className="committees-dashboard-back"
@@ -2463,31 +2396,19 @@ function CommitteesDashboard() {
               window.history.back()
             }
           >
-
             العودة للوحات الرئيسية
-
-            <span>
-              ←
-            </span>
-
+            <span>←</span>
           </button>
-
         </div>
-
       </header>
 
-
       <main className="committees-main">
-
-
         <section className="committees-hero">
-
           <div className="committees-hero-content">
-
             <h2>
               إدارة اللجان
-              والفرق
               <br />
+              والفرق
             </h2>
 
             <p>
@@ -2496,9 +2417,7 @@ function CommitteesDashboard() {
               ومتابعة أعمالها طوال العام الدراسي.
             </p>
 
-
             <div className="committees-hero-points">
-
               <span>
                 ✓ تنظيم وتوثيق أعمال اللجان
               </span>
@@ -2513,53 +2432,35 @@ function CommitteesDashboard() {
 
               <p>
                 مديرة المدرسة: أ/ خيرية الخالدي
-             </p>
-
+              </p>
             </div>
-
           </div>
 
-
           <div className="committees-hero-visual">
-
             <div className="hero-document">
-
-              <div className="hero-document-top"></div>
-
-              <div className="hero-document-line"></div>
-
-              <div className="hero-document-line short"></div>
-
-              <div className="hero-document-line"></div>
-
-              <div className="hero-document-line short"></div>
-
+              <div className="hero-document-top" />
+              <div className="hero-document-line" />
+              <div className="hero-document-line short" />
+              <div className="hero-document-line" />
+              <div className="hero-document-line short" />
             </div>
-
 
             <div className="hero-check">
               ✓
             </div>
 
-
             <div className="hero-target">
               🎯
             </div>
-
           </div>
-
         </section>
 
-
         <section className="committees-info-card">
-
           <div className="info-card-icon">
             🎯
           </div>
 
-
           <div className="info-card-content">
-
             <span>
               الهدف من السجل
             </span>
@@ -2573,27 +2474,16 @@ function CommitteesDashboard() {
               تحقيق أهداف المدرسة ورفع جودة الأداء من خلال العمل
               الجماعي والتخطيط المنظم والتقويم المستمر.
             </p>
-
           </div>
-
         </section>
 
-
-        {/* =====================================================
-            مؤشر الاجتماعات المنفذة
-        ===================================================== */}
-
         <section className="committees-indicators">
-
           <div className="committee-indicator-card">
-
             <div className="committee-indicator-icon">
               🗓️
             </div>
 
-
             <div className="committee-indicator-content">
-
               <span>
                 مؤشر الاجتماعات
               </span>
@@ -2605,18 +2495,12 @@ function CommitteesDashboard() {
               <p>
                 الاجتماعات المنفذة
               </p>
-
             </div>
-
           </div>
-
         </section>
 
-
         <div className="committees-section-heading">
-
           <div>
-
             <span>
               دليل اللجان
             </span>
@@ -2628,12 +2512,9 @@ function CommitteesDashboard() {
             <p>
               اختاري اللجنة للدخول إلى ملفها الكامل.
             </p>
-
           </div>
 
-
           <div className="committees-count-badge">
-
             <strong>
               {committees.length}
             </strong>
@@ -2641,26 +2522,21 @@ function CommitteesDashboard() {
             <span>
               لجان
             </span>
-
           </div>
-
         </div>
 
-
         <section className="committees-grid">
-
           {committees.map(
-            (committee) => (
-
+            (
+              committee
+            ) => (
               <article
                 key={
                   committee.id
                 }
                 className="committee-card"
               >
-
                 <div className="committee-card-top">
-
                   <div className="committee-card-icon">
                     {
                       committee.icon
@@ -2675,12 +2551,9 @@ function CommitteesDashboard() {
                       "0"
                     )}
                   </span>
-
                 </div>
 
-
                 <div className="committee-card-body">
-
                   <h3>
                     {
                       committee.title
@@ -2692,12 +2565,9 @@ function CommitteesDashboard() {
                       committee.description
                     }
                   </p>
-
                 </div>
 
-
                 <div className="committee-card-footer">
-
                   <button
                     type="button"
                     className="committee-open-button"
@@ -2707,31 +2577,20 @@ function CommitteesDashboard() {
                       )
                     }
                   >
-
                     عرض اللجنة
-
                     <span>
                       ←
                     </span>
-
                   </button>
-
                 </div>
-
               </article>
-
             )
           )}
-
         </section>
 
-
         <section className="committees-documentation">
-
           <div className="committees-documentation-heading">
-
             <div>
-
               <span>
                 مسارات التوثيق
               </span>
@@ -2743,27 +2602,19 @@ function CommitteesDashboard() {
               <p>
                 الوصول السريع إلى أهم أجزاء ملف اللجنة.
               </p>
-
             </div>
-
           </div>
 
-
           <div className="committees-documentation-grid">
-
-
             <button
               type="button"
               className="committee-document-card"
             >
-
               <div className="committee-document-icon">
                 👥
               </div>
 
-
               <div className="committee-document-content">
-
                 <span>
                   01
                 </span>
@@ -2775,24 +2626,18 @@ function CommitteesDashboard() {
                 <p>
                   قرار تشكيل فريق العمل وإضافة أعضاء اللجنة وحفظ بيانات التشكيل.
                 </p>
-
               </div>
-
             </button>
-
 
             <button
               type="button"
               className="committee-document-card"
             >
-
               <div className="committee-document-icon">
                 🎯
               </div>
 
-
               <div className="committee-document-content">
-
                 <span>
                   02
                 </span>
@@ -2804,24 +2649,18 @@ function CommitteesDashboard() {
                 <p>
                   متابعة مهام اللجنة ومسؤولياتها وأعمالها خلال العام الدراسي.
                 </p>
-
               </div>
-
             </button>
-
 
             <button
               type="button"
               className="committee-document-card"
             >
-
               <div className="committee-document-icon">
                 🗓️
               </div>
 
-
               <div className="committee-document-content">
-
                 <span>
                   03
                 </span>
@@ -2833,36 +2672,24 @@ function CommitteesDashboard() {
                 <p>
                   تسجيل الاجتماعات ومتابعة المحاضر والتوصيات والقرارات والتوقيعات.
                 </p>
-
               </div>
-
             </button>
-
           </div>
-
         </section>
 
-
         <section className="committees-bottom-note">
-
           <div className="bottom-note-icon">
             💜
           </div>
 
           <div>
-
             <strong>
               سجل اللجان المدرسية
             </strong>
-
           </div>
-
         </section>
-
       </main>
-
     </div>
-
   );
 }
 
