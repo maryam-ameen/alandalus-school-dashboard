@@ -7,6 +7,7 @@ import React, {
 
 import "./CommitteesDashboard.css";
 import logo from "../../assets/logo.png";
+import { supabase } from "../../lib/supabase";
 
 /* =========================================================
    بيانات اللجان
@@ -251,132 +252,109 @@ const excellenceCommitteeData = {
 };
 
 /* =========================================================
+   أدوات مساعدة
+========================================================= */
+
+const getCommitteeData = (committeeId) => {
+  switch (committeeId) {
+    case 2:
+      return guidanceCommitteeData;
+
+    case 3:
+      return academicAchievementCommitteeData;
+
+    case 4:
+      return safetyCommitteeData;
+
+    case 5:
+      return excellenceCommitteeData;
+
+    default:
+      return administrativeCommitteeData;
+  }
+};
+
+const getArabicDay = (date) => {
+  if (!date) return "";
+
+  const days = [
+    "الأحد",
+    "الاثنين",
+    "الثلاثاء",
+    "الأربعاء",
+    "الخميس",
+    "الجمعة",
+    "السبت",
+  ];
+
+  const d = new Date(`${date}T00:00:00`);
+
+  return days[d.getDay()];
+};
+
+/* =========================================================
    الاجتماعات الافتراضية
 ========================================================= */
 
-const createDefaultMeetings = (committeeId) => [
-  {
-    id: `${committeeId}-1`,
-    title: "الاجتماع الشهري الأول",
-    date: "",
-    day: "",
-    place: "",
-    status: "لم يُنفذ",
-    agenda: "",
-    discussion: "",
-    decisions: "",
-    recommendations: "",
-    attendees: [],
-  },
-  {
-    id: `${committeeId}-2`,
-    title: "الاجتماع الشهري الثاني",
-    date: "",
-    day: "",
-    place: "",
-    status: "لم يُنفذ",
-    agenda: "",
-    discussion: "",
-    decisions: "",
-    recommendations: "",
-    attendees: [],
-  },
-  {
-    id: `${committeeId}-3`,
-    title: "الاجتماع الشهري الثالث",
-    date: "",
-    day: "",
-    place: "",
-    status: "لم يُنفذ",
-    agenda: "",
-    discussion: "",
-    decisions: "",
-    recommendations: "",
-    attendees: [],
-  },
-];
+const createDefaultMeetings = () => {
+  return [];
+};
 
 /* =========================================================
-   التخزين
-========================================================= */
-
-const LEGACY_STORAGE_KEY =
-  "alandalus-committee-meetings-v2";
-
-const getMeetingsStorageKey = (committeeId) =>
-  `alandalus-committee-meetings-v2-${committeeId}`;
-
-const getDecisionStorageKey = (committeeId) =>
-  `alandalus-committee-decision-v2-${committeeId}`;
-
-/* =========================================================
-   القرار الإداري
+   القرار الافتراضي
 ========================================================= */
 
 const createDefaultDecision = (committee) => {
-  const isAdministrative = committee.id === 1;
+  const data = getCommitteeData(committee.id);
 
-  const defaultMembers = isAdministrative
-    ? administrativeCommitteeData.members.map(
-        (member) => ({
-          name: member.name || "",
-          job: member.job || "",
-          role: member.role || "عضوة",
-          signature: "",
-        })
-      )
-    : [
-        {
-          name: "",
-          job: "مديرة المدرسة",
-          role: "رئيسة",
-          signature: "",
-        },
-        {
-          name: "",
-          job: "وكيلة",
-          role: "عضوة",
-          signature: "",
-        },
-        {
-          name: "",
-          job: "وكيلة",
-          role: "عضوة",
-          signature: "",
-        },
-        {
-          name: "",
-          job: "موجهة طلابية",
-          role: "عضوة",
-          signature: "",
-        },
-        {
-          name: "",
-          job: "رائدة نشاط",
-          role: "عضوة",
-          signature: "",
-        },
-        {
-          name: "",
-          job: "معلمة",
-          role: "عضوة",
-          signature: "",
-        },
-        {
-          name: "",
-          job: "معلمة",
-          role: "عضوة",
-          signature: "",
-        },
-        {
-          name: "",
-          job: "معلمة",
-          role: "عضوة",
-          signature: "",
-        },
-      ];
+  const defaultMembers =
+    data.members?.map((member) => ({
+      name: member.name || "",
+      job: member.job || "",
+      role: member.role || "عضوة",
+      signature: "",
+    })) || [
+      {
+        name: "",
+        job: "مديرة المدرسة",
+        role: "رئيسة",
+        signature: "",
+      },
+      {
+        name: "",
+        job: "وكيلة",
+        role: "عضوة",
+        signature: "",
+      },
+      {
+        name: "",
+        job: "وكيلة",
+        role: "عضوة",
+        signature: "",
+      },
+      {
+        name: "",
+        job: "موجهة طلابية",
+        role: "عضوة",
+        signature: "",
+      },
+      {
+        name: "",
+        job: "رائدة نشاط",
+        role: "عضوة",
+        signature: "",
+      },
+      {
+        name: "",
+        job: "معلمة",
+        role: "عضوة",
+        signature: "",
+      },
+    ];
 
   return {
+    id: null,
+    committee_id: committee.id,
     day: "",
     date: "",
     schoolYear: "1448 / 1449",
@@ -384,41 +362,112 @@ const createDefaultDecision = (committee) => {
   };
 };
 
-const loadCommitteeDecision = (committee) => {
+/* =========================================================
+   تحميل القرار
+========================================================= */
+
+const loadCommitteeDecision = async (committee) => {
+  const defaultDecision =
+    createDefaultDecision(committee);
+
   try {
-    const saved = localStorage.getItem(
-      getDecisionStorageKey(committee.id)
-    );
+    const {
+      data: decisionRow,
+      error: decisionError,
+    } = await supabase
+      .from("committee_decisions")
+      .select("*")
+      .eq("committee_id", committee.id)
+      .order("created_at", {
+        ascending: false,
+      })
+      .limit(1)
+      .maybeSingle();
 
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      const defaultDecision =
-        createDefaultDecision(committee);
+    if (decisionError) {
+      console.error(
+        "خطأ تحميل القرار:",
+        decisionError
+      );
 
-      return {
-        ...defaultDecision,
-        ...parsed,
-        members:
-          parsed.members?.length > 0
-            ? parsed.members
-            : defaultDecision.members,
-      };
+      return defaultDecision;
     }
+
+    if (!decisionRow) {
+      return defaultDecision;
+    }
+
+    const {
+      data: memberRows,
+      error: membersError,
+    } = await supabase
+      .from("committee_members")
+      .select("*")
+      .eq(
+        "decision_id",
+        decisionRow.id
+      )
+      .order("id", {
+        ascending: true,
+      });
+
+    if (membersError) {
+      console.error(
+        "خطأ تحميل أعضاء القرار:",
+        membersError
+      );
+    }
+
+    return {
+      id: decisionRow.id,
+      committee_id:
+        decisionRow.committee_id ||
+        committee.id,
+      day: decisionRow.day || "",
+      date:
+        decisionRow.decision_date ||
+        decisionRow.date ||
+        "",
+      schoolYear:
+        decisionRow.school_year ||
+        "1448 / 1449",
+      members:
+        memberRows?.length > 0
+          ? memberRows.map((member) => ({
+              id: member.id,
+              name:
+                member.member_name ||
+                "",
+              job:
+                member.job_title ||
+                "",
+              role:
+                member.assigned_work ||
+                "عضوة",
+              signature:
+                member.signature ||
+                "",
+            }))
+          : defaultDecision.members,
+    };
   } catch (error) {
     console.error(
-      "خطأ في تحميل القرار:",
+      "خطأ غير متوقع في تحميل القرار:",
       error
     );
-  }
 
-  return createDefaultDecision(committee);
+    return defaultDecision;
+  }
 };
 
 /* =========================================================
    لوحة التوقيع
 ========================================================= */
 
-function SignaturePad({ value, onChange }) {
+function SignaturePad({
+  value,
+  onChange,
+}) {
   const canvasRef = useRef(null);
   const drawingRef = useRef(false);
 
@@ -467,7 +516,10 @@ function SignaturePad({ value, onChange }) {
     const canvas = canvasRef.current;
 
     if (!canvas) {
-      return { x: 0, y: 0 };
+      return {
+        x: 0,
+        y: 0,
+      };
     }
 
     const rect =
@@ -509,22 +561,31 @@ function SignaturePad({ value, onChange }) {
 
     const ctx = canvas.getContext("2d");
 
-    const { x, y } =
-      getPosition(event);
+    const {
+      x,
+      y,
+    } = getPosition(event);
 
     drawingRef.current = true;
 
     ctx.beginPath();
+
     ctx.moveTo(x, y);
 
     ctx.lineWidth = 2.5;
+
     ctx.lineCap = "round";
+
     ctx.lineJoin = "round";
-    ctx.strokeStyle = "#39246b";
+
+    ctx.strokeStyle =
+      "#39246b";
   };
 
   const draw = (event) => {
-    if (!drawingRef.current) return;
+    if (!drawingRef.current) {
+      return;
+    }
 
     event.preventDefault();
 
@@ -534,15 +595,20 @@ function SignaturePad({ value, onChange }) {
 
     const ctx = canvas.getContext("2d");
 
-    const { x, y } =
-      getPosition(event);
+    const {
+      x,
+      y,
+    } = getPosition(event);
 
     ctx.lineTo(x, y);
+
     ctx.stroke();
   };
 
   const stopDrawing = () => {
-    if (!drawingRef.current) return;
+    if (!drawingRef.current) {
+      return;
+    }
 
     drawingRef.current = false;
 
@@ -551,7 +617,9 @@ function SignaturePad({ value, onChange }) {
     if (!canvas) return;
 
     onChange(
-      canvas.toDataURL("image/png")
+      canvas.toDataURL(
+        "image/png"
+      )
     );
   };
 
@@ -579,13 +647,23 @@ function SignaturePad({ value, onChange }) {
         width={canvasWidth}
         height={canvasHeight}
         className="committee-signature-canvas"
-        onMouseDown={startDrawing}
+        onMouseDown={
+          startDrawing
+        }
         onMouseMove={draw}
-        onMouseUp={stopDrawing}
-        onMouseLeave={stopDrawing}
-        onTouchStart={startDrawing}
+        onMouseUp={
+          stopDrawing
+        }
+        onMouseLeave={
+          stopDrawing
+        }
+        onTouchStart={
+          startDrawing
+        }
         onTouchMove={draw}
-        onTouchEnd={stopDrawing}
+        onTouchEnd={
+          stopDrawing
+        }
       />
 
       <div className="committee-signature-line" />
@@ -593,7 +671,9 @@ function SignaturePad({ value, onChange }) {
       <button
         type="button"
         className="committee-clear-signature"
-        onClick={clearSignature}
+        onClick={
+          clearSignature
+        }
       >
         مسح
       </button>
@@ -608,21 +688,61 @@ function SignaturePad({ value, onChange }) {
 function CommitteeDecisionSection({
   committee,
 }) {
-  const [decision, setDecision] =
-    useState(() =>
-      loadCommitteeDecision(committee)
-    );
+  const [
+    decision,
+    setDecision,
+  ] = useState(
+    createDefaultDecision(
+      committee
+    )
+  );
 
-  const [savedMessage, setSavedMessage] =
-    useState(false);
+  const [
+    loading,
+    setLoading,
+  ] = useState(true);
+
+  const [
+    saving,
+    setSaving,
+  ] = useState(false);
+
+  const [
+    savedMessage,
+    setSavedMessage,
+  ] = useState(false);
+
+  /* -------------------------------------------------------
+     تحميل القرار
+  ------------------------------------------------------- */
 
   useEffect(() => {
-    setDecision(
-      loadCommitteeDecision(committee)
-    );
+    let mounted = true;
 
-    setSavedMessage(false);
+    const load = async () => {
+      setLoading(true);
+
+      const loaded =
+        await loadCommitteeDecision(
+          committee
+        );
+
+      if (mounted) {
+        setDecision(loaded);
+        setLoading(false);
+      }
+    };
+
+    load();
+
+    return () => {
+      mounted = false;
+    };
   }, [committee.id]);
+
+  /* -------------------------------------------------------
+     تغيير بيانات القرار
+  ------------------------------------------------------- */
 
   const handleDecisionChange = (
     field,
@@ -633,6 +753,10 @@ function CommitteeDecisionSection({
       [field]: value,
     }));
   };
+
+  /* -------------------------------------------------------
+     تغيير عضو
+  ------------------------------------------------------- */
 
   const handleMemberChange = (
     index,
@@ -656,11 +780,17 @@ function CommitteeDecisionSection({
     });
   };
 
+  /* -------------------------------------------------------
+     إضافة عضو
+  ------------------------------------------------------- */
+
   const addDecisionMember = () => {
     setDecision((prev) => ({
       ...prev,
+
       members: [
         ...prev.members,
+
         {
           name: "",
           job: "",
@@ -671,42 +801,244 @@ function CommitteeDecisionSection({
     }));
   };
 
+  /* -------------------------------------------------------
+     حذف عضو
+  ------------------------------------------------------- */
+
   const removeDecisionMember = (
     index
   ) => {
     setDecision((prev) => ({
       ...prev,
-      members: prev.members.filter(
-        (_, i) => i !== index
-      ),
+
+      members:
+        prev.members.filter(
+          (_, i) =>
+            i !== index
+        ),
     }));
   };
 
-  const saveDecision = () => {
-    localStorage.setItem(
-      getDecisionStorageKey(
-        committee.id
-      ),
-      JSON.stringify(decision)
-    );
+  /* -------------------------------------------------------
+     حفظ القرار
+  ------------------------------------------------------- */
 
-    setSavedMessage(true);
+  const saveDecision = async () => {
+    if (saving) return;
+
+    setSaving(true);
+
+    try {
+      let decisionId =
+        decision.id;
+
+      const decisionPayload = {
+        committee_id:
+          committee.id,
+
+        day:
+          decision.day ||
+          null,
+
+        decision_date:
+          decision.date ||
+          null,
+
+        school_year:
+          decision.schoolYear ||
+          "1448 / 1449",
+      };
+
+      /* ---------------------------------------------------
+         تحديث أو إنشاء القرار
+      --------------------------------------------------- */
+
+      if (decisionId) {
+        const {
+          data,
+          error,
+        } = await supabase
+          .from(
+            "committee_decisions"
+          )
+          .update(
+            decisionPayload
+          )
+          .eq(
+            "id",
+            decisionId
+          )
+          .select()
+          .single();
+
+        if (error) {
+          throw error;
+        }
+
+        decisionId = data.id;
+      } else {
+        const {
+          data,
+          error,
+        } = await supabase
+          .from(
+            "committee_decisions"
+          )
+          .insert([
+            decisionPayload,
+          ])
+          .select()
+          .single();
+
+        if (error) {
+          throw error;
+        }
+
+        decisionId = data.id;
+      }
+
+      /* ---------------------------------------------------
+         حذف الأعضاء السابقين
+      --------------------------------------------------- */
+
+      const {
+        error: deleteMembersError,
+      } = await supabase
+        .from(
+          "committee_members"
+        )
+        .delete()
+        .eq(
+          "decision_id",
+          decisionId
+        );
+
+      if (deleteMembersError) {
+        throw deleteMembersError;
+      }
+
+      /* ---------------------------------------------------
+         إضافة الأعضاء الحالية
+      --------------------------------------------------- */
+
+      const membersToInsert =
+        decision.members
+          .filter(
+            (member) =>
+              member.name?.trim() ||
+              member.job?.trim() ||
+              member.role?.trim() ||
+              member.signature
+          )
+          .map(
+            (member) => ({
+              decision_id:
+                decisionId,
+
+              member_name:
+                member.name ||
+                "",
+
+              job_title:
+                member.job ||
+                "",
+
+              assigned_work:
+                member.role ||
+                "عضوة",
+
+              signature:
+                member.signature ||
+                "",
+            })
+          );
+
+      if (
+        membersToInsert.length >
+        0
+      ) {
+        const {
+          error:
+            insertMembersError,
+        } = await supabase
+          .from(
+            "committee_members"
+          )
+          .insert(
+            membersToInsert
+          );
+
+        if (
+          insertMembersError
+        ) {
+          throw insertMembersError;
+        }
+      }
+
+      /* ---------------------------------------------------
+         إعادة تحميل القرار
+      --------------------------------------------------- */
+
+      const refreshed =
+        await loadCommitteeDecision(
+          committee
+        );
+
+      setDecision(
+        refreshed
+      );
+
+      setSavedMessage(true);
+
+      setTimeout(() => {
+        setSavedMessage(false);
+      }, 2500);
+
+      alert(
+        "تم حفظ بيانات القرار بنجاح ✓"
+      );
+    } catch (error) {
+      console.error(
+        "خطأ حفظ القرار:",
+        error
+      );
+
+      alert(
+        "حدث خطأ أثناء حفظ القرار:\n\n" +
+          (error.message ||
+            "خطأ غير معروف")
+      );
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  /* -------------------------------------------------------
+     الطباعة
+  ------------------------------------------------------- */
+
+  const printDecision = async () => {
+    await saveDecision();
 
     setTimeout(() => {
-      setSavedMessage(false);
-    }, 2500);
+      window.print();
+    }, 300);
   };
 
-  const printDecision = () => {
-    localStorage.setItem(
-      getDecisionStorageKey(
-        committee.id
-      ),
-      JSON.stringify(decision)
+  if (loading) {
+    return (
+      <section className="committee-content-card">
+        <div
+          style={{
+            padding: "50px",
+            textAlign: "center",
+          }}
+        >
+          جاري تحميل بيانات القرار...
+        </div>
+      </section>
     );
-
-    window.print();
-  };
+  }
 
   return (
     <section className="committee-content-card committee-decision-print-area">
@@ -726,11 +1058,15 @@ function CommitteeDecisionSection({
 
       <div className="committee-decision-info">
         <label className="committee-decision-field">
-          <span>اليوم</span>
+          <span>
+            اليوم
+          </span>
 
           <input
             type="text"
-            value={decision.day}
+            value={
+              decision.day
+            }
             onChange={(e) =>
               handleDecisionChange(
                 "day",
@@ -742,11 +1078,15 @@ function CommitteeDecisionSection({
         </label>
 
         <label className="committee-decision-field">
-          <span>التاريخ</span>
+          <span>
+            التاريخ
+          </span>
 
           <input
             type="date"
-            value={decision.date}
+            value={
+              decision.date
+            }
             onChange={(e) =>
               handleDecisionChange(
                 "date",
@@ -757,11 +1097,15 @@ function CommitteeDecisionSection({
         </label>
 
         <label className="committee-decision-field">
-          <span>العام الدراسي</span>
+          <span>
+            العام الدراسي
+          </span>
 
           <input
             type="text"
-            value={decision.schoolYear}
+            value={
+              decision.schoolYear
+            }
             onChange={(e) =>
               handleDecisionChange(
                 "schoolYear",
@@ -785,10 +1129,22 @@ function CommitteeDecisionSection({
         <table className="committee-members-table">
           <thead>
             <tr>
-              <th>الاسم</th>
-              <th>الوصف الوظيفي</th>
-              <th>العمل المكلف به</th>
-              <th>التوقيع</th>
+              <th>
+                الاسم
+              </th>
+
+              <th>
+                الوصف الوظيفي
+              </th>
+
+              <th>
+                العمل المكلف به
+              </th>
+
+              <th>
+                التوقيع
+              </th>
+
               <th className="no-print">
                 حذف
               </th>
@@ -797,13 +1153,25 @@ function CommitteeDecisionSection({
 
           <tbody>
             {decision.members.map(
-              (member, index) => (
-                <tr key={index}>
+              (
+                member,
+                index
+              ) => (
+                <tr
+                  key={
+                    member.id ||
+                    index
+                  }
+                >
                   <td>
                     <input
                       type="text"
-                      value={member.name}
-                      onChange={(e) =>
+                      value={
+                        member.name
+                      }
+                      onChange={(
+                        e
+                      ) =>
                         handleMemberChange(
                           index,
                           "name",
@@ -818,8 +1186,12 @@ function CommitteeDecisionSection({
                   <td>
                     <input
                       type="text"
-                      value={member.job}
-                      onChange={(e) =>
+                      value={
+                        member.job
+                      }
+                      onChange={(
+                        e
+                      ) =>
                         handleMemberChange(
                           index,
                           "job",
@@ -833,8 +1205,12 @@ function CommitteeDecisionSection({
                   <td>
                     <input
                       type="text"
-                      value={member.role}
-                      onChange={(e) =>
+                      value={
+                        member.role
+                      }
+                      onChange={(
+                        e
+                      ) =>
                         handleMemberChange(
                           index,
                           "role",
@@ -850,7 +1226,9 @@ function CommitteeDecisionSection({
                       value={
                         member.signature
                       }
-                      onChange={(signature) =>
+                      onChange={(
+                        signature
+                      ) =>
                         handleMemberChange(
                           index,
                           "signature",
@@ -884,7 +1262,9 @@ function CommitteeDecisionSection({
         <button
           type="button"
           className="committee-add-member-button"
-          onClick={addDecisionMember}
+          onClick={
+            addDecisionMember
+          }
         >
           ＋ إضافة عضو
         </button>
@@ -904,15 +1284,23 @@ function CommitteeDecisionSection({
         <button
           type="button"
           className="committee-save-decision"
-          onClick={saveDecision}
+          onClick={
+            saveDecision
+          }
+          disabled={saving}
         >
-          💾 حفظ القرار
+          {saving
+            ? "جاري الحفظ..."
+            : "💾 حفظ القرار"}
         </button>
 
         <button
           type="button"
           className="committee-print-button"
-          onClick={printDecision}
+          onClick={
+            printDecision
+          }
+          disabled={saving}
         >
           🖨️ طباعة القرار
         </button>
@@ -928,20 +1316,1235 @@ function CommitteeDecisionSection({
 }
 
 /* =========================================================
+   المحضر والحضور والتوقيع
+========================================================= */
+
+/*
+  جدول الحضور المستخدم في Supabase:
+  meeting_attendees
+  - id
+  - meeting_id
+  - attendee_name
+  - job_title
+  - attended
+  - signature
+*/
+
+const createDefaultAttendee = (meetingId) => ({
+  id: null,
+  meeting_id: meetingId,
+  attendee_name: "",
+  job_title: "",
+  attended: false,
+  signature: "",
+  _local: true,
+});
+
+/* =========================================================
+   تحميل حضور الاجتماع
+========================================================= */
+
+const loadMeetingAttendees = async (meetingId) => {
+  const { data, error } = await supabase
+    .from("meeting_attendees")
+    .select("*")
+    .eq("meeting_id", meetingId)
+    .order("id", { ascending: true });
+
+  if (error) {
+    console.error("خطأ تحميل حضور الاجتماع:", error);
+    return [];
+  }
+
+  return (data || []).map((row) => ({
+    ...row,
+    name: row.attendee_name || "",
+  }));
+};
+
+/* =========================================================
    المحضر
 ========================================================= */
 
-const createDefaultAttendee = () => ({
-  id:
-    Date.now() +
-    Math.random(),
+function MeetingEditor({
+  committee,
+  meeting,
+  onClose,
+  onSaved,
+  onDeleted,
+}) {
+  const [form, setForm] = useState({
+    ...meeting,
+    meeting_number: meeting?.meeting_number ?? "",
+    meeting_date: meeting?.meeting_date ?? "",
+    meeting_time: meeting?.meeting_time ?? "",
+    meeting_place: meeting?.meeting_place ?? "",
+    meeting_status: meeting?.meeting_status ?? "قادم",
+    subject: meeting?.subject ?? "",
+    notes: meeting?.notes ?? "",
+    discussion: meeting?.discussion ?? "",
+    recommendations: meeting?.recommendations ?? "",
+    manager_name: meeting?.manager_name ?? "خيرية الخالدي",
+    manager_signature: meeting?.manager_signature ?? "",
+  });
 
-  name: "",
+  const [attendees, setAttendees] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [addingAttendee, setAddingAttendee] = useState(false);
 
-  job: "",
+  /* -------------------------------------------------------
+     تحميل بيانات الحضور
+  ------------------------------------------------------- */
 
-  signature: "",
-});
+  useEffect(() => {
+    let mounted = true;
+
+    const load = async () => {
+      if (!meeting?.id) {
+        setLoading(false);
+        return;
+      }
+
+      setLoading(true);
+
+      const loaded = await loadMeetingAttendees(meeting.id);
+
+      if (!mounted) return;
+
+      setAttendees(loaded);
+      setLoading(false);
+    };
+
+    load();
+
+    return () => {
+      mounted = false;
+    };
+  }, [meeting?.id]);
+
+  /* -------------------------------------------------------
+     تغيير بيانات المحضر
+  ------------------------------------------------------- */
+
+  const handleChange = (field, value) => {
+    setForm((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
+
+  /* -------------------------------------------------------
+     حفظ بيانات مديرة المدرسة
+  ------------------------------------------------------- */
+
+  const saveManagerName = async () => {
+    const managerName = (form.manager_name || "").trim() || "خيرية الخالدي";
+
+    const { data, error } = await supabase
+      .from("meetings")
+      .update({
+        manager_name: managerName,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", meeting.id)
+      .select("*")
+      .single();
+
+    if (error) {
+      console.error("خطأ حفظ اسم مديرة المدرسة:", error);
+      alert("حدث خطأ أثناء حفظ اسم مديرة المدرسة");
+      return;
+    }
+
+    setForm((prev) => ({
+      ...prev,
+      manager_name: data?.manager_name || managerName,
+    }));
+  };
+
+  const saveManagerSignature = async (signature) => {
+    setForm((prev) => ({
+      ...prev,
+      manager_signature: signature || "",
+    }));
+
+    const { data, error } = await supabase
+      .from("meetings")
+      .update({
+        manager_signature: signature || "",
+        manager_name: form.manager_name || "خيرية الخالدي",
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", meeting.id)
+      .select("*")
+      .single();
+
+    if (error) {
+      console.error("خطأ حفظ توقيع مديرة المدرسة:", error);
+      alert("حدث خطأ أثناء حفظ توقيع مديرة المدرسة");
+      return;
+    }
+
+    setForm((prev) => ({
+      ...prev,
+      manager_signature: data?.manager_signature || signature || "",
+      manager_name: data?.manager_name || prev.manager_name || "خيرية الخالدي",
+    }));
+  };
+
+  /* -------------------------------------------------------
+     تغيير بيانات الحاضر
+  ------------------------------------------------------- */
+
+  const updateAttendeeLocal = (attendeeId, field, value) => {
+    setAttendees((prev) =>
+      prev.map((attendee) =>
+        String(attendee.id) === String(attendeeId)
+          ? { ...attendee, [field]: value }
+          : attendee
+      )
+    );
+  };
+
+  /* -------------------------------------------------------
+     إضافة حاضر جديد
+  ------------------------------------------------------- */
+
+  const addAttendee = async () => {
+    if (!meeting?.id || addingAttendee) return;
+
+    setAddingAttendee(true);
+
+    try {
+      const payload = {
+        meeting_id: meeting.id,
+        attendee_name: "",
+        job_title: "",
+        attended: false,
+        signature: "",
+      };
+
+      const { data, error } = await supabase
+        .from("meeting_attendees")
+        .insert([payload])
+        .select("*")
+        .single();
+
+      if (error) throw error;
+
+      setAttendees((prev) => [...prev, data]);
+    } catch (error) {
+      console.error("خطأ إضافة حاضر:", error);
+      alert(
+        "حدث خطأ أثناء إضافة الحاضر:\n\n" +
+          (error.message || "خطأ غير معروف")
+      );
+    } finally {
+      setAddingAttendee(false);
+    }
+  };
+
+  /* -------------------------------------------------------
+     حفظ بيانات حاضر مباشرة عند مغادرة الحقل
+  ------------------------------------------------------- */
+
+  const saveAttendeeField = async (attendee) => {
+    if (!attendee?.id || !meeting?.id) return;
+
+    const { error } = await supabase
+      .from("meeting_attendees")
+      .update({
+        attendee_name: attendee.name || "",
+        job_title: attendee.job_title || "",
+        attended: Boolean(attendee.attended),
+        signature: attendee.signature || "",
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", attendee.id)
+      .eq("meeting_id", meeting.id);
+
+    if (error) {
+      console.error("خطأ حفظ بيانات الحاضر:", error);
+      alert(
+        "تعذر حفظ بيانات الحاضر.\n\n" +
+          (error.message || "خطأ غير معروف")
+      );
+      return;
+    }
+  };
+
+  /* -------------------------------------------------------
+     تسجيل / إلغاء الحضور
+  ------------------------------------------------------- */
+
+  const toggleAttendance = async (attendee) => {
+    if (!attendee?.id || !meeting?.id) return;
+
+    const previousValue = Boolean(attendee.attended);
+    const newValue = !previousValue;
+
+    // تحديث الواجهة مباشرة
+    setAttendees((prev) =>
+      prev.map((item) =>
+        String(item.id) === String(attendee.id)
+          ? { ...item, attended: newValue }
+          : item
+      )
+    );
+
+    try {
+      // نحفظ قيمة الحضور فقط؛ لا نستخدم select بعد التحديث
+      // حتى لا يفشل الحفظ بسبب مشكلة في إرجاع الصف بعد UPDATE.
+      const { error } = await supabase
+        .from("meeting_attendees")
+        .update({
+          attended: newValue,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", attendee.id)
+        .eq("meeting_id", meeting.id);
+
+      if (error) {
+        console.error("خطأ حفظ الحضور:", error);
+        console.error("تفاصيل الخطأ:", {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code,
+        });
+
+        // إعادة الحالة السابقة إذا فشل الحفظ
+        setAttendees((prev) =>
+          prev.map((item) =>
+            String(item.id) === String(attendee.id)
+              ? { ...item, attended: previousValue }
+              : item
+          )
+        );
+
+        alert(
+          "تعذر حفظ حالة الحضور.\n\n" +
+            (error.message || "خطأ غير معروف")
+        );
+        return;
+      }
+
+      console.log("تم حفظ الحضور:", {
+        attendeeId: attendee.id,
+        meetingId: meeting.id,
+        attended: newValue,
+      });
+    } catch (error) {
+      console.error("خطأ غير متوقع أثناء حفظ الحضور:", error);
+
+      setAttendees((prev) =>
+        prev.map((item) =>
+          String(item.id) === String(attendee.id)
+            ? { ...item, attended: previousValue }
+            : item
+        )
+      );
+
+      alert(
+        "حدث خطأ أثناء حفظ الحضور.\n\n" +
+          (error?.message || "خطأ غير معروف")
+      );
+    }
+  };
+
+  /* -------------------------------------------------------
+     تسجيل حضور الجميع
+  ------------------------------------------------------- */
+
+  const markAllPresent = async () => {
+    if (!meeting?.id || attendees.length === 0) return;
+
+    try {
+      const { error } = await supabase
+        .from("meeting_attendees")
+        .update({
+          attended: true,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("meeting_id", meeting.id);
+
+      if (error) throw error;
+
+      setAttendees((prev) =>
+        prev.map((attendee) => ({
+          ...attendee,
+          attended: true,
+        }))
+      );
+    } catch (error) {
+      console.error("خطأ تسجيل حضور الجميع:", error);
+      alert(
+        "تعذر تسجيل حضور الجميع.\n\n" +
+          (error?.message || "خطأ غير معروف")
+      );
+    }
+  };
+
+  /* -------------------------------------------------------
+     حفظ التوقيع
+  ------------------------------------------------------- */
+
+  const saveSignature = async (attendee, signature) => {
+    if (!attendee?.id || !meeting?.id) return;
+
+    updateAttendeeLocal(attendee.id, "signature", signature || "");
+
+    const { error } = await supabase
+      .from("meeting_attendees")
+      .update({
+        signature: signature || "",
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", attendee.id)
+      .eq("meeting_id", meeting.id);
+
+    if (error) {
+      console.error("خطأ حفظ التوقيع:", error);
+    }
+  };
+
+  /* -------------------------------------------------------
+     حذف حاضر
+  ------------------------------------------------------- */
+
+  const deleteAttendee = async (attendeeId) => {
+    const confirmed = window.confirm("هل تريدين حذف هذا الحاضر؟");
+    if (!confirmed) return;
+
+    const { error } = await supabase
+      .from("meeting_attendees")
+      .delete()
+      .eq("id", attendeeId)
+      .eq("meeting_id", meeting.id);
+
+    if (error) {
+      console.error("خطأ حذف الحاضر:", error);
+      alert("حدث خطأ أثناء حذف الحاضر");
+      return;
+    }
+
+    setAttendees((prev) =>
+      prev.filter(
+        (item) => String(item.id) !== String(attendeeId)
+      )
+    );
+  };
+
+  /* -------------------------------------------------------
+     حفظ جميع بيانات الحضور
+  ------------------------------------------------------- */
+
+  const saveAllAttendees = async () => {
+    if (!meeting?.id || attendees.length === 0) return;
+
+    for (const attendee of attendees) {
+      if (!attendee?.id) continue;
+
+      const { error } = await supabase
+        .from("meeting_attendees")
+        .update({
+          attendee_name: attendee.name || "",
+          job_title: attendee.job_title || "",
+          attended: Boolean(attendee.attended),
+          signature: attendee.signature || "",
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", attendee.id)
+        .eq("meeting_id", meeting.id);
+
+      if (error) {
+        console.error("خطأ حفظ بيانات الحاضر:", error);
+        throw error;
+      }
+    }
+  };
+
+  /* -------------------------------------------------------
+     حفظ المحضر
+  ------------------------------------------------------- */
+
+  const saveMeeting = async () => {
+    if (saving || !meeting?.id) return;
+
+    setSaving(true);
+
+    try {
+      const payload = {
+        committee_id: committee.id,
+        meeting_number: Number(form.meeting_number) || 0,
+        meeting_date: form.meeting_date || null,
+        meeting_time: form.meeting_time || null,
+        meeting_place: form.meeting_place || null,
+        meeting_status: form.meeting_status || "قادم",
+        subject: form.subject || "",
+        notes: form.notes || null,
+        discussion: form.discussion || null,
+        recommendations: form.recommendations || null,
+        manager_name: form.manager_name || "خيرية الخالدي",
+        manager_signature: form.manager_signature || "",
+        updated_at: new Date().toISOString(),
+      };
+
+      const { data, error } = await supabase
+        .from("meetings")
+        .update(payload)
+        .eq("id", meeting.id)
+        .select("*")
+        .single();
+
+      if (error) throw error;
+
+      await saveAllAttendees();
+
+      alert("تم حفظ محضر الاجتماع وبيانات الحضور بنجاح ✓");
+      onSaved(data);
+    } catch (error) {
+      console.error("خطأ حفظ المحضر:", error);
+      alert(
+        "حدث خطأ أثناء حفظ المحضر:\n\n" +
+          (error.message || "خطأ غير معروف")
+      );
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  /* -------------------------------------------------------
+     الطباعة
+  ------------------------------------------------------- */
+
+ const printMeeting = async () => {
+  if (saving) return;
+
+  await saveMeeting();
+
+  setTimeout(() => {
+    window.print();
+  }, 500);
+};
+
+  /* -------------------------------------------------------
+     حذف الاجتماع
+  ------------------------------------------------------- */
+
+  const deleteMeeting = async () => {
+    const confirmed = window.confirm(
+      "هل أنتِ متأكدة من حذف هذا الاجتماع؟"
+    );
+
+    if (!confirmed) return;
+
+    try {
+      /* حذف الحضور أولاً حتى لا يتأثر الحذف إذا لم يكن هناك CASCADE */
+      const { error: attendeesError } = await supabase
+        .from("meeting_attendees")
+        .delete()
+        .eq("meeting_id", meeting.id);
+
+      if (attendeesError) throw attendeesError;
+
+      const { error } = await supabase
+        .from("meetings")
+        .delete()
+        .eq("id", meeting.id);
+
+      if (error) throw error;
+
+      alert("تم حذف الاجتماع بنجاح");
+      onDeleted(meeting.id);
+    } catch (error) {
+      console.error("خطأ حذف الاجتماع:", error);
+      alert(
+        "حدث خطأ أثناء حذف الاجتماع:\n\n" +
+          (error.message || "خطأ غير معروف")
+      );
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="committee-meeting-editor">
+        <div
+          style={{
+            padding: "50px",
+            textAlign: "center",
+          }}
+        >
+          جاري تحميل بيانات المحضر...
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="committee-meeting-editor">
+      <div className="committee-editor-header">
+        <div>
+          <span>محضر اجتماع اللجنة</span>
+
+          <h3>
+            {form.subject || `الاجتماع رقم ${form.meeting_number}`}
+          </h3>
+        </div>
+
+        <button type="button" onClick={onClose}>
+          ×
+        </button>
+      </div>
+
+      {/* =================================================
+          البيانات الأساسية
+      ================================================= */}
+
+      <div className="committee-meeting-form-section">
+        <div className="committee-form-section-title">
+          <span>01</span>
+
+          <div>
+            <small>البيانات الأساسية</small>
+            <h4>بيانات الاجتماع</h4>
+          </div>
+        </div>
+
+        <div className="committee-editor-grid">
+          <label>
+            <span>رقم الاجتماع</span>
+            <input
+              type="number"
+              value={form.meeting_number || ""}
+              onChange={(e) =>
+                handleChange("meeting_number", e.target.value)
+              }
+            />
+          </label>
+
+          <label>
+            <span>التاريخ</span>
+            <input
+              type="date"
+              value={form.meeting_date || ""}
+              onChange={(e) =>
+                handleChange("meeting_date", e.target.value)
+              }
+            />
+          </label>
+
+          <label>
+            <span>اليوم</span>
+            <input
+              value={getArabicDay(form.meeting_date)}
+              readOnly
+            />
+          </label>
+
+          <label>
+            <span>مكان الاجتماع</span>
+            <input
+              value={form.meeting_place || ""}
+              onChange={(e) =>
+                handleChange("meeting_place", e.target.value)
+              }
+              placeholder="مثال: قاعة الاجتماعات"
+            />
+          </label>
+
+          <label>
+            <span>حالة الاجتماع</span>
+            <select
+              value={form.meeting_status || "قادم"}
+              onChange={(e) =>
+                handleChange("meeting_status", e.target.value)
+              }
+            >
+              <option value="قادم">قادم</option>
+              <option value="منفذ">منفذ</option>
+            </select>
+          </label>
+
+          <label style={{ gridColumn: "1 / -1" }}>
+            <span>موضوع الاجتماع</span>
+            <input
+              value={form.subject || ""}
+              onChange={(e) =>
+                handleChange("subject", e.target.value)
+              }
+              placeholder="موضوع الاجتماع"
+            />
+          </label>
+        </div>
+      </div>
+
+      {/* =================================================
+          تفاصيل الاجتماع
+      ================================================= */}
+
+      <div className="committee-meeting-form-section">
+        <div className="committee-form-section-title">
+          <span>02</span>
+
+          <div>
+            <small>محاور المحضر</small>
+            <h4>تفاصيل الاجتماع</h4>
+          </div>
+        </div>
+
+        <div className="committee-editor-full">
+          <label>
+            <span>جدول الأعمال</span>
+            <textarea
+              value={form.notes || ""}
+              onChange={(e) => handleChange("notes", e.target.value)}
+              placeholder="اكتبي جدول أعمال الاجتماع..."
+            />
+          </label>
+
+          <label>
+            <span>أبرز ما تمت مناقشته</span>
+            <textarea
+              value={form.discussion || ""}
+              onChange={(e) =>
+                handleChange("discussion", e.target.value)
+              }
+              placeholder="اكتبي أبرز الموضوعات والمناقشات..."
+            />
+          </label>
+
+          <label>
+            <span>القرارات والتوصيات</span>
+            <textarea
+              value={form.recommendations || ""}
+              onChange={(e) =>
+                handleChange("recommendations", e.target.value)
+              }
+              placeholder="اكتبي القرارات والتوصيات..."
+            />
+          </label>
+        </div>
+      </div>
+
+      {/* =================================================
+          الحضور والتوقيع
+      ================================================= */}
+
+      <div className="committee-meeting-form-section committee-attendance-section">
+        <div className="committee-form-section-title">
+          <span>03</span>
+
+          <div>
+            <small>التوثيق</small>
+            <h4>سجل الحضور والتوقيع</h4>
+          </div>
+
+          <div
+            style={{
+              display: "flex",
+              gap: "8px",
+              flexWrap: "wrap",
+              marginInlineStart: "auto",
+            }}
+            className="no-print"
+          >
+            <button
+              type="button"
+              className="committee-add-attendee-button"
+              onClick={markAllPresent}
+              disabled={attendees.length === 0}
+            >
+              ✓ تسجيل حضور الجميع
+            </button>
+
+            <button
+              type="button"
+              className="committee-add-attendee-button"
+              onClick={addAttendee}
+              disabled={addingAttendee}
+            >
+              ＋ {addingAttendee ? "جاري الإضافة..." : "إضافة حاضر"}
+            </button>
+          </div>
+        </div>
+
+        {attendees.length === 0 ? (
+          <div className="committee-no-attendees">
+            <div>👥</div>
+            <strong>لا توجد أسماء للحضور في هذا الاجتماع</strong>
+            <p>
+              اضغطي على «إضافة حاضر» لإضافة الاسم والمسمى الوظيفي ثم تسجيل
+              الحضور والتوقيع.
+            </p>
+          </div>
+        ) : (
+          <div className="committee-attendance-table-wrapper">
+            <table className="committee-attendance-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>اسم الحاضر</th>
+                  <th>المسمى الوظيفي</th>
+                  <th>الحضور</th>
+                  <th>التوقيع</th>
+                  <th className="no-print">إجراء</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {attendees.map((attendee, index) => (
+                  <tr key={attendee.id || `attendee-${index}`}>
+                    <td>{index + 1}</td>
+
+                    <td>
+                      <input
+                        type="text"
+                        value={attendee.name || ""}
+                        onChange={(e) =>
+                          updateAttendeeLocal(
+                            attendee.id,
+                            "name",
+                            e.target.value
+                          )
+                        }
+                        onBlur={() => saveAttendeeField(attendee)}
+                        placeholder="اسم الحاضر"
+                      />
+                    </td>
+
+                    <td>
+                      <input
+                        type="text"
+                        value={attendee.job_title || ""}
+                        onChange={(e) =>
+                          updateAttendeeLocal(
+                            attendee.id,
+                            "job_title",
+                            e.target.value
+                          )
+                        }
+                        onBlur={() => saveAttendeeField(attendee)}
+                        placeholder="المسمى الوظيفي"
+                      />
+                    </td>
+
+                    <td>
+                      <label
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          gap: "8px",
+                          cursor: "pointer",
+                        }}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={Boolean(attendee.attended)}
+                          onChange={() => toggleAttendance(attendee)}
+                        />
+
+                        <span>
+                          {attendee.attended ? "حاضر" : "غائب"}
+                        </span>
+                      </label>
+                    </td>
+
+                    <td>
+                      {attendee.attended ? (
+                        <SignaturePad
+                          value={attendee.signature || ""}
+                          onChange={(signature) =>
+                            saveSignature(attendee, signature)
+                          }
+                        />
+                      ) : (
+                        <span>— سجل الحضور أولاً —</span>
+                      )}
+                    </td>
+
+                    <td className="no-print">
+                      <button
+                        type="button"
+                        className="committee-delete-attendee-button"
+                        onClick={() => deleteAttendee(attendee.id)}
+                        title="حذف الحاضر"
+                      >
+                        🗑️
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      {/* =================================================
+          اعتماد المحضر
+      ================================================= */}
+
+      <div className="committee-minutes-footer">
+        <div>
+          <span>رئيسة اللجنة</span>
+          <strong>مديرة المدرسة</strong>
+        </div>
+
+        <div>
+          <span>الاسم</span>
+          <input
+            type="text"
+            value={form.manager_name || ""}
+            onChange={(e) => handleChange("manager_name", e.target.value)}
+            onBlur={saveManagerName}
+            placeholder="اسم مديرة المدرسة"
+            className="committee-manager-name-input"
+          />
+        </div>
+
+        <div>
+          <span>التوقيع</span>
+          <SignaturePad
+            value={form.manager_signature || ""}
+            onChange={saveManagerSignature}
+          />
+        </div>
+      </div>
+
+
+{/* =================================================
+    نسخة الطباعة الرسمية
+================================================= */}
+
+<div className="meeting-print-document">
+
+  {/* رأس المحضر */}
+  <div className="meeting-print-header">
+
+    <div className="meeting-print-school">
+      <img
+        src={logo}
+        alt="شعار مدارس الأندلس"
+        className="meeting-print-logo"
+      />
+
+      <div>
+        <strong>
+          متوسطة وثانوية الأندلس بالطائف - بنات
+        </strong>
+
+        <span>
+          مدارس الأندلس الأهلية بالطائف
+        </span>
+      </div>
+    </div>
+
+    <div className="meeting-print-title">
+      <h1>محضر اجتماع اللجنة</h1>
+
+      <p>
+        {committee?.title || "اللجنة المدرسية"}
+      </p>
+    </div>
+
+  </div>
+
+
+  {/* خط فاصل */}
+  <div className="meeting-print-divider" />
+
+
+  {/* بيانات الاجتماع */}
+  <section className="meeting-print-section">
+
+    <div className="meeting-print-section-title">
+      <span>أولاً</span>
+      <strong>بيانات الاجتماع</strong>
+    </div>
+
+    <table className="meeting-print-info-table">
+      <tbody>
+
+        <tr>
+          <th>رقم الاجتماع</th>
+          <td>
+            {form.meeting_number || "—"}
+          </td>
+
+          <th>التاريخ</th>
+          <td>
+            {form.meeting_date || "—"}
+          </td>
+        </tr>
+
+        <tr>
+          <th>اليوم</th>
+          <td>
+            {getArabicDay(form.meeting_date) || "—"}
+          </td>
+
+          <th>الوقت</th>
+          <td>
+            {form.meeting_time || "—"}
+          </td>
+        </tr>
+
+        <tr>
+          <th>مكان الاجتماع</th>
+          <td>
+            {form.meeting_place || "—"}
+          </td>
+
+          <th>حالة الاجتماع</th>
+          <td>
+            {form.meeting_status || "—"}
+          </td>
+        </tr>
+
+        <tr>
+          <th>موضوع الاجتماع</th>
+          <td colSpan="3">
+            {form.subject || "—"}
+          </td>
+        </tr>
+
+      </tbody>
+    </table>
+
+  </section>
+
+
+  {/* جدول الأعمال */}
+  <section className="meeting-print-section">
+
+    <div className="meeting-print-section-title">
+      <span>ثانياً</span>
+      <strong>جدول الأعمال</strong>
+    </div>
+
+    <div className="meeting-print-text-box">
+      {form.notes?.trim() ? (
+        form.notes
+      ) : (
+        "لا يوجد"
+      )}
+    </div>
+
+  </section>
+
+
+  {/* المناقشات */}
+  <section className="meeting-print-section">
+
+    <div className="meeting-print-section-title">
+      <span>ثالثاً</span>
+      <strong>أبرز ما تمت مناقشته</strong>
+    </div>
+
+    <div className="meeting-print-text-box">
+      {form.discussion?.trim() ? (
+        form.discussion
+      ) : (
+        "لا يوجد"
+      )}
+    </div>
+
+  </section>
+
+
+  {/* القرارات والتوصيات */}
+  <section className="meeting-print-section">
+
+    <div className="meeting-print-section-title">
+      <span>رابعاً</span>
+      <strong>القرارات والتوصيات</strong>
+    </div>
+
+    <div className="meeting-print-text-box">
+      {form.recommendations?.trim() ? (
+        form.recommendations
+      ) : (
+        "لا يوجد"
+      )}
+    </div>
+
+  </section>
+
+
+  {/* الحضور */}
+  <section className="meeting-print-section meeting-print-attendance">
+
+    <div className="meeting-print-section-title">
+      <span>خامساً</span>
+      <strong>سجل الحضور والتوقيع</strong>
+    </div>
+
+    {attendees.length > 0 ? (
+
+      <table className="meeting-print-attendance-table">
+
+        <thead>
+          <tr>
+            <th className="print-number">م</th>
+            <th>اسم الحاضرة</th>
+            <th>المسمى الوظيفي</th>
+            <th className="print-attendance">الحضور</th>
+            <th className="print-signature">التوقيع</th>
+          </tr>
+        </thead>
+
+        <tbody>
+
+          {attendees.map((attendee, index) => (
+
+            <tr
+              key={
+                attendee.id ||
+                `print-attendee-${index}`
+              }
+            >
+
+              <td>
+                {index + 1}
+              </td>
+
+              <td>
+                {attendee.name || "—"}
+              </td>
+
+              <td>
+                {attendee.job_title || "—"}
+              </td>
+
+              <td>
+                {attendee.attended
+                  ? "حاضر"
+                  : "غائب"}
+              </td>
+
+              <td className="print-signature-cell">
+
+                {attendee.signature ? (
+                  <img
+                    src={attendee.signature}
+                    alt="توقيع"
+                  />
+                ) : (
+                  "—"
+                )}
+
+              </td>
+
+            </tr>
+
+          ))}
+
+        </tbody>
+
+      </table>
+
+    ) : (
+
+      <div className="meeting-print-empty">
+        لا توجد بيانات للحضور.
+      </div>
+
+    )}
+
+  </section>
+
+
+  {/* اعتماد المحضر */}
+  <section className="meeting-print-approval">
+
+    <div className="meeting-print-approval-title">
+      اعتماد المحضر
+    </div>
+
+    <div className="meeting-print-approval-grid">
+
+      <div>
+        <span>رئيسة اللجنة</span>
+        <strong>مديرة المدرسة</strong>
+      </div>
+
+      <div>
+        <span>الاسم</span>
+        <strong>
+          {form.manager_name || "خيرية الخالدي"}
+        </strong>
+      </div>
+
+      <div className="meeting-print-manager-signature">
+        <span>التوقيع</span>
+
+        {form.manager_signature ? (
+          <img
+            src={form.manager_signature}
+            alt="توقيع مديرة المدرسة"
+          />
+        ) : (
+          <div className="meeting-print-sign-line" />
+        )}
+      </div>
+
+    </div>
+
+  </section>
+
+
+  {/* أسفل الصفحة */}
+  <div className="meeting-print-footer">
+
+    <span>
+      متوسطة وثانوية الأندلس بالطائف - بنات
+    </span>
+
+    <span>
+      محضر اجتماع اللجنة
+    </span>
+
+  </div>
+
+</div>
+
+      {/* =================================================
+          الأزرار
+      ================================================= */}
+
+      <div className="committee-editor-actions no-print">
+        <button
+          type="button"
+          className="committee-save-meeting"
+          onClick={saveMeeting}
+          disabled={saving}
+        >
+          {saving ? "جاري الحفظ..." : "💾 حفظ المحضر"}
+        </button>
+
+        <button
+          type="button"
+          className="committee-print-meeting"
+          onClick={printMeeting}
+          disabled={saving}
+        >
+          🖨️ طباعة محضر الاجتماع
+        </button>
+
+        <button
+          type="button"
+          className="committee-delete-meeting"
+          onClick={deleteMeeting}
+        >
+          🗑️ حذف الاجتماع
+        </button>
+      </div>
+    </div>
+  );
+}
 
 /* =========================================================
    المكوّن الرئيسي
@@ -958,11 +2561,6 @@ function CommitteesDashboard() {
     setSelectedSection,
   ] = useState(null);
 
-  /*
-    مهم جدًا:
-    هذه الحالات موجودة مرة واحدة فقط.
-    الاجتماعات تعتمد على اللجنة المختارة.
-  */
   const [
     meetings,
     setMeetings,
@@ -974,177 +2572,97 @@ function CommitteesDashboard() {
   ] = useState(null);
 
   const [
-    meetingForm,
-    setMeetingForm,
-  ] = useState(null);
+    loadingMeetings,
+    setLoadingMeetings,
+  ] = useState(false);
+
+  const [
+    savingMeeting,
+    setSavingMeeting,
+  ] = useState(false);
+
+  const [
+    errorMessage,
+    setErrorMessage,
+  ] = useState("");
 
   /* =======================================================
-     تحميل اجتماعات اللجنة الحالية
+     تحميل اجتماعات اللجنة
+  ======================================================= */
+
+  const loadMeetings = async (
+    committeeId
+  ) => {
+    setLoadingMeetings(true);
+    setErrorMessage("");
+
+    try {
+      const {
+        data,
+        error,
+      } = await supabase
+        .from("meetings")
+        .select("*")
+        .eq(
+          "committee_id",
+          committeeId
+        )
+        .order(
+          "meeting_date",
+          {
+            ascending: true,
+          }
+        )
+        .order(
+          "meeting_number",
+          {
+            ascending: true,
+          }
+        );
+
+      if (error) {
+        throw error;
+      }
+
+      setMeetings(
+        data || []
+      );
+    } catch (error) {
+      console.error(
+        "خطأ تحميل اجتماعات اللجنة:",
+        error
+      );
+
+      setMeetings([]);
+
+      setErrorMessage(
+        error.message ||
+          "تعذر تحميل اجتماعات اللجنة"
+      );
+    } finally {
+      setLoadingMeetings(
+        false
+      );
+    }
+  };
+
+  /* =======================================================
+     عند اختيار لجنة
   ======================================================= */
 
   useEffect(() => {
     if (!selectedCommittee) {
       setMeetings([]);
-      setSelectedMeeting(null);
-      setMeetingForm(null);
+      setSelectedMeeting(
+        null
+      );
       return;
     }
 
-    const committeeStorageKey =
-      getMeetingsStorageKey(
-        selectedCommittee.id
-      );
-
-    try {
-      const saved =
-        localStorage.getItem(
-          committeeStorageKey
-        );
-
-      if (saved) {
-        const parsed =
-          JSON.parse(saved);
-
-        if (Array.isArray(parsed)) {
-          setMeetings(
-            parsed.map(
-              (meeting) => ({
-                ...meeting,
-                attendees:
-                  Array.isArray(
-                    meeting.attendees
-                  )
-                    ? meeting.attendees
-                    : [],
-              })
-            )
-          );
-        } else {
-          setMeetings(
-            createDefaultMeetings(selectedCommittee.id).map(
-              (meeting) => ({
-                ...meeting,
-                attendees: [],
-              })
-            )
-          );
-        }
-
-        setSelectedMeeting(null);
-        setMeetingForm(null);
-
-        return;
-      }
-
-      /*
-        ترحيل الاجتماعات القديمة:
-        الاجتماعات القديمة يتم نقلها للجنة الإدارية فقط.
-      */
-
-      if (
-        selectedCommittee.id === 1
-      ) {
-        const oldSaved =
-          localStorage.getItem(
-            LEGACY_STORAGE_KEY
-          );
-
-        if (oldSaved) {
-          const parsed =
-            JSON.parse(oldSaved);
-
-          const migrated =
-            Array.isArray(parsed)
-              ? parsed.map(
-                  (meeting) => ({
-                    ...meeting,
-                    attendees:
-                      Array.isArray(
-                        meeting.attendees
-                      )
-                        ? meeting.attendees
-                        : [],
-                  })
-                )
-              : createDefaultMeetings(selectedCommittee.id).map(
-                  (meeting) => ({
-                    ...meeting,
-                    attendees: [],
-                  })
-                );
-
-          setMeetings(migrated);
-
-          localStorage.setItem(
-            committeeStorageKey,
-            JSON.stringify(migrated)
-          );
-
-          setSelectedMeeting(null);
-          setMeetingForm(null);
-
-          return;
-        }
-      }
-
-      /*
-        كل لجنة أخرى تحصل على اجتماعاتها الخاصة.
-        نستخدم نسخة جديدة حتى لا تتشارك اللجان نفس البيانات.
-      */
-
-      const freshMeetings =
-        createDefaultMeetings(selectedCommittee.id).map(
-          (meeting) => ({
-            ...meeting,
-            attendees: [],
-          })
-        );
-
-      setMeetings(
-        freshMeetings
-      );
-
-      setSelectedMeeting(null);
-      setMeetingForm(null);
-
-    } catch (error) {
-      console.error(
-        "خطأ في تحميل اجتماعات اللجنة:",
-        error
-      );
-
-      const freshMeetings =
-        createDefaultMeetings(selectedCommittee.id).map(
-          (meeting) => ({
-            ...meeting,
-            attendees: [],
-          })
-        );
-
-      setMeetings(
-        freshMeetings
-      );
-
-      setSelectedMeeting(null);
-      setMeetingForm(null);
-    }
-  }, [selectedCommittee]);
-
-  /* =======================================================
-     حفظ اجتماعات اللجنة الحالية
-  ======================================================= */
-
-  useEffect(() => {
-    if (!selectedCommittee) return;
-
-    localStorage.setItem(
-      getMeetingsStorageKey(
-        selectedCommittee.id
-      ),
-      JSON.stringify(meetings)
+    loadMeetings(
+      selectedCommittee.id
     );
   }, [
-    meetings,
     selectedCommittee,
   ]);
 
@@ -1156,28 +2674,13 @@ function CommitteesDashboard() {
     useMemo(() => {
       return meetings.filter(
         (meeting) =>
-          meeting.status ===
+          meeting.meeting_status ===
           "منفذ"
       ).length;
     }, [meetings]);
 
   /* =======================================================
-     بيانات اللجنة الحالية
-  ======================================================= */
-
-  const currentCommitteeData =
-    selectedCommittee?.id === 2
-      ? guidanceCommitteeData
-      : selectedCommittee?.id === 3
-      ? academicAchievementCommitteeData
-      : selectedCommittee?.id === 4
-      ? safetyCommitteeData
-      : selectedCommittee?.id === 5
-      ? excellenceCommitteeData
-      : administrativeCommitteeData;
-
-  /* =======================================================
-     فتح قسم
+     فتح القسم
   ======================================================= */
 
   const openSection = (
@@ -1190,14 +2693,10 @@ function CommitteesDashboard() {
     setSelectedMeeting(
       null
     );
-
-    setMeetingForm(
-      null
-    );
   };
 
   /* =======================================================
-     العودة
+     إغلاق القسم
   ======================================================= */
 
   const closeSection = () => {
@@ -1206,10 +2705,6 @@ function CommitteesDashboard() {
     );
 
     setSelectedMeeting(
-      null
-    );
-
-    setMeetingForm(
       null
     );
   };
@@ -1224,228 +2719,166 @@ function CommitteesDashboard() {
     setSelectedMeeting(
       meeting
     );
-
-    setMeetingForm({
-      ...meeting,
-      attendees:
-        meeting.attendees || [],
-    });
-  };
-
-  /* =======================================================
-     تغيير بيانات الاجتماع
-  ======================================================= */
-
-  const handleMeetingChange = (
-    field,
-    value
-  ) => {
-    setMeetingForm((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
-  };
-
-  /* =======================================================
-     تغيير بيانات حاضر
-  ======================================================= */
-
-  const handleAttendeeChange = (
-    attendeeId,
-    field,
-    value
-  ) => {
-    setMeetingForm((prev) => ({
-      ...prev,
-
-      attendees:
-        prev.attendees.map(
-          (attendee) =>
-            attendee.id ===
-            attendeeId
-              ? {
-                  ...attendee,
-                  [field]:
-                    value,
-                }
-              : attendee
-        ),
-    }));
-  };
-
-  /* =======================================================
-     إضافة حاضر
-  ======================================================= */
-
-  const addAttendee = () => {
-    setMeetingForm((prev) => ({
-      ...prev,
-
-      attendees: [
-        ...(prev.attendees || []),
-        createDefaultAttendee(),
-      ],
-    }));
-  };
-
-  /* =======================================================
-     حذف حاضر
-  ======================================================= */
-
-  const deleteAttendee = (
-    attendeeId
-  ) => {
-    setMeetingForm((prev) => ({
-      ...prev,
-
-      attendees:
-        prev.attendees.filter(
-          (attendee) =>
-            attendee.id !==
-            attendeeId
-        ),
-    }));
-  };
-
-  /* =======================================================
-     حفظ الاجتماع
-  ======================================================= */
-
-  const saveMeeting = () => {
-    if (!meetingForm) return;
-
-    const updatedMeeting = {
-      ...meetingForm,
-      attendees:
-        meetingForm.attendees || [],
-    };
-
-    setMeetings((prev) =>
-      prev.map((meeting) =>
-        meeting.id ===
-        updatedMeeting.id
-          ? updatedMeeting
-          : meeting
-      )
-    );
-
-    setSelectedMeeting(
-      updatedMeeting
-    );
-
-    alert(
-      "تم حفظ محضر الاجتماع بنجاح ✓"
-    );
   };
 
   /* =======================================================
      إضافة اجتماع
   ======================================================= */
 
-  const addMeeting = () => {
-    const newId =
-      meetings.length > 0
-        ? Math.max(
-            ...meetings.map(
-              (m) => m.id
-            )
-          ) + 1
-        : 1;
+  const addMeeting = async () => {
+    if (
+      !selectedCommittee ||
+      savingMeeting
+    ) {
+      return;
+    }
 
-    const newMeeting = {
-      id: newId,
-
-      title:
-        `الاجتماع رقم ${newId}`,
-
-      date: "",
-
-      day: "",
-
-      place: "",
-
-      status:
-        "لم يُنفذ",
-
-      agenda: "",
-
-      discussion: "",
-
-      decisions: "",
-
-      recommendations: "",
-
-      attendees: [],
-    };
-
-    setMeetings((prev) => [
-      ...prev,
-      newMeeting,
-    ]);
-
-    setSelectedMeeting(
-      newMeeting
+    setSavingMeeting(
+      true
     );
 
-    setMeetingForm({
-      ...newMeeting,
-    });
-  };
+    try {
+      const nextNumber =
+        meetings.length > 0
+          ? Math.max(
+              ...meetings.map(
+                (m) =>
+                  Number(
+                    m.meeting_number
+                  ) || 0
+              )
+            ) + 1
+          : 1;
 
-  /* =======================================================
-     حذف اجتماع
-  ======================================================= */
+      const {
+        data,
+        error,
+      } = await supabase
+        .from("meetings")
+        .insert([
+          {
+            committee_id:
+              selectedCommittee.id,
 
-  const deleteMeeting = (
-    id
-  ) => {
-    const confirmed =
-      window.confirm(
-        "هل أنتِ متأكدة من حذف هذا الاجتماع؟"
+            meeting_number:
+              nextNumber,
+
+            meeting_date:
+              null,
+
+            meeting_time:
+              null,
+
+            meeting_place:
+              null,
+
+            meeting_status:
+              "قادم",
+
+            subject:
+              `الاجتماع رقم ${nextNumber}`,
+
+            notes:
+              null,
+
+            recommendations:
+              null,
+          },
+        ])
+        .select()
+        .single();
+
+      if (error) {
+        throw error;
+      }
+
+      setMeetings(
+        (prev) => [
+          ...prev,
+          data,
+        ]
       );
 
-    if (!confirmed) return;
+      setSelectedMeeting(
+        data
+      );
 
-    setMeetings((prev) =>
-      prev.filter(
-        (meeting) =>
-          meeting.id !== id
-      )
+      alert(
+        "تمت إضافة الاجتماع بنجاح ✓"
+      );
+    } catch (error) {
+      console.error(
+        "خطأ إضافة الاجتماع:",
+        error
+      );
+
+      alert(
+        "حدث خطأ أثناء إضافة الاجتماع:\n\n" +
+          (error.message ||
+            "خطأ غير معروف")
+      );
+    } finally {
+      setSavingMeeting(
+        false
+      );
+    }
+  };
+
+  /* =======================================================
+     بعد حفظ اجتماع
+  ======================================================= */
+
+  const handleMeetingSaved = (
+    updatedMeeting
+  ) => {
+    setMeetings(
+      (prev) =>
+        prev.map(
+          (meeting) =>
+            String(
+              meeting.id
+            ) ===
+            String(
+              updatedMeeting.id
+            )
+              ? updatedMeeting
+              : meeting
+        )
+    );
+
+    setSelectedMeeting(
+      updatedMeeting
+    );
+  };
+
+  /* =======================================================
+     بعد حذف اجتماع
+  ======================================================= */
+
+  const handleMeetingDeleted = (
+    meetingId
+  ) => {
+    setMeetings(
+      (prev) =>
+        prev.filter(
+          (meeting) =>
+            String(
+              meeting.id
+            ) !==
+            String(
+              meetingId
+            )
+        )
     );
 
     setSelectedMeeting(
       null
     );
-
-    setMeetingForm(
-      null
-    );
   };
 
   /* =======================================================
-     طباعة المحضر
+     الصفحة الداخلية للجنة
   ======================================================= */
-
-  const printMeeting = () => {
-    if (!meetingForm) return;
-
-    setMeetings((prev) =>
-      prev.map((meeting) =>
-        meeting.id ===
-        meetingForm.id
-          ? meetingForm
-          : meeting
-      )
-    );
-
-    setTimeout(() => {
-      window.print();
-    }, 100);
-  };
-
-  /* =========================================================
-     صفحة اللجنة
-  ========================================================= */
 
   if (selectedCommittee) {
     return (
@@ -1493,14 +2926,13 @@ function CommitteesDashboard() {
                 setSelectedMeeting(
                   null
                 );
-
-                setMeetingForm(
-                  null
-                );
               }}
               type="button"
             >
-              <span>←</span>
+              <span>
+                ←
+              </span>
+
               العودة إلى ملف اللجان وفرق العمل
             </button>
           </div>
@@ -1512,16 +2944,22 @@ function CommitteesDashboard() {
               اللوحات الرئيسية
             </span>
 
-            <b>/</b>
+            <b>
+              /
+            </b>
 
             <span>
               ملف اللجان وفرق العمل
             </span>
 
-            <b>/</b>
+            <b>
+              /
+            </b>
 
             <strong>
-              {selectedCommittee.title}
+              {
+                selectedCommittee.title
+              }
             </strong>
           </div>
 
@@ -1535,21 +2973,30 @@ function CommitteesDashboard() {
                     closeSection
                   }
                 >
-                  <span>→</span>
+                  <span>
+                    →
+                  </span>
+
                   العودة لأقسام اللجنة
                 </button>
 
                 <div>
                   <span>
-                    {selectedCommittee.title}
+                    {
+                      selectedCommittee.title
+                    }
                   </span>
 
                   <h2>
-                    {selectedSection.title}
+                    {
+                      selectedSection.title
+                    }
                   </h2>
 
                   <p>
-                    {selectedSection.description}
+                    {
+                      selectedSection.description
+                    }
                   </p>
                 </div>
               </div>
@@ -1563,7 +3010,9 @@ function CommitteesDashboard() {
                 <div className="committee-content-stack">
                   <section className="committee-content-card">
                     <div className="committee-content-card-title">
-                      <span>01</span>
+                      <span>
+                        01
+                      </span>
 
                       <div>
                         <small>
@@ -1577,22 +3026,30 @@ function CommitteesDashboard() {
                     </div>
 
                     <div className="committee-goals-grid">
-                      {currentCommitteeData.goals.map(
+                      {getCommitteeData(
+                        selectedCommittee.id
+                      ).goals.map(
                         (
                           goal,
                           index
                         ) => (
                           <div
                             className="committee-goal-item"
-                            key={index}
+                            key={
+                              index
+                            }
                           >
                             <span>
-                              {index +
-                                1}
+                              {
+                                index +
+                                1
+                              }
                             </span>
 
                             <p>
-                              {goal}
+                              {
+                                goal
+                              }
                             </p>
                           </div>
                         )
@@ -1602,7 +3059,9 @@ function CommitteesDashboard() {
 
                   <section className="committee-content-card">
                     <div className="committee-content-card-title">
-                      <span>02</span>
+                      <span>
+                        02
+                      </span>
 
                       <div>
                         <small>
@@ -1616,22 +3075,30 @@ function CommitteesDashboard() {
                     </div>
 
                     <div className="committee-rules-list">
-                      {currentCommitteeData.formationRules.map(
+                      {getCommitteeData(
+                        selectedCommittee.id
+                      ).formationRules.map(
                         (
                           rule,
                           index
                         ) => (
                           <div
-                            key={index}
+                            key={
+                              index
+                            }
                             className="committee-rule-item"
                           >
                             <span>
-                              {index +
-                                1}
+                              {
+                                index +
+                                1
+                              }
                             </span>
 
                             <p>
-                              {rule}
+                              {
+                                rule
+                              }
                             </p>
                           </div>
                         )
@@ -1665,7 +3132,9 @@ function CommitteesDashboard() {
                 3 && (
                 <section className="committee-content-card">
                   <div className="committee-content-card-title">
-                    <span>01</span>
+                    <span>
+                      01
+                    </span>
 
                     <div>
                       <small>
@@ -1679,13 +3148,17 @@ function CommitteesDashboard() {
                   </div>
 
                   <div className="committee-tasks-list">
-                    {currentCommitteeData.tasks.map(
+                    {getCommitteeData(
+                      selectedCommittee.id
+                    ).tasks.map(
                       (
                         task,
                         index
                       ) => (
                         <div
-                          key={index}
+                          key={
+                            index
+                          }
                           className="committee-task-item"
                         >
                           <span>
@@ -1699,7 +3172,9 @@ function CommitteesDashboard() {
                           </span>
 
                           <p>
-                            {task}
+                            {
+                              task
+                            }
                           </p>
                         </div>
                       )
@@ -1709,7 +3184,7 @@ function CommitteesDashboard() {
               )}
 
               {/* =================================================
-                  الاجتماعات والمحاضر
+                  الاجتماعات
               ================================================= */}
 
               {selectedSection.id ===
@@ -1726,18 +3201,23 @@ function CommitteesDashboard() {
                       </h2>
 
                       <p>
-                        تسجيل اجتماعات اللجنة وتوثيق الحضور
-                        والتوقيعات والقرارات والتوصيات.
+                        تسجيل اجتماعات اللجنة وتوثيق الحضور والتوقيعات والقرارات والتوصيات.
                       </p>
                     </div>
 
                     <div className="committee-meetings-counter">
                       <strong>
-                        {completedMeetings}
+                        {
+                          completedMeetings
+                        }
                       </strong>
 
                       <span>
-                        من {meetings.length} اجتماع
+                        من{" "}
+                        {
+                          meetings.length
+                        }{" "}
+                        اجتماع
                       </span>
                     </div>
                   </div>
@@ -1749,625 +3229,177 @@ function CommitteesDashboard() {
                       onClick={
                         addMeeting
                       }
+                      disabled={
+                        savingMeeting
+                      }
                     >
                       <span>
                         ＋
                       </span>
 
-                      إضافة اجتماع
+                      {savingMeeting
+                        ? "جاري الإضافة..."
+                        : "إضافة اجتماع"}
                     </button>
                   </div>
 
-                  <div className="committee-meetings-grid">
-                    {meetings.map(
-                      (
-                        meeting
-                      ) => (
-                        <article
-                          key={
-                            meeting.id
-                          }
-                          className={`committee-meeting-card ${
-                            meeting.status ===
-                            "منفذ"
-                              ? "completed"
-                              : ""
-                          }`}
-                        >
-                          <div className="committee-meeting-card-top">
-                            <span>
-                              {String(
-                                meeting.id
-                              ).padStart(
-                                2,
-                                "0"
-                              )}
-                            </span>
+                  {errorMessage && (
+                    <div
+                      style={{
+                        marginTop:
+                          "15px",
+                        padding:
+                          "14px",
+                        borderRadius:
+                          "12px",
+                        background:
+                          "#fff1f1",
+                        color:
+                          "#a33",
+                        textAlign:
+                          "center",
+                      }}
+                    >
+                      {errorMessage}
+                    </div>
+                  )}
 
-                            <b
-                              className={
-                                meeting.status ===
-                                "منفذ"
-                                  ? "status-done"
-                                  : "status-pending"
+                  {loadingMeetings ? (
+                    <div className="committee-no-attendees">
+                      <div>
+                        ⏳
+                      </div>
+
+                      <strong>
+                        جاري تحميل اجتماعات اللجنة...
+                      </strong>
+                    </div>
+                  ) : meetings.length ===
+                    0 ? (
+                    <div className="committee-no-attendees">
+                      <div>
+                        📅
+                      </div>
+
+                      <strong>
+                        لا توجد اجتماعات لهذه اللجنة بعد
+                      </strong>
+
+                      <p>
+                        اضغطي على «إضافة اجتماع» لإنشاء أول اجتماع للجنة.
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="committee-meetings-grid">
+                      {meetings.map(
+                        (
+                          meeting
+                        ) => (
+                          <article
+                            key={
+                              meeting.id
+                            }
+                            className={`committee-meeting-card ${
+                              meeting.meeting_status ===
+                              "منفذ"
+                                ? "completed"
+                                : ""
+                            }`}
+                          >
+                            <div className="committee-meeting-card-top">
+                              <span>
+                                {String(
+                                  meeting.meeting_number ||
+                                    0
+                                ).padStart(
+                                  2,
+                                  "0"
+                                )}
+                              </span>
+
+                              <b
+                                className={
+                                  meeting.meeting_status ===
+                                  "منفذ"
+                                    ? "status-done"
+                                    : "status-pending"
+                                }
+                              >
+                                {
+                                  meeting.meeting_status
+                                }
+                              </b>
+                            </div>
+
+                            <h3>
+                              {
+                                meeting.subject
+                              }
+                            </h3>
+
+                            <div className="committee-meeting-meta">
+                              <span>
+                                📅{" "}
+                                {meeting.meeting_date ||
+                                  "لم يحدد التاريخ"}
+                              </span>
+
+                              <span>
+                                📍{" "}
+                                {meeting.meeting_place ||
+                                  "لم يحدد المكان"}
+                              </span>
+                            </div>
+
+                            <button
+                              type="button"
+                              className="committee-open-meeting"
+                              onClick={() =>
+                                openMeeting(
+                                  meeting
+                                )
                               }
                             >
-                              {
-                                meeting.status
-                              }
-                            </b>
-                          </div>
+                              فتح المحضر
 
-                          <h3>
-                            {
-                              meeting.title
-                            }
-                          </h3>
-
-                          <div className="committee-meeting-meta">
-                            <span>
-                              📅{" "}
-                              {meeting.date ||
-                                "لم يحدد التاريخ"}
-                            </span>
-
-                            <span>
-                              📍{" "}
-                              {meeting.place ||
-                                "لم يحدد المكان"}
-                            </span>
-
-                            <span>
-                              👥{" "}
-                              {
-                                meeting.attendees
-                                  ?.length || 0
-                              }{" "}
-                              حاضر
-                            </span>
-                          </div>
-
-                          <button
-                            type="button"
-                            className="committee-open-meeting"
-                            onClick={() =>
-                              openMeeting(
-                                meeting
-                              )
-                            }
-                          >
-                            فتح المحضر
-
-                            <span>
-                              ←
-                            </span>
-                          </button>
-                        </article>
-                      )
-                    )}
-                  </div>
+                              <span>
+                                ←
+                              </span>
+                            </button>
+                          </article>
+                        )
+                      )}
+                    </div>
+                  )}
 
                   {/* =================================================
                       محرر المحضر
                   ================================================= */}
 
-                  {selectedMeeting &&
-                    meetingForm && (
-                      <div className="committee-meeting-editor">
-                        <div className="committee-editor-header">
-                          <div>
-                            <span>
-                              محضر اجتماع اللجنة
-                            </span>
-
-                            <h3>
-                              {
-                                meetingForm.title
-                              }
-                            </h3>
-                          </div>
-
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setSelectedMeeting(
-                                null
-                              );
-
-                              setMeetingForm(
-                                null
-                              );
-                            }}
-                          >
-                            ×
-                          </button>
-                        </div>
-
-                        {/* بيانات الاجتماع */}
-
-                        <div className="committee-meeting-form-section">
-                          <div className="committee-form-section-title">
-                            <span>
-                              01
-                            </span>
-
-                            <div>
-                              <small>
-                                البيانات الأساسية
-                              </small>
-
-                              <h4>
-                                بيانات الاجتماع
-                              </h4>
-                            </div>
-                          </div>
-
-                          <div className="committee-editor-grid">
-                            <label>
-                              <span>
-                                اسم الاجتماع
-                              </span>
-
-                              <input
-                                value={
-                                  meetingForm.title
-                                }
-                                onChange={(
-                                  e
-                                ) =>
-                                  handleMeetingChange(
-                                    "title",
-                                    e.target
-                                      .value
-                                  )
-                                }
-                              />
-                            </label>
-
-                            <label>
-                              <span>
-                                التاريخ
-                              </span>
-
-                              <input
-                                type="date"
-                                value={
-                                  meetingForm.date
-                                }
-                                onChange={(
-                                  e
-                                ) =>
-                                  handleMeetingChange(
-                                    "date",
-                                    e.target
-                                      .value
-                                  )
-                                }
-                              />
-                            </label>
-
-                            <label>
-                              <span>
-                                اليوم
-                              </span>
-
-                              <input
-                                value={
-                                  meetingForm.day
-                                }
-                                onChange={(
-                                  e
-                                ) =>
-                                  handleMeetingChange(
-                                    "day",
-                                    e.target
-                                      .value
-                                  )
-                                }
-                                placeholder="مثال: الأحد"
-                              />
-                            </label>
-
-                            <label>
-                              <span>
-                                مكان الاجتماع
-                              </span>
-
-                              <input
-                                value={
-                                  meetingForm.place
-                                }
-                                onChange={(
-                                  e
-                                ) =>
-                                  handleMeetingChange(
-                                    "place",
-                                    e.target
-                                      .value
-                                  )
-                                }
-                                placeholder="مثال: قاعة الاجتماعات"
-                              />
-                            </label>
-
-                            <label>
-                              <span>
-                                حالة الاجتماع
-                              </span>
-
-                              <select
-                                value={
-                                  meetingForm.status
-                                }
-                                onChange={(
-                                  e
-                                ) =>
-                                  handleMeetingChange(
-                                    "status",
-                                    e.target
-                                      .value
-                                  )
-                                }
-                              >
-                                <option value="لم يُنفذ">
-                                  لم يُنفذ
-                                </option>
-
-                                <option value="منفذ">
-                                  منفذ
-                                </option>
-                              </select>
-                            </label>
-                          </div>
-                        </div>
-
-                        {/* محاور الاجتماع */}
-
-                        <div className="committee-meeting-form-section">
-                          <div className="committee-form-section-title">
-                            <span>
-                              02
-                            </span>
-
-                            <div>
-                              <small>
-                                محاور المحضر
-                              </small>
-
-                              <h4>
-                                تفاصيل الاجتماع
-                              </h4>
-                            </div>
-                          </div>
-
-                          <div className="committee-editor-full">
-                            <label>
-                              <span>
-                                جدول الأعمال
-                              </span>
-
-                              <textarea
-                                value={
-                                  meetingForm.agenda
-                                }
-                                onChange={(
-                                  e
-                                ) =>
-                                  handleMeetingChange(
-                                    "agenda",
-                                    e.target
-                                      .value
-                                  )
-                                }
-                                placeholder="اكتبي جدول أعمال الاجتماع..."
-                              />
-                            </label>
-
-                            <label>
-                              <span>
-                                أبرز ما تمت مناقشته
-                              </span>
-
-                              <textarea
-                                value={
-                                  meetingForm.discussion
-                                }
-                                onChange={(
-                                  e
-                                ) =>
-                                  handleMeetingChange(
-                                    "discussion",
-                                    e.target
-                                      .value
-                                  )
-                                }
-                                placeholder="اكتبي أبرز الموضوعات والمناقشات..."
-                              />
-                            </label>
-
-                            <label>
-                              <span>
-                                القرارات
-                              </span>
-
-                              <textarea
-                                value={
-                                  meetingForm.decisions
-                                }
-                                onChange={(
-                                  e
-                                ) =>
-                                  handleMeetingChange(
-                                    "decisions",
-                                    e.target
-                                      .value
-                                  )
-                                }
-                                placeholder="اكتبي القرارات..."
-                              />
-                            </label>
-
-                            <label>
-                              <span>
-                                التوصيات
-                              </span>
-
-                              <textarea
-                                value={
-                                  meetingForm.recommendations
-                                }
-                                onChange={(
-                                  e
-                                ) =>
-                                  handleMeetingChange(
-                                    "recommendations",
-                                    e.target
-                                      .value
-                                  )
-                                }
-                                placeholder="اكتبي التوصيات..."
-                              />
-                            </label>
-                          </div>
-                        </div>
-
-                        {/* الحضور */}
-
-                        <div className="committee-meeting-form-section committee-attendance-section">
-                          <div className="committee-form-section-title">
-                            <span>
-                              03
-                            </span>
-
-                            <div>
-                              <small>
-                                التوثيق
-                              </small>
-
-                              <h4>
-                                سجل الحضور والتوقيع
-                              </h4>
-                            </div>
-
-                            <button
-                              type="button"
-                              className="committee-add-attendee-button no-print"
-                              onClick={
-                                addAttendee
-                              }
-                            >
-                              ＋ إضافة حاضر
-                            </button>
-                          </div>
-
-                          {meetingForm.attendees
-                            ?.length >
-                          0 ? (
-                            <div className="committee-attendance-table-wrapper">
-                              <table className="committee-attendance-table">
-                                <thead>
-                                  <tr>
-                                    <th>
-                                      #
-                                    </th>
-
-                                    <th>
-                                      اسم الحاضر
-                                    </th>
-
-                                    <th>
-                                      المسمى الوظيفي
-                                    </th>
-
-                                    <th>
-                                      التوقيع
-                                    </th>
-
-                                    <th className="no-print">
-                                      إجراء
-                                    </th>
-                                  </tr>
-                                </thead>
-
-                                <tbody>
-                                  {meetingForm.attendees.map(
-                                    (
-                                      attendee,
-                                      index
-                                    ) => (
-                                      <tr
-                                        key={
-                                          attendee.id
-                                        }
-                                      >
-                                        <td>
-                                          {index +
-                                            1}
-                                        </td>
-
-                                        <td>
-                                          <input
-                                            type="text"
-                                            value={
-                                              attendee.name
-                                            }
-                                            onChange={(
-                                              e
-                                            ) =>
-                                              handleAttendeeChange(
-                                                attendee.id,
-                                                "name",
-                                                e.target
-                                                  .value
-                                              )
-                                            }
-                                            placeholder="اسم الحاضر"
-                                          />
-                                        </td>
-
-                                        <td>
-                                          <input
-                                            type="text"
-                                            value={
-                                              attendee.job
-                                            }
-                                            onChange={(
-                                              e
-                                            ) =>
-                                              handleAttendeeChange(
-                                                attendee.id,
-                                                "job",
-                                                e.target
-                                                  .value
-                                              )
-                                            }
-                                            placeholder="المسمى الوظيفي"
-                                          />
-                                        </td>
-
-                                        <td>
-                                          <SignaturePad
-                                            value={
-                                              attendee.signature
-                                            }
-                                            onChange={(
-                                              signature
-                                            ) =>
-                                              handleAttendeeChange(
-                                                attendee.id,
-                                                "signature",
-                                                signature
-                                              )
-                                            }
-                                          />
-                                        </td>
-
-                                        <td className="no-print">
-                                          <button
-                                            type="button"
-                                            className="committee-delete-attendee"
-                                            onClick={() =>
-                                              deleteAttendee(
-                                                attendee.id
-                                              )
-                                            }
-                                          >
-                                            🗑️ حذف
-                                          </button>
-                                        </td>
-                                      </tr>
-                                    )
-                                  )}
-                                </tbody>
-                              </table>
-                            </div>
-                          ) : (
-                            <div className="committee-no-attendees">
-                              <div>
-                                👥
-                              </div>
-
-                              <strong>
-                                لم تتم إضافة الحضور بعد
-                              </strong>
-
-                              <p>
-                                اضغطي على «إضافة حاضر» لإضافة أسماء الحاضرين
-                                وتوقيعاتهم.
-                              </p>
-                            </div>
-                          )}
-                        </div>
-
-                        {/* اعتماد المحضر */}
-
-                        <div className="committee-minutes-footer">
-                          <div>
-                            <span>
-                              رئيسة اللجنة
-                            </span>
-
-                            <strong>
-                              مديرة المدرسة
-                            </strong>
-                          </div>
-
-                          <div>
-                            <span>
-                              الاسم
-                            </span>
-
-                            <strong>
-                              خيرية الخالدي
-                            </strong>
-                          </div>
-
-                          <div>
-                            <span>
-                              التوقيع
-                            </span>
-
-                            <div className="minutes-sign-line" />
-                          </div>
-                        </div>
-
-                        {/* أزرار */}
-
-                        <div className="committee-editor-actions no-print">
-                          <button
-                            type="button"
-                            className="committee-save-meeting"
-                            onClick={
-                              saveMeeting
-                            }
-                          >
-                            💾 حفظ المحضر
-                          </button>
-
-                          <button
-                            type="button"
-                            className="committee-print-meeting"
-                            onClick={
-                              printMeeting
-                            }
-                          >
-                            🖨️ طباعة محضر الاجتماع
-                          </button>
-
-                          <button
-                            type="button"
-                            className="committee-delete-meeting"
-                            onClick={() =>
-                              deleteMeeting(
-                                meetingForm.id
-                              )
-                            }
-                          >
-                            🗑️ حذف الاجتماع
-                          </button>
-                        </div>
-                      </div>
-                    )}
+                  {selectedMeeting && (
+                    <MeetingEditor
+                      key={
+                        selectedMeeting.id
+                      }
+                      committee={
+                        selectedCommittee
+                      }
+                      meeting={
+                        selectedMeeting
+                      }
+                      onClose={() =>
+                        setSelectedMeeting(
+                          null
+                        )
+                      }
+                      onSaved={
+                        handleMeetingSaved
+                      }
+                      onDeleted={
+                        handleMeetingDeleted
+                      }
+                    />
+                  )}
                 </section>
               )}
             </section>
@@ -2554,7 +3586,9 @@ function CommitteesDashboard() {
           >
             العودة للوحات الرئيسية
 
-            <span>←</span>
+            <span>
+              ←
+            </span>
           </button>
         </div>
       </header>
@@ -2563,10 +3597,8 @@ function CommitteesDashboard() {
         <section className="committees-hero">
           <div className="committees-hero-content">
             <h2>
-              إدارة اللجان
-              <br />
-              والفرق
-            </h2>
+               إدارة اللجان والفرق المدرسية 
+              </h2>
 
             <p>
               سجل إلكتروني متكامل لتنظيم أعمال اللجان المدرسية،
@@ -2650,11 +3682,11 @@ function CommitteesDashboard() {
               </span>
 
               <strong>
-                {completedMeetings}
+                اختر لجنة
               </strong>
 
               <p>
-                الاجتماعات المنفذة
+                لعرض الاجتماعات المنفذة
               </p>
             </div>
           </div>
@@ -2677,7 +3709,9 @@ function CommitteesDashboard() {
 
           <div className="committees-count-badge">
             <strong>
-              {committees.length}
+              {
+                committees.length
+              }
             </strong>
 
             <span>
@@ -2771,6 +3805,11 @@ function CommitteesDashboard() {
             <button
               type="button"
               className="committee-document-card"
+              onClick={() =>
+                setSelectedCommittee(
+                  committees[0]
+                )
+              }
             >
               <div className="committee-document-icon">
                 👥
@@ -2794,6 +3833,11 @@ function CommitteesDashboard() {
             <button
               type="button"
               className="committee-document-card"
+              onClick={() =>
+                setSelectedCommittee(
+                  committees[0]
+                )
+              }
             >
               <div className="committee-document-icon">
                 🎯
@@ -2817,6 +3861,11 @@ function CommitteesDashboard() {
             <button
               type="button"
               className="committee-document-card"
+              onClick={() =>
+                setSelectedCommittee(
+                  committees[0]
+                )
+              }
             >
               <div className="committee-document-icon">
                 🗓️
