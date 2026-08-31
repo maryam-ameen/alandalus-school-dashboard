@@ -1446,7 +1446,10 @@ const loadMeetingAttendees = async (meetingId) => {
     return [];
   }
 
-  return data || [];
+  return (data || []).map((attendee) => ({
+    ...attendee,
+    name: attendee.attendee_name || "",
+  }));
 };
 
 /* =========================================================
@@ -1620,7 +1623,13 @@ function MeetingEditor({
 
       if (error) throw error;
 
-      setAttendees((prev) => [...prev, data]);
+      setAttendees((prev) => [
+  ...prev,
+  {
+    ...data,
+    name: data.attendee_name || "",
+  },
+]);
     } catch (error) {
       console.error("خطأ إضافة حاضر:", error);
       alert(
@@ -1662,10 +1671,15 @@ function MeetingEditor({
     }
 
     setAttendees((prev) =>
-      prev.map((item) =>
-        String(item.id) === String(attendee.id) ? data : item
-      )
-    );
+  prev.map((item) =>
+    String(item.id) === String(attendee.id)
+      ? {
+          ...data,
+          name: data.attendee_name || "",
+        }
+      : item
+  )
+);
   };
 
   /* -------------------------------------------------------
@@ -1736,7 +1750,12 @@ function MeetingEditor({
 
       if (error) throw error;
 
-      setAttendees(data || []);
+      setAttendees(
+  (data || []).map((attendee) => ({
+    ...attendee,
+    name: attendee.attendee_name || "",
+  }))
+);
     } catch (error) {
       console.error("خطأ تسجيل حضور الجميع:", error);
       alert("حدث خطأ أثناء تسجيل الحضور");
