@@ -2755,67 +2755,307 @@
    الطباعة
 ========================================================= */
 
+/* =========================================================
+   الطباعة الرسمية لمحضر الاجتماع
+   ========================================================= */
+
 @media print {
+
+  @page {
+    size: A4 portrait;
+    margin: 14mm 14mm 16mm 14mm;
+  }
 
   body {
     background: #ffffff !important;
+    margin: 0 !important;
   }
 
-  .no-print {
+  /* إخفاء العناصر التي لا نحتاجها في الورقة */
+  .no-print,
+  .committee-editor-actions,
+  .committee-section-page-header,
+  .committee-breadcrumb,
+  .committee-inner-hero,
+  .committee-sections-heading,
+  .committee-meetings-top {
     display: none !important;
   }
 
+  /* صفحة المحضر */
   .committee-page {
     background: #ffffff !important;
     background-image: none !important;
   }
 
-  .committee-inner-header {
-    border-bottom: 1px solid #ddd !important;
-  }
-
   .committee-page-container {
     width: 100% !important;
-
-    padding: 10px !important;
+    padding: 0 !important;
+    margin: 0 !important;
   }
 
   .committee-meeting-editor {
+    display: block !important;
+    width: 100% !important;
     margin: 0 !important;
-
-    padding: 20px !important;
-
+    padding: 0 !important;
     border: none !important;
-
     box-shadow: none !important;
+    background: #ffffff !important;
+    color: #222 !important;
   }
 
+  /* عنوان المحضر */
+  .committee-editor-header {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+    border-bottom: 2px solid #56347e !important;
+    padding: 0 0 14px !important;
+    margin-bottom: 18px !important;
+  }
+
+  .committee-editor-header > div {
+    width: 100% !important;
+    text-align: center !important;
+  }
+
+  .committee-editor-header span {
+    display: block !important;
+    color: #56347e !important;
+    font-size: 16px !important;
+    font-weight: 700 !important;
+  }
+
+  .committee-editor-header h3 {
+    margin: 6px 0 0 !important;
+    color: #222 !important;
+    font-size: 20px !important;
+    font-weight: 700 !important;
+  }
+
+  .committee-editor-header button {
+    display: none !important;
+  }
+
+  /* أقسام المحضر */
   .committee-meeting-form-section {
-    page-break-inside: avoid;
+    display: block !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    margin-bottom: 16px !important;
+    padding: 0 !important;
+    border: 1px solid #ddd !important;
+    border-radius: 8px !important;
+    background: #fff !important;
+  }
+
+  .committee-form-section-title {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    background: #f5f1f8 !important;
+    padding: 9px 12px !important;
+    border-bottom: 1px solid #ddd !important;
+  }
+
+  .committee-form-section-title > span {
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    color: #56347e !important;
+  }
+
+  .committee-form-section-title small {
+    color: #777 !important;
+    font-size: 11px !important;
+  }
+
+  .committee-form-section-title h4 {
+    margin: 2px 0 0 !important;
+    color: #56347e !important;
+    font-size: 15px !important;
+    font-weight: 700 !important;
+  }
+
+  /* البيانات */
+  .committee-editor-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 0 !important;
+  }
+
+  .committee-editor-grid label {
+    padding: 10px 12px !important;
+    border-bottom: 1px solid #eee !important;
+  }
+
+  .committee-editor-grid label:nth-child(odd) {
+    border-left: 1px solid #eee !important;
+  }
+
+  .committee-editor-grid label:last-child {
+    grid-column: 1 / -1 !important;
+    border-left: none !important;
+  }
+
+  .committee-editor-grid label > span,
+  .committee-editor-full label > span {
+    display: block !important;
+    color: #777 !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    margin-bottom: 4px !important;
+  }
+
+  .committee-editor-grid input,
+  .committee-editor-grid select,
+  .committee-editor-full textarea {
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
+    padding: 0 !important;
+    width: 100% !important;
+    color: #222 !important;
+    font-family: Arial, Tahoma, sans-serif !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+  }
+
+  /* تفاصيل الاجتماع */
+  .committee-editor-full {
+    display: block !important;
+    padding: 0 !important;
+  }
+
+  .committee-editor-full label {
+    display: block !important;
+    padding: 11px 12px !important;
+    border-bottom: 1px solid #eee !important;
+  }
+
+  .committee-editor-full label:last-child {
+    border-bottom: none !important;
+  }
+
+  .committee-editor-full textarea {
+    min-height: 55px !important;
+    resize: none !important;
+    line-height: 1.8 !important;
+    white-space: pre-wrap !important;
+  }
+
+  /* جدول الحضور */
+  .committee-attendance-section {
+    page-break-inside: auto !important;
+  }
+
+  .committee-attendance-table-wrapper {
+    width: 100% !important;
+    overflow: visible !important;
   }
 
   .committee-attendance-table {
     width: 100% !important;
+    border-collapse: collapse !important;
+    table-layout: fixed !important;
+    font-size: 12px !important;
   }
 
-  .committee-attendance-table
-  .committee-signature-box {
-    height: 72px !important;
+  .committee-attendance-table th {
+    background: #56347e !important;
+    color: #fff !important;
+    padding: 8px 5px !important;
+    border: 1px solid #56347e !important;
+    font-size: 11px !important;
   }
 
+  .committee-attendance-table td {
+    padding: 7px 5px !important;
+    border: 1px solid #ddd !important;
+    color: #222 !important;
+    vertical-align: middle !important;
+    text-align: center !important;
+  }
+
+  .committee-attendance-table td input {
+    border: none !important;
+    outline: none !important;
+    background: transparent !important;
+    width: 100% !important;
+    text-align: center !important;
+    font-size: 12px !important;
+    color: #222 !important;
+  }
+
+  .committee-attendance-table .committee-signature-box {
+    height: 55px !important;
+    min-height: 55px !important;
+  }
+
+  /* اعتماد المحضر */
   .committee-minutes-footer {
-    page-break-inside: avoid;
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 18px !important;
+    margin-top: 18px !important;
+    padding: 14px !important;
+    border: 1px solid #ddd !important;
+    border-radius: 8px !important;
+    background: #fcfaff !important;
+    page-break-inside: avoid !important;
   }
 
-  .committee-editor-actions {
-    display: none !important;
+  .committee-minutes-footer > div {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 5px !important;
   }
 
-  .committee-section-page-header,
-  .committee-breadcrumb,
-  .committee-inner-hero,
-  .committee-sections-heading {
-    display: none !important;
+  .committee-minutes-footer span {
+    color: #777 !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+  }
+
+  .committee-minutes-footer strong {
+    color: #56347e !important;
+    font-size: 14px !important;
+    font-weight: 700 !important;
+  }
+
+  .committee-manager-name-input {
+    border: none !important;
+    background: transparent !important;
+    color: #222 !important;
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    padding: 0 !important;
+  }
+
+  /* التوقيع */
+  .minutes-sign-line {
+    width: 100% !important;
+    height: 35px !important;
+    border-bottom: 1px solid #999 !important;
+  }
+
+  /* منع تقطيع بعض العناصر */
+  .committee-attendance-table thead {
+    display: table-header-group !important;
+  }
+
+  .committee-attendance-table tr {
+    page-break-inside: avoid !important;
+  }
+
+  /* إظهار الحقول كبيانات عند الطباعة */
+  input,
+  textarea,
+  select {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
 }
 
