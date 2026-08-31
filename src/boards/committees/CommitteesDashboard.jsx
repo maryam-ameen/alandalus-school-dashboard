@@ -354,10 +354,11 @@ const createDefaultDecision = (committee) => {
 
   return {
     id: null,
-    committee_id: committee.id,
+    title: committee.title,
     day: "",
     date: "",
     schoolYear: "1448 / 1449",
+    description: committee.description || "",
     members: defaultMembers,
   };
 };
@@ -377,7 +378,7 @@ const loadCommitteeDecision = async (committee) => {
     } = await supabase
       .from("committee_decisions")
       .select("*")
-      .eq("committee_id", committee.id)
+      .eq("title", committee.title)
       .order("created_at", {
         ascending: false,
       })
@@ -420,17 +421,16 @@ const loadCommitteeDecision = async (committee) => {
 
     return {
       id: decisionRow.id,
-      committee_id:
-        decisionRow.committee_id ||
-        committee.id,
-      day: decisionRow.day || "",
-      date:
-        decisionRow.decision_date ||
-        decisionRow.date ||
-        "",
+      title: decisionRow.title || committee.title,
+      day: decisionRow.day_name || "",
+      date: decisionRow.decision_date || "",
       schoolYear:
-        decisionRow.school_year ||
+        decisionRow.academic_year ||
         "1448 / 1449",
+      description:
+        decisionRow.description ||
+        committee.description ||
+        "",
       members:
         memberRows?.length > 0
           ? memberRows.map((member) => ({
@@ -741,6 +741,42 @@ function CommitteeDecisionSection({
   }, [committee.id]);
 
   /* -------------------------------------------------------
+     مزامنة القرار بين جميع الأجهزة
+     قاعدة البيانات الجديدة تستخدم title لتمييز اللجنة
+  ------------------------------------------------------- */
+  useEffect(() => {
+    let active = true;
+
+    const channel = supabase
+      .channel(`committee-decision-${committee.id}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "committee_decisions",
+          filter: `title=eq.${committee.title}`,
+        },
+        async () => {
+          if (!active || saving) return;
+
+          const refreshed =
+            await loadCommitteeDecision(committee);
+
+          if (active) {
+            setDecision(refreshed);
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      active = false;
+      supabase.removeChannel(channel);
+    };
+  }, [committee.id, committee.title, saving]);
+
+  /* -------------------------------------------------------
      تغيير بيانات القرار
   ------------------------------------------------------- */
 
@@ -833,20 +869,19 @@ function CommitteeDecisionSection({
         decision.id;
 
       const decisionPayload = {
-        committee_id:
-          committee.id,
-
-        day:
+        title: committee.title,
+        decision_date: decision.date || null,
+        day_name:
           decision.day ||
-          null,
-
-        decision_date:
-          decision.date ||
-          null,
-
-        school_year:
+          (decision.date ? getArabicDay(decision.date) : null),
+        academic_year:
           decision.schoolYear ||
           "1448 / 1449",
+        description:
+          decision.description ||
+          committee.description ||
+          "",
+        updated_at: new Date().toISOString(),
       };
 
       /* ---------------------------------------------------
@@ -867,6 +902,10 @@ function CommitteeDecisionSection({
           .eq(
             "id",
             decisionId
+          )
+          .eq(
+            "title",
+            committee.title
           )
           .select()
           .single();
@@ -1042,6 +1081,57 @@ function CommitteeDecisionSection({
 
   return (
     <section className="committee-content-card committee-decision-print-area">
+      <div className="decision-print-header">
+  <img
+    src={logo}
+    alt="شعار مدارس الأندلس"
+    className="decision-print-logo"
+  />
+
+  <div className="decision-print-school-name">
+    <strong>متوسطة وثانوية الأندلس بالطائف - بنات</strong>
+    <span>إدارة المدرسة</span>
+  </div>
+</div>
+
+<div className="decision-print-title">
+  <h2>إقــــرار</h2>
+
+  <h3>
+    قرار إداري بشأن تشكيل فريق عمل
+    <br />
+    {committee.title}
+  </h3>
+
+  <p>
+    العام الدراسي:
+    {" "}
+    <strong>
+      {decision.schoolYear || "1448 / 1449"}
+    </strong>
+  </p>
+</div>
+
+<div className="decision-print-introduction">
+  <p>
+    بناءً على ما تقتضيه مصلحة العمل وتنظيم أعمال اللجان
+    المدرسية، فقد تقرر تشكيل فريق عمل
+    {" "}
+    <strong>{committee.title}</strong>
+    {" "}
+    للعام الدراسي
+    {" "}
+    <strong>
+      {decision.schoolYear || "1448 / 1449"}
+    </strong>
+    ، وذلك وفق المهام والمسؤوليات المعتمدة بالمدرسة.
+  </p>
+
+  <p>
+    وقد تم اختيار أعضاء الفريق وتحديد أدوارهم ومسؤولياتهم
+    على النحو الآتي:
+  </p>
+</div>
       <div className="committee-content-card-title">
         <span>01</span>
 
@@ -1303,7 +1393,7 @@ function CommitteeDecisionSection({
           disabled={saving}
         >
           🖨️ طباعة القرار
-        </button>
+                </button>
       </div>
 
       {savedMessage && (
@@ -1324,7 +1414,7 @@ function CommitteeDecisionSection({
   meeting_attendees
   - id
   - meeting_id
-  - attendee_name
+  - name
   - job_title
   - attended
   - signature
@@ -1356,10 +1446,7 @@ const loadMeetingAttendees = async (meetingId) => {
     return [];
   }
 
-  return (data || []).map((row) => ({
-    ...row,
-    name: row.attendee_name || "",
-  }));
+  return data || [];
 };
 
 /* =========================================================
@@ -1550,28 +1637,35 @@ function MeetingEditor({
   ------------------------------------------------------- */
 
   const saveAttendeeField = async (attendee) => {
-    if (!attendee?.id || !meeting?.id) return;
+    if (!attendee?.id) return;
 
-    const { error } = await supabase
+    const payload = {
+      attendee_name: attendee.name || "",
+      job_title: attendee.job_title || "",
+      attended: Boolean(attendee.attended),
+      signature: attendee.signature || "",
+      updated_at: new Date().toISOString(),
+    };
+
+    const { data, error } = await supabase
       .from("meeting_attendees")
-      .update({
-        attendee_name: attendee.name || "",
-        job_title: attendee.job_title || "",
-        attended: Boolean(attendee.attended),
-        signature: attendee.signature || "",
-        updated_at: new Date().toISOString(),
-      })
+      .update(payload)
       .eq("id", attendee.id)
-      .eq("meeting_id", meeting.id);
+      .eq("meeting_id", meeting.id)
+      .select("*")
+      .single();
 
     if (error) {
       console.error("خطأ حفظ بيانات الحاضر:", error);
-      alert(
-        "تعذر حفظ بيانات الحاضر.\n\n" +
-          (error.message || "خطأ غير معروف")
-      );
+      alert("حدث خطأ أثناء حفظ بيانات الحاضر");
       return;
     }
+
+    setAttendees((prev) =>
+      prev.map((item) =>
+        String(item.id) === String(attendee.id) ? data : item
+      )
+    );
   };
 
   /* -------------------------------------------------------
@@ -1579,12 +1673,10 @@ function MeetingEditor({
   ------------------------------------------------------- */
 
   const toggleAttendance = async (attendee) => {
-    if (!attendee?.id || !meeting?.id) return;
+    if (!attendee?.id) return;
 
-    const previousValue = Boolean(attendee.attended);
-    const newValue = !previousValue;
+    const newValue = !Boolean(attendee.attended);
 
-    // تحديث الواجهة مباشرة
     setAttendees((prev) =>
       prev.map((item) =>
         String(item.id) === String(attendee.id)
@@ -1593,64 +1685,36 @@ function MeetingEditor({
       )
     );
 
-    try {
-      // نحفظ قيمة الحضور فقط؛ لا نستخدم select بعد التحديث
-      // حتى لا يفشل الحفظ بسبب مشكلة في إرجاع الصف بعد UPDATE.
-      const { error } = await supabase
-        .from("meeting_attendees")
-        .update({
-          attended: newValue,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", attendee.id)
-        .eq("meeting_id", meeting.id);
-
-      if (error) {
-        console.error("خطأ حفظ الحضور:", error);
-        console.error("تفاصيل الخطأ:", {
-          message: error.message,
-          details: error.details,
-          hint: error.hint,
-          code: error.code,
-        });
-
-        // إعادة الحالة السابقة إذا فشل الحفظ
-        setAttendees((prev) =>
-          prev.map((item) =>
-            String(item.id) === String(attendee.id)
-              ? { ...item, attended: previousValue }
-              : item
-          )
-        );
-
-        alert(
-          "تعذر حفظ حالة الحضور.\n\n" +
-            (error.message || "خطأ غير معروف")
-        );
-        return;
-      }
-
-      console.log("تم حفظ الحضور:", {
-        attendeeId: attendee.id,
-        meetingId: meeting.id,
+    const { data, error } = await supabase
+      .from("meeting_attendees")
+      .update({
         attended: newValue,
-      });
-    } catch (error) {
-      console.error("خطأ غير متوقع أثناء حفظ الحضور:", error);
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", attendee.id)
+      .eq("meeting_id", meeting.id)
+      .select("*")
+      .single();
+
+    if (error) {
+      console.error("خطأ حفظ الحضور:", error);
+      alert("حدث خطأ أثناء حفظ الحضور");
 
       setAttendees((prev) =>
         prev.map((item) =>
           String(item.id) === String(attendee.id)
-            ? { ...item, attended: previousValue }
+            ? { ...item, attended: Boolean(attendee.attended) }
             : item
         )
       );
-
-      alert(
-        "حدث خطأ أثناء حفظ الحضور.\n\n" +
-          (error?.message || "خطأ غير معروف")
-      );
+      return;
     }
+
+    setAttendees((prev) =>
+      prev.map((item) =>
+        String(item.id) === String(attendee.id) ? data : item
+      )
+    );
   };
 
   /* -------------------------------------------------------
@@ -1661,28 +1725,21 @@ function MeetingEditor({
     if (!meeting?.id || attendees.length === 0) return;
 
     try {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from("meeting_attendees")
         .update({
           attended: true,
           updated_at: new Date().toISOString(),
         })
-        .eq("meeting_id", meeting.id);
+        .eq("meeting_id", meeting.id)
+        .select("*");
 
       if (error) throw error;
 
-      setAttendees((prev) =>
-        prev.map((attendee) => ({
-          ...attendee,
-          attended: true,
-        }))
-      );
+      setAttendees(data || []);
     } catch (error) {
       console.error("خطأ تسجيل حضور الجميع:", error);
-      alert(
-        "تعذر تسجيل حضور الجميع.\n\n" +
-          (error?.message || "خطأ غير معروف")
-      );
+      alert("حدث خطأ أثناء تسجيل الحضور");
     }
   };
 
@@ -1691,22 +1748,31 @@ function MeetingEditor({
   ------------------------------------------------------- */
 
   const saveSignature = async (attendee, signature) => {
-    if (!attendee?.id || !meeting?.id) return;
+    if (!attendee?.id) return;
 
-    updateAttendeeLocal(attendee.id, "signature", signature || "");
+    updateAttendeeLocal(attendee.id, "signature", signature);
 
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from("meeting_attendees")
       .update({
         signature: signature || "",
         updated_at: new Date().toISOString(),
       })
       .eq("id", attendee.id)
-      .eq("meeting_id", meeting.id);
+      .eq("meeting_id", meeting.id)
+      .select("*")
+      .single();
 
     if (error) {
       console.error("خطأ حفظ التوقيع:", error);
+      return;
     }
+
+    setAttendees((prev) =>
+      prev.map((item) =>
+        String(item.id) === String(attendee.id) ? data : item
+      )
+    );
   };
 
   /* -------------------------------------------------------
@@ -1744,9 +1810,9 @@ function MeetingEditor({
     if (!meeting?.id || attendees.length === 0) return;
 
     for (const attendee of attendees) {
-      if (!attendee?.id) continue;
+      if (!attendee.id) continue;
 
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from("meeting_attendees")
         .update({
           attendee_name: attendee.name || "",
@@ -1756,12 +1822,17 @@ function MeetingEditor({
           updated_at: new Date().toISOString(),
         })
         .eq("id", attendee.id)
-        .eq("meeting_id", meeting.id);
+        .eq("meeting_id", meeting.id)
+        .select("*")
+        .single();
 
-      if (error) {
-        console.error("خطأ حفظ بيانات الحاضر:", error);
-        throw error;
-      }
+      if (error) throw error;
+
+      setAttendees((prev) =>
+        prev.map((item) =>
+          String(item.id) === String(attendee.id) ? data : item
+        )
+      );
     }
   };
 
@@ -1819,15 +1890,13 @@ function MeetingEditor({
      الطباعة
   ------------------------------------------------------- */
 
- const printMeeting = async () => {
-  if (saving) return;
+  const printMeeting = async () => {
+    await saveMeeting();
 
-  await saveMeeting();
-
-  setTimeout(() => {
-    window.print();
-  }, 500);
-};
+    setTimeout(() => {
+      window.print();
+    }, 400);
+  };
 
   /* -------------------------------------------------------
      حذف الاجتماع
@@ -2213,303 +2282,6 @@ function MeetingEditor({
           />
         </div>
       </div>
-
-
-{/* =================================================
-    نسخة الطباعة الرسمية
-================================================= */}
-
-<div className="meeting-print-document">
-
-  {/* رأس المحضر */}
-  <div className="meeting-print-header">
-
-    <div className="meeting-print-school">
-      <img
-        src={logo}
-        alt="شعار مدارس الأندلس"
-        className="meeting-print-logo"
-      />
-
-      <div>
-        <strong>
-          متوسطة وثانوية الأندلس بالطائف - بنات
-        </strong>
-
-        <span>
-          مدارس الأندلس الأهلية بالطائف
-        </span>
-      </div>
-    </div>
-
-    <div className="meeting-print-title">
-      <h1>محضر اجتماع اللجنة</h1>
-
-      <p>
-        {committee?.title || "اللجنة المدرسية"}
-      </p>
-    </div>
-
-  </div>
-
-
-  {/* خط فاصل */}
-  <div className="meeting-print-divider" />
-
-
-  {/* بيانات الاجتماع */}
-  <section className="meeting-print-section">
-
-    <div className="meeting-print-section-title">
-      <span>أولاً</span>
-      <strong>بيانات الاجتماع</strong>
-    </div>
-
-    <table className="meeting-print-info-table">
-      <tbody>
-
-        <tr>
-          <th>رقم الاجتماع</th>
-          <td>
-            {form.meeting_number || "—"}
-          </td>
-
-          <th>التاريخ</th>
-          <td>
-            {form.meeting_date || "—"}
-          </td>
-        </tr>
-
-        <tr>
-          <th>اليوم</th>
-          <td>
-            {getArabicDay(form.meeting_date) || "—"}
-          </td>
-
-          <th>الوقت</th>
-          <td>
-            {form.meeting_time || "—"}
-          </td>
-        </tr>
-
-        <tr>
-          <th>مكان الاجتماع</th>
-          <td>
-            {form.meeting_place || "—"}
-          </td>
-
-          <th>حالة الاجتماع</th>
-          <td>
-            {form.meeting_status || "—"}
-          </td>
-        </tr>
-
-        <tr>
-          <th>موضوع الاجتماع</th>
-          <td colSpan="3">
-            {form.subject || "—"}
-          </td>
-        </tr>
-
-      </tbody>
-    </table>
-
-  </section>
-
-
-  {/* جدول الأعمال */}
-  <section className="meeting-print-section">
-
-    <div className="meeting-print-section-title">
-      <span>ثانياً</span>
-      <strong>جدول الأعمال</strong>
-    </div>
-
-    <div className="meeting-print-text-box">
-      {form.notes?.trim() ? (
-        form.notes
-      ) : (
-        "لا يوجد"
-      )}
-    </div>
-
-  </section>
-
-
-  {/* المناقشات */}
-  <section className="meeting-print-section">
-
-    <div className="meeting-print-section-title">
-      <span>ثالثاً</span>
-      <strong>أبرز ما تمت مناقشته</strong>
-    </div>
-
-    <div className="meeting-print-text-box">
-      {form.discussion?.trim() ? (
-        form.discussion
-      ) : (
-        "لا يوجد"
-      )}
-    </div>
-
-  </section>
-
-
-  {/* القرارات والتوصيات */}
-  <section className="meeting-print-section">
-
-    <div className="meeting-print-section-title">
-      <span>رابعاً</span>
-      <strong>القرارات والتوصيات</strong>
-    </div>
-
-    <div className="meeting-print-text-box">
-      {form.recommendations?.trim() ? (
-        form.recommendations
-      ) : (
-        "لا يوجد"
-      )}
-    </div>
-
-  </section>
-
-
-  {/* الحضور */}
-  <section className="meeting-print-section meeting-print-attendance">
-
-    <div className="meeting-print-section-title">
-      <span>خامساً</span>
-      <strong>سجل الحضور والتوقيع</strong>
-    </div>
-
-    {attendees.length > 0 ? (
-
-      <table className="meeting-print-attendance-table">
-
-        <thead>
-          <tr>
-            <th className="print-number">م</th>
-            <th>اسم الحاضرة</th>
-            <th>المسمى الوظيفي</th>
-            <th className="print-attendance">الحضور</th>
-            <th className="print-signature">التوقيع</th>
-          </tr>
-        </thead>
-
-        <tbody>
-
-          {attendees.map((attendee, index) => (
-
-            <tr
-              key={
-                attendee.id ||
-                `print-attendee-${index}`
-              }
-            >
-
-              <td>
-                {index + 1}
-              </td>
-
-              <td>
-                {attendee.name || "—"}
-              </td>
-
-              <td>
-                {attendee.job_title || "—"}
-              </td>
-
-              <td>
-                {attendee.attended
-                  ? "حاضر"
-                  : "غائب"}
-              </td>
-
-              <td className="print-signature-cell">
-
-                {attendee.signature ? (
-                  <img
-                    src={attendee.signature}
-                    alt="توقيع"
-                  />
-                ) : (
-                  "—"
-                )}
-
-              </td>
-
-            </tr>
-
-          ))}
-
-        </tbody>
-
-      </table>
-
-    ) : (
-
-      <div className="meeting-print-empty">
-        لا توجد بيانات للحضور.
-      </div>
-
-    )}
-
-  </section>
-
-
-  {/* اعتماد المحضر */}
-  <section className="meeting-print-approval">
-
-    <div className="meeting-print-approval-title">
-      اعتماد المحضر
-    </div>
-
-    <div className="meeting-print-approval-grid">
-
-      <div>
-        <span>رئيسة اللجنة</span>
-        <strong>مديرة المدرسة</strong>
-      </div>
-
-      <div>
-        <span>الاسم</span>
-        <strong>
-          {form.manager_name || "خيرية الخالدي"}
-        </strong>
-      </div>
-
-      <div className="meeting-print-manager-signature">
-        <span>التوقيع</span>
-
-        {form.manager_signature ? (
-          <img
-            src={form.manager_signature}
-            alt="توقيع مديرة المدرسة"
-          />
-        ) : (
-          <div className="meeting-print-sign-line" />
-        )}
-      </div>
-
-    </div>
-
-  </section>
-
-
-  {/* أسفل الصفحة */}
-  <div className="meeting-print-footer">
-
-    <span>
-      متوسطة وثانوية الأندلس بالطائف - بنات
-    </span>
-
-    <span>
-      محضر اجتماع اللجنة
-    </span>
-
-  </div>
-
-</div>
 
       {/* =================================================
           الأزرار
@@ -3597,8 +3369,10 @@ function CommitteesDashboard() {
         <section className="committees-hero">
           <div className="committees-hero-content">
             <h2>
-               إدارة اللجان والفرق المدرسية 
-              </h2>
+              إدارة اللجان
+              <br />
+              والفرق
+            </h2>
 
             <p>
               سجل إلكتروني متكامل لتنظيم أعمال اللجان المدرسية،

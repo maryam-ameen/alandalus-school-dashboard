@@ -4280,3 +4280,538 @@
   }
 
 }
+/* =========================================================
+   طباعة القرار الإداري - إقرار رسمي
+========================================================= */
+
+.decision-print-header,
+.decision-print-title,
+.decision-print-introduction {
+  display: none;
+}
+
+
+/* =========================================================
+   إعداد الطباعة
+========================================================= */
+
+@media print {
+
+  @page {
+    size: A4 portrait;
+    margin: 15mm 14mm 15mm 14mm;
+  }
+
+  html,
+  body {
+    background: #ffffff !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  body {
+    font-family:
+      Arial,
+      Tahoma,
+      "Noto Naskh Arabic",
+      sans-serif !important;
+  }
+
+
+  /* إخفاء كل شيء غير الإقرار */
+
+  body * {
+    visibility: hidden !important;
+  }
+
+  .committee-decision-print-area,
+  .committee-decision-print-area * {
+    visibility: visible !important;
+  }
+
+
+  /* منطقة الطباعة */
+
+  .committee-decision-print-area {
+    position: absolute !important;
+
+    top: 0 !important;
+    right: 0 !important;
+    left: 0 !important;
+
+    width: 100% !important;
+    max-width: 100% !important;
+
+    min-height: 100vh !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    background: #ffffff !important;
+
+    border: none !important;
+    box-shadow: none !important;
+
+    direction: rtl !important;
+
+    color: #222222 !important;
+
+    font-size: 16px !important;
+  }
+
+
+  /* =========================================================
+     الشعار
+  ========================================================= */
+
+  .decision-print-header {
+    display: flex !important;
+
+    flex-direction: column !important;
+
+    align-items: center !important;
+
+    justify-content: center !important;
+
+    text-align: center !important;
+
+    padding-bottom: 12px !important;
+
+    margin-bottom: 15px !important;
+
+    border-bottom: 2px solid #39246b !important;
+  }
+
+  .decision-print-logo {
+    display: block !important;
+
+    width: 90px !important;
+    height: 90px !important;
+
+    object-fit: contain !important;
+
+    margin: 0 auto 8px !important;
+  }
+
+
+  /* =========================================================
+     اسم المدرسة
+  ========================================================= */
+
+  .decision-print-school-name {
+    display: flex !important;
+
+    flex-direction: column !important;
+
+    align-items: center !important;
+
+    justify-content: center !important;
+
+    gap: 5px !important;
+
+    text-align: center !important;
+
+    color: #222222 !important;
+  }
+
+  .decision-print-school-name strong {
+    font-size: 17px !important;
+
+    font-weight: 800 !important;
+
+    color: #222222 !important;
+  }
+
+  .decision-print-school-name span {
+    font-size: 15px !important;
+
+    font-weight: 700 !important;
+
+    color: #555555 !important;
+  }
+
+
+  /* =========================================================
+     عنوان الإقرار
+  ========================================================= */
+
+  .decision-print-title {
+    display: block !important;
+
+    text-align: center !important;
+
+    margin: 20px 0 20px !important;
+
+    color: #222222 !important;
+  }
+
+  .decision-print-title h2 {
+    margin: 0 0 12px !important;
+
+    font-size: 25px !important;
+
+    font-weight: 900 !important;
+
+    color: #39246b !important;
+  }
+
+  .decision-print-title h3 {
+    margin: 0 0 10px !important;
+
+    font-size: 17px !important;
+
+    line-height: 1.8 !important;
+
+    font-weight: 800 !important;
+
+    color: #222222 !important;
+  }
+
+  .decision-print-title p {
+    margin: 0 !important;
+
+    font-size: 15px !important;
+
+    font-weight: 700 !important;
+
+    color: #444444 !important;
+  }
+
+  .decision-print-title p strong {
+    font-weight: 900 !important;
+
+    color: #222222 !important;
+  }
+
+
+  /* =========================================================
+     النص الرمادي — كبير وغامق
+  ========================================================= */
+
+  .decision-print-introduction {
+    display: block !important;
+
+    margin: 18px 0 20px !important;
+
+    padding: 0 5px !important;
+
+    color: #444444 !important;
+
+    font-size: 16px !important;
+
+    font-weight: 700 !important;
+
+    line-height: 2 !important;
+
+    text-align: justify !important;
+  }
+
+  .decision-print-introduction p {
+    margin: 0 0 10px !important;
+
+    color: #444444 !important;
+
+    font-size: 16px !important;
+
+    font-weight: 700 !important;
+
+    line-height: 2 !important;
+  }
+
+  .decision-print-introduction strong {
+    color: #222222 !important;
+
+    font-size: 16px !important;
+
+    font-weight: 900 !important;
+  }
+
+
+  /* =========================================================
+     بيانات اليوم والتاريخ والعام
+  ========================================================= */
+
+  .committee-decision-info {
+    display: flex !important;
+
+    flex-direction: row !important;
+
+    justify-content: space-between !important;
+
+    align-items: stretch !important;
+
+    gap: 15px !important;
+
+    width: 100% !important;
+
+    margin: 15px 0 20px !important;
+
+    padding: 10px 12px !important;
+
+    box-sizing: border-box !important;
+
+    background: #ffffff !important;
+
+    border: 1px solid #777777 !important;
+
+    border-radius: 0 !important;
+  }
+
+  .committee-decision-field {
+    flex: 1 !important;
+
+    display: flex !important;
+
+    flex-direction: column !important;
+
+    align-items: center !important;
+
+    justify-content: center !important;
+
+    text-align: center !important;
+  }
+
+  .committee-decision-field span {
+    display: block !important;
+
+    margin-bottom: 5px !important;
+
+    font-size: 15px !important;
+
+    font-weight: 900 !important;
+
+    color: #333333 !important;
+  }
+
+  .committee-decision-field input {
+    width: 100% !important;
+
+    padding: 2px !important;
+
+    border: none !important;
+
+    outline: none !important;
+
+    background: transparent !important;
+
+    text-align: center !important;
+
+    font-family: Arial, Tahoma, sans-serif !important;
+
+    font-size: 15px !important;
+
+    font-weight: 700 !important;
+
+    color: #222222 !important;
+  }
+
+
+  /* =========================================================
+     جدول الأعضاء
+  ========================================================= */
+
+  .committee-table-wrapper {
+    width: 100% !important;
+
+    overflow: visible !important;
+
+    margin-top: 10px !important;
+  }
+
+  .committee-members-table {
+    width: 100% !important;
+
+    border-collapse: collapse !important;
+
+    table-layout: fixed !important;
+
+    margin: 0 !important;
+  }
+
+  .committee-members-table th,
+  .committee-members-table td {
+    border: 1px solid #555555 !important;
+
+    padding: 8px 6px !important;
+
+    text-align: center !important;
+
+    vertical-align: middle !important;
+
+    font-size: 14px !important;
+
+    font-weight: 700 !important;
+
+    color: #222222 !important;
+
+    background: #ffffff !important;
+  }
+
+  .committee-members-table th {
+    background: #eeeeee !important;
+
+    font-size: 15px !important;
+
+    font-weight: 900 !important;
+
+    color: #222222 !important;
+  }
+
+
+  /* أسماء العضوات */
+
+  .committee-members-table td:first-child,
+  .committee-members-table td:nth-child(2),
+  .committee-members-table td:nth-child(3) {
+    font-size: 14px !important;
+
+    font-weight: 700 !important;
+  }
+
+  .committee-members-table input {
+    width: 100% !important;
+
+    border: none !important;
+
+    outline: none !important;
+
+    background: transparent !important;
+
+    text-align: center !important;
+
+    font-family: Arial, Tahoma, sans-serif !important;
+
+    font-size: 14px !important;
+
+    font-weight: 700 !important;
+
+    color: #222222 !important;
+  }
+
+  .committee-members-table input::placeholder {
+    color: transparent !important;
+  }
+
+
+  /* =========================================================
+     التوقيعات
+  ========================================================= */
+
+  .committee-signature-box {
+    width: 100% !important;
+
+    min-height: 55px !important;
+
+    display: flex !important;
+
+    align-items: center !important;
+
+    justify-content: center !important;
+  }
+
+  .committee-signature-canvas {
+    display: block !important;
+
+    width: 105px !important;
+
+    height: 45px !important;
+
+    object-fit: contain !important;
+  }
+
+  .committee-signature-line {
+    display: none !important;
+  }
+
+  .committee-clear-signature {
+    display: none !important;
+  }
+
+
+  /* =========================================================
+     اعتماد المديرة
+  ========================================================= */
+
+  .committee-manager-signature {
+    display: flex !important;
+
+    flex-direction: column !important;
+
+    align-items: flex-start !important;
+
+    justify-content: flex-start !important;
+
+    margin-top: 35px !important;
+
+    margin-right: 15px !important;
+
+    color: #222222 !important;
+
+    text-align: center !important;
+  }
+
+  .committee-manager-signature span {
+    margin-bottom: 8px !important;
+
+    font-size: 15px !important;
+
+    font-weight: 800 !important;
+
+    color: #444444 !important;
+  }
+
+  .committee-manager-signature strong {
+    font-size: 16px !important;
+
+    font-weight: 900 !important;
+
+    color: #222222 !important;
+  }
+
+
+  /* =========================================================
+     إخفاء عناصر التحكم
+  ========================================================= */
+
+  .no-print,
+  .committee-content-card-title,
+  .committee-add-member-area,
+  .committee-decision-actions,
+  .committee-saved-message,
+  .committee-remove-member {
+    display: none !important;
+  }
+
+
+  /* =========================================================
+     منع ظهور زر الحذف كعمود
+  ========================================================= */
+
+  .committee-members-table th.no-print,
+  .committee-members-table td.no-print {
+    display: none !important;
+  }
+
+
+  /* =========================================================
+     تحسين الصفحة للطباعة
+  ========================================================= */
+
+  table {
+    page-break-inside: auto !important;
+  }
+
+  tr {
+    page-break-inside: avoid !important;
+
+    page-break-after: auto !important;
+  }
+
+  thead {
+    display: table-header-group !important;
+  }
+
+  tbody {
+    display: table-row-group !important;
+  }
+}
