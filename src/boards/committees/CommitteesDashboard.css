@@ -5055,3 +5055,125 @@
     display: table-row-group !important;
   }
 }
+
+/* =========================================================
+   طباعة محضر الاجتماع - جدول المهام ومنع الصفحة البيضاء
+   هذا الجزء خاص بالطباعة فقط ولا يغيّر شكل النظام على الشاشة.
+========================================================= */
+
+.meeting-print-tasks-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.meeting-print-tasks-table th,
+.meeting-print-tasks-table td {
+  border: 1px solid #aaa;
+  padding: 6px 8px;
+  text-align: right;
+  vertical-align: middle;
+  word-break: break-word;
+}
+
+.meeting-print-tasks-table thead th {
+  background: #39246b;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.meeting-print-tasks-table tbody td {
+  font-size: 11px;
+  min-height: 30px;
+}
+
+.meeting-print-tasks-table .print-task-number {
+  width: 9%;
+  text-align: center;
+}
+
+@media print {
+  /* منع ظهور أي جزء من لوحة النظام مع إبقاء نسخة المحضر فقط */
+  html,
+  body {
+    width: 100% !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+  }
+
+  body * {
+    visibility: hidden !important;
+  }
+
+  .meeting-print-document,
+  .meeting-print-document * {
+    visibility: visible !important;
+  }
+
+  .meeting-print-document {
+    display: block !important;
+    position: absolute !important;
+    top: 0 !important;
+    right: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+    color: #222222 !important;
+    direction: rtl !important;
+    font-family: Arial, Tahoma, sans-serif !important;
+    font-size: 13px !important;
+    line-height: 1.7 !important;
+    box-sizing: border-box !important;
+  }
+
+  /* إلغاء مساحة محرر الاجتماع في الطباعة؛ نسخة الطباعة مستقلة عنه */
+  .committee-meeting-editor {
+    visibility: hidden !important;
+    display: block !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    box-shadow: none !important;
+  }
+
+  .meeting-print-header,
+  .meeting-print-section,
+  .meeting-print-approval,
+  .meeting-print-footer {
+    visibility: visible !important;
+  }
+
+  .meeting-print-header * ,
+  .meeting-print-section * ,
+  .meeting-print-approval * ,
+  .meeting-print-footer * {
+    visibility: visible !important;
+  }
+
+  .meeting-print-section,
+  .meeting-print-info-table,
+  .meeting-print-tasks-table,
+  .meeting-print-attendance-table,
+  .meeting-print-approval {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+  .meeting-print-tasks-table thead {
+    display: table-header-group !important;
+  }
+
+  .meeting-print-tasks-table tr,
+  .meeting-print-attendance-table tr {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+}

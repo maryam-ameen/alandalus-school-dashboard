@@ -1081,57 +1081,6 @@ function CommitteeDecisionSection({
 
   return (
     <section className="committee-content-card committee-decision-print-area">
-      <div className="decision-print-header">
-  <img
-    src={logo}
-    alt="شعار مدارس الأندلس"
-    className="decision-print-logo"
-  />
-
-  <div className="decision-print-school-name">
-    <strong>متوسطة وثانوية الأندلس بالطائف - بنات</strong>
-    <span>إدارة المدرسة</span>
-  </div>
-</div>
-
-<div className="decision-print-title">
-  <h2>إقــــرار</h2>
-
-  <h3>
-    قرار إداري بشأن تشكيل فريق عمل
-    <br />
-    {committee.title}
-  </h3>
-
-  <p>
-    العام الدراسي:
-    {" "}
-    <strong>
-      {decision.schoolYear || "1448 / 1449"}
-    </strong>
-  </p>
-</div>
-
-<div className="decision-print-introduction">
-  <p>
-    بناءً على ما تقتضيه مصلحة العمل وتنظيم أعمال اللجان
-    المدرسية، فقد تقرر تشكيل فريق عمل
-    {" "}
-    <strong>{committee.title}</strong>
-    {" "}
-    للعام الدراسي
-    {" "}
-    <strong>
-      {decision.schoolYear || "1448 / 1449"}
-    </strong>
-    ، وذلك وفق المهام والمسؤوليات المعتمدة بالمدرسة.
-  </p>
-
-  <p>
-    وقد تم اختيار أعضاء الفريق وتحديد أدوارهم ومسؤولياتهم
-    على النحو الآتي:
-  </p>
-</div>
       <div className="committee-content-card-title">
         <span>01</span>
 
@@ -1393,7 +1342,7 @@ function CommitteeDecisionSection({
           disabled={saving}
         >
           🖨️ طباعة القرار
-                </button>
+        </button>
       </div>
 
       {savedMessage && (
@@ -1446,10 +1395,7 @@ const loadMeetingAttendees = async (meetingId) => {
     return [];
   }
 
-  return (data || []).map((attendee) => ({
-    ...attendee,
-    name: attendee.attendee_name || "",
-  }));
+  return data || [];
 };
 
 /* =========================================================
@@ -1624,12 +1570,12 @@ function MeetingEditor({
       if (error) throw error;
 
       setAttendees((prev) => [
-  ...prev,
-  {
-    ...data,
-    name: data.attendee_name || "",
-  },
-]);
+        ...prev,
+        {
+          ...data,
+          name: data.attendee_name || '',
+        },
+      ]);
     } catch (error) {
       console.error("خطأ إضافة حاضر:", error);
       alert(
@@ -1671,15 +1617,12 @@ function MeetingEditor({
     }
 
     setAttendees((prev) =>
-  prev.map((item) =>
-    String(item.id) === String(attendee.id)
-      ? {
-          ...data,
-          name: data.attendee_name || "",
-        }
-      : item
-  )
-);
+      prev.map((item) =>
+        String(item.id) === String(attendee.id)
+            ? { ...data, name: data.attendee_name || '' }
+            : item
+      )
+    );
   };
 
   /* -------------------------------------------------------
@@ -1726,7 +1669,9 @@ function MeetingEditor({
 
     setAttendees((prev) =>
       prev.map((item) =>
-        String(item.id) === String(attendee.id) ? data : item
+        String(item.id) === String(attendee.id)
+            ? { ...data, name: data.attendee_name || '' }
+            : item
       )
     );
   };
@@ -1751,11 +1696,11 @@ function MeetingEditor({
       if (error) throw error;
 
       setAttendees(
-  (data || []).map((attendee) => ({
-    ...attendee,
-    name: attendee.attendee_name || "",
-  }))
-);
+        (data || []).map((attendee) => ({
+          ...attendee,
+          name: attendee.attendee_name || '',
+        }))
+      );
     } catch (error) {
       console.error("خطأ تسجيل حضور الجميع:", error);
       alert("حدث خطأ أثناء تسجيل الحضور");
@@ -1789,7 +1734,9 @@ function MeetingEditor({
 
     setAttendees((prev) =>
       prev.map((item) =>
-        String(item.id) === String(attendee.id) ? data : item
+        String(item.id) === String(attendee.id)
+            ? { ...data, name: data.attendee_name || '' }
+            : item
       )
     );
   };
@@ -1849,7 +1796,9 @@ function MeetingEditor({
 
       setAttendees((prev) =>
         prev.map((item) =>
-          String(item.id) === String(attendee.id) ? data : item
+          String(item.id) === String(attendee.id)
+            ? { ...data, name: data.attendee_name || '' }
+            : item
         )
       );
     }
@@ -1971,7 +1920,199 @@ function MeetingEditor({
   }
 
   return (
-    <div className="committee-meeting-editor">
+    <>
+      {/* =================================================
+          نسخة مستقلة للطباعة - لا تظهر داخل النظام
+      ================================================= */}
+      <div className="meeting-print-document" dir="rtl">
+        <div className="meeting-print-header">
+          <div className="meeting-print-school">
+            <img
+              src={logo}
+              alt="شعار مدارس الأندلس"
+              className="meeting-print-logo"
+            />
+            <div>
+              <strong>متوسطة وثانوية الأندلس بالطائف - بنات</strong>
+              <span>سجل اللجان وفرق العمل المدرسية</span>
+            </div>
+          </div>
+
+          <div className="meeting-print-title">
+            <h1>محضر اجتماع</h1>
+            <p>{committee.title}</p>
+          </div>
+        </div>
+
+        <div className="meeting-print-divider" />
+
+        <section className="meeting-print-section">
+          <div className="meeting-print-section-title">
+            <span>01</span>
+            <strong>بيانات الاجتماع</strong>
+          </div>
+
+          <table className="meeting-print-info-table">
+            <tbody>
+              <tr>
+                <th>رقم الاجتماع</th>
+                <td>{form.meeting_number || "—"}</td>
+                <th>التاريخ</th>
+                <td>{form.meeting_date || "—"}</td>
+              </tr>
+              <tr>
+                <th>اليوم</th>
+                <td>{getArabicDay(form.meeting_date) || "—"}</td>
+                <th>الوقت</th>
+                <td>{form.meeting_time || "—"}</td>
+              </tr>
+              <tr>
+                <th>مقر الاجتماع</th>
+                <td>{form.meeting_place || "—"}</td>
+                <th>حالة الاجتماع</th>
+                <td>{form.meeting_status || "—"}</td>
+              </tr>
+              <tr>
+                <th>عنوان الاجتماع</th>
+                <td colSpan="3">{form.subject || "—"}</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section className="meeting-print-section">
+          <div className="meeting-print-section-title">
+            <span>02</span>
+            <strong>جدول المهام / الأعمال</strong>
+          </div>
+
+          <table className="meeting-print-tasks-table">
+            <thead>
+              <tr>
+                <th className="print-task-number">#</th>
+                <th>المهمة / محور العمل</th>
+              </tr>
+            </thead>
+            <tbody>
+              {(form.notes || "")
+                .split(/\n+/)
+                .map((item) => item.trim())
+                .filter(Boolean)
+                .map((item, index) => (
+                  <tr key={`print-task-${index}`}>
+                    <td>{index + 1}</td>
+                    <td>{item}</td>
+                  </tr>
+                ))}
+              {!(form.notes || "").trim() && (
+                <tr>
+                  <td>—</td>
+                  <td>لا توجد مهام أو محاور مدخلة.</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </section>
+
+        <section className="meeting-print-section">
+          <div className="meeting-print-section-title">
+            <span>03</span>
+            <strong>أبرز ما تمت مناقشته</strong>
+          </div>
+          <div className="meeting-print-text-box">
+            {form.discussion || "لا توجد بيانات مدخلة."}
+          </div>
+        </section>
+
+        <section className="meeting-print-section">
+          <div className="meeting-print-section-title">
+            <span>04</span>
+            <strong>التوصيات والقرارات</strong>
+          </div>
+          <div className="meeting-print-text-box">
+            {form.recommendations || "لا توجد توصيات أو قرارات مدخلة."}
+          </div>
+        </section>
+
+        <section className="meeting-print-section meeting-print-attendance">
+          <div className="meeting-print-section-title">
+            <span>05</span>
+            <strong>الحضور والتوقيع</strong>
+          </div>
+
+          {attendees.length > 0 ? (
+            <table className="meeting-print-attendance-table">
+              <thead>
+                <tr>
+                  <th className="print-number">#</th>
+                  <th>اسم الحاضر</th>
+                  <th>المسمى الوظيفي</th>
+                  <th className="print-attendance">الحضور</th>
+                  <th className="print-signature">التوقيع</th>
+                </tr>
+              </thead>
+              <tbody>
+                {attendees.map((attendee, index) => (
+                  <tr key={attendee.id || `print-attendee-${index}`}>
+                    <td>{index + 1}</td>
+                    <td>{attendee.name || attendee.attendee_name || "—"}</td>
+                    <td>{attendee.job_title || "—"}</td>
+                    <td>{attendee.attended ? "حاضر" : "غائب"}</td>
+                    <td className="print-signature-cell">
+                      {attendee.signature ? (
+                        <img
+                          src={attendee.signature}
+                          alt="توقيع"
+                        />
+                      ) : (
+                        "—"
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ) : (
+            <div className="meeting-print-empty">
+              لا توجد أسماء حضور مسجلة لهذا الاجتماع.
+            </div>
+          )}
+        </section>
+
+        <section className="meeting-print-approval">
+          <div className="meeting-print-approval-title">اعتماد المحضر</div>
+          <div className="meeting-print-approval-grid">
+            <div>
+              <span>رئيسة اللجنة</span>
+              <strong>مديرة المدرسة</strong>
+            </div>
+
+            <div>
+              <span>الاسم</span>
+              <strong>{form.manager_name || "خيرية الخالدي"}</strong>
+            </div>
+
+            <div className="meeting-print-manager-signature">
+              <span>التوقيع</span>
+              {form.manager_signature ? (
+                <img
+                  src={form.manager_signature}
+                  alt="توقيع مديرة المدرسة"
+                />
+              ) : (
+                <div className="meeting-print-sign-line" />
+              )}
+            </div>
+          </div>
+        </section>
+
+        <div className="meeting-print-footer">
+          <span>متوسطة وثانوية الأندلس بالطائف - بنات</span>
+          <span>محضر اجتماع لجنة {committee.title}</span>
+        </div>
+      </div>
+
+      <div className="committee-meeting-editor">
       <div className="committee-editor-header">
         <div>
           <span>محضر اجتماع اللجنة</span>
@@ -2333,7 +2474,8 @@ function MeetingEditor({
           🗑️ حذف الاجتماع
         </button>
       </div>
-    </div>
+      </div>
+    </>
   );
 }
 
