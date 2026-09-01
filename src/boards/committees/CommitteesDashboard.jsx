@@ -1373,6 +1373,7 @@ const createDefaultAttendee = (meetingId) => ({
   id: null,
   meeting_id: meetingId,
   attendee_name: "",
+  name: "",
   job_title: "",
   attended: false,
   signature: "",
@@ -1395,7 +1396,11 @@ const loadMeetingAttendees = async (meetingId) => {
     return [];
   }
 
-  return data || [];
+  return (data || []).map((attendee) => ({
+    ...attendee,
+    // Supabase stores the name in attendee_name, while the UI uses name.
+    name: attendee.attendee_name ?? attendee.name ?? "",
+  }));
 };
 
 /* =========================================================
@@ -1448,7 +1453,12 @@ function MeetingEditor({
 
       if (!mounted) return;
 
-      setAttendees(loaded);
+      setAttendees(
+        (loaded || []).map((attendee) => ({
+          ...attendee,
+          name: attendee.attendee_name ?? attendee.name ?? "",
+        }))
+      );
       setLoading(false);
     };
 
